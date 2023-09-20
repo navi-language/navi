@@ -14,9 +14,9 @@ Navi is a static type, compiled language, we can compile the source code into By
 
 - Provided for general programming language (Navi), indicator engine (Navi Stream).
 - High performance: Navi is a static type, compiled language, which is comparable to Go, Rust, and C.
-- Easy to use: Borrowing the syntax of excellent programming languages such as TypeScript, Rust, and Ruby, NaviScript is more user-friendly.
-- Stream computing: Support stream computing, which can be used for real-time analysis.
-- Cross-platform: Support running on Linux, Windows, macOS, etc., support iOS, Android, and run on Browser via WASM.
+- Easy to use: Borrowing the syntax of excellent programming languages such as TypeScript, Rust, and Ruby, Navi syntax is more user-friendly.
+- Stream computing (Navi Stream): Support stream computing, which can be used for real-time analysis.
+- Cross-platform (Navi Stream): Support running on Linux, Windows, macOS, etc., support iOS, Android, and run on Browser via WASM.
 
 ## Performance
 
