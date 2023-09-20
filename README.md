@@ -18,6 +18,12 @@ Navi is a static type, compiled language, we can compile the source code into By
 - Stream computing (Navi Stream): Support stream computing, which can be used for real-time analysis.
 - Cross-platform (Navi Stream): Support running on Linux, Windows, macOS, etc., support iOS, Android, and run on Browser via WASM.
 
+## Installation
+
+```bash
+curl -sSL https://github.com/navilang/navi/raw/main/install | sh
+```
+
 ## Performance
 
 With the [MACD](https://en.wikipedia.org/wiki/MACD) indicator (about 2000 times indicator calculation), Navi takes 300 µs to calculate MACD once, and due to the characteristics of stream computing, in the server-side scenario where a large number of real-time calculations are required, Navi can rely on the calculation data of history to improve the efficiency of calculation, and Navi will get hundreds of times performance improvement.
