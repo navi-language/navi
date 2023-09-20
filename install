@@ -12,7 +12,7 @@ get_latest_release() {
 
 app_name='Navi'
 bin_name='navi'
-version='v0.5.0'
+version=get_latest_release
 
 platform="$(uname | tr "[A-Z]" "[a-z]")"  # Linux => linux
 arch="$(uname -m | sed 's/x86_64/amd64/')"  # x86_64 => amd64
