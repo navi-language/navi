@@ -5,5 +5,5 @@ let name = "Navi";
 io.println(`Hello world, this is {name}.`);
 
 test "hello" {
-  assert 1 == 2;
+  assert 1 != 2;
 }

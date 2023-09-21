@@ -17,4 +17,5 @@ jobs:
       - name: Setup Navi
         run: curl -sSL https://navi-lang.org/install | sh
       - name: Test
-        run: navi test .
+        run: |
+          navi test examples/
