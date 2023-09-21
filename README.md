@@ -48,16 +48,22 @@ You can create a file named with `.nv` extension, and write some code in it, for
 
 ```rust
 // main.nv
-use io;
+use std.io;
 
 io.println("Hello World.");
+
+test "Hello World" {
+  assert 1 == 1
+}
 ```
 
 Then run it by:
 
 ```bash
-$ navi main.nv
+$ navi run main.nv
 Hello world, this is Navi.
+
+$ navi test .
 ```
 
 ### Examples
@@ -65,7 +71,7 @@ Hello world, this is Navi.
 In `examples` directory, we provide some examples, you can run it by:
 
 ```bash
-$ navi examples/macd/main.nv
+$ navi run examples/macd/main.nv
 ```
 
 ## Development Tools

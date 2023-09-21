@@ -1,5 +1,5 @@
 use macd;
-use io;
+use std.io;
 
 struct Candlestick {
     time: int,
