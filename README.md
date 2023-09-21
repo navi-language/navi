@@ -57,7 +57,7 @@ Then run it by:
 
 ```bash
 $ navi main.nv
-Hello World.
+Hello world, this is Navi.
 ```
 
 ### Examples

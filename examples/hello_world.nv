@@ -1,3 +1,5 @@
 use io;
 
-io.println("Hello World.");
+let name = "Navi";
+
+io.println(`Hello world, this is {name}.`);
