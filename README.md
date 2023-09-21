@@ -30,16 +30,18 @@ Run `navi -h` to get help.
 
 ```bash
 $ navi -h
-Usage: navi [OPTIONS] <ENTRY>
+Usage: navi [OPTIONS] [COMMAND]
 
-Arguments:
-  <ENTRY>  Entry module name
+Commands:
+  run      Run a navi script
+  test     Test a navi script
+  compile  Compile a navi script and show the bytecode
+  help     Print this message or the help of the given subcommand(s)
 
 Options:
-  -p, --path <PATH>   Module path
-      --compile-only  Compile only
-  -h, --help          Print help
-  -V, --version       Print version
+  -p, --path <PATH>  Module path
+  -h, --help         Print help information
+  -V, --version      Print version information
 ```
 
 ### Run a Navi program
