@@ -21,7 +21,7 @@ Navi is a static type, compiled language, we can compile the source code into By
 ## Installation
 
 ```bash
-curl -sSL https://github.com/navilang/navi/raw/main/install | sh
+curl -sSL https://navi-lang.org/install | sh
 ```
 
 ## Usage
