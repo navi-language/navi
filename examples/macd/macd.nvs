@@ -1,0 +1,13 @@
+use quote, ta;
+
+param {
+    Length1 = 12,
+    Length2 = 26,
+    Length3 = 9,
+}
+
+let fast_ma = ema(close, Length1);
+let slow_ma = ema(close, Length2);
+export let hist = fast_ma - slow_ma;
+export let signal = ema(hist, Length3);
+export let macd = (hist - signal) * 2;

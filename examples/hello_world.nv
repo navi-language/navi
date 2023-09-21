@@ -1,0 +1,3 @@
+use io;
+
+io.println("Hello World.");

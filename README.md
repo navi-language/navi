@@ -1,6 +1,6 @@
 # Navi
 
-Navi（/ˈnævi/）is a high-performance programming language &amp; indicator engine, which is used to perform complex calculations and analysis based on market data.
+Navi (/ˈnævi/) is a high-performance programming language &amp; indicator engine, which is used to perform complex calculations and analysis based on market data.
 
 We designed to be used in the quantitative trading system, and can be used in other scenarios where complex calculations are required.
 
@@ -24,6 +24,60 @@ Navi is a static type, compiled language, we can compile the source code into By
 curl -sSL https://github.com/navilang/navi/raw/main/install | sh
 ```
 
+## Usage
+
+Run `navi -h` to get help.
+
+```bash
+$ navi -h
+Usage: navi [OPTIONS] <ENTRY>
+
+Arguments:
+  <ENTRY>  Entry module name
+
+Options:
+  -p, --path <PATH>   Module path
+      --compile-only  Compile only
+  -h, --help          Print help
+  -V, --version       Print version
+```
+
+### Run a Navi program
+
+You can create a file named with `.nv` extension, and write some code in it, for example:
+
+```rust
+// main.nv
+use io;
+
+io.println("Hello World.");
+```
+
+Then run it by:
+
+```bash
+$ navi main.nv
+Hello World.
+```
+
+### Examples
+
+In `examples` directory, we provide some examples, you can run it by:
+
+```bash
+$ navi examples/macd/main.nv
+```
+
+## Development Tools
+
+We build a Navi LSP for provided a Language Server Protocol for Navi Stream, to provide a lot of features for most IDEs (VS Code, VIM ...).
+
+### VS Code Extension
+
+You can visit VS Code Marketplace and install it.
+
+https://marketplace.visualstudio.com/items?itemName=huacnlee.navi
+
 ## Performance
 
 With the [MACD](https://en.wikipedia.org/wiki/MACD) indicator (about 2000 times indicator calculation), Navi takes 300 µs to calculate MACD once, and due to the characteristics of stream computing, in the server-side scenario where a large number of real-time calculations are required, Navi can rely on the calculation data of history to improve the efficiency of calculation, and Navi will get hundreds of times performance improvement.
@@ -38,6 +92,6 @@ Currently, we test that the memory occupied by 1.2 million targets in the server
 
 ## Where is the source code?
 
-There still have a lot of works need to do (Performance, Programming Features, Documents, Development Tools ...). 
+There still have a lot of works need to do (Performance, Programming Features, Documents, Development Tools ...).
 
 We may open source this project in future when we completed all of that.
