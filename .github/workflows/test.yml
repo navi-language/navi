@@ -15,6 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Setup Navi
-        run: ./install
+        run: curl -sSL https://navi-lang.org/install | sh
       - name: Test
         run: navi test .
