@@ -1,0 +1,41 @@
+use std.rand;
+
+test "int" {
+  for (let _ in 0..1000) {
+    let n = rand.int(0, 99);
+    assert n >= 0 && n < 99, `n is {n}`;
+
+    let n = rand.int(24, 53);
+    assert n >= 24 && n < 53, `n is {n}`;
+  }
+}
+
+test "float" {
+  for (let _ in 0..1000) {
+    let n = rand.float(0.0, 1.0);
+    assert n >= 0.0 && n < 1.0, `n is {n}`;
+
+    let n = rand.float(3.14, 6.26);
+    assert n >= 3.14 && n < 6.26, `n is {n}`;
+  }
+}
+
+test "bytes" {
+  let buf = rand.bytes(10);
+  assert_eq buf.len(), 10;
+  assert_eq buf.encode("hex").len(), 20;
+  
+  assert_ne rand.bytes(20).encode("base64"), "";
+}
+
+bench "int" {
+  bench.run(fn() {
+    rand.int(0, 99);
+  });
+}
+
+bench "float" {
+  bench.run(fn() {
+    rand.float(0.0, 0.99);
+  });
+}

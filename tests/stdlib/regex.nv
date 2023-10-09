@@ -1,0 +1,96 @@
+use std.regex;
+
+test "parse" {
+    let re = regex.parse("[a-z0-9]+");
+    assert re.is_match("hello");
+    assert re.is_match("hello123");
+
+    assert !re.is_match("HELLO WORLD!");
+    assert !re.is_match("+-*/");
+}
+
+test "Regex - string_interpolation" {
+    let re = regex.parse("[a-z0-9]+");
+    assert_eq `{re}`, "[a-z0-9]+";
+}
+
+test "Match - string_interpolation" {
+    let m = regex.parse("[a-z0-9]+").match("hello123");
+    assert_eq `{m}`, "hello123";
+}
+
+test "is_match" {
+    let re = regex.parse("(?mi)[\\w]+");
+    assert re.is_match("hello1");
+    assert re.is_match("hello123");
+    assert re.is_match("Hello, world!");
+    assert re.is_match("\n\nHello, world!");
+
+    let re = regex.parse("^[\\w]+$");
+    assert re.is_match("hello123");
+    assert !re.is_match("Hello, world!");
+    assert !re.is_match("\n\nHello, world!");
+}
+
+test "replace" {
+    let re = regex.parse("[a-z]");
+    assert re.replace("hello", "x") == "xello";
+    assert re.replace("hello123", "x") == "xello123";
+}
+
+test "replace_all" {
+    let re = regex.parse("[a-z]+");
+    assert re.replace_all("hello", "x") == "x";
+    assert re.replace_all("hello123hello", "x") == "x123x";
+}
+
+test "split" {
+    let re = regex.parse("[\\s]+");
+    let s = "a b c\n\rd\te";
+    let parts = re.split(s);
+
+    assert_eq parts.len(), 5;
+    assert_eq parts.join(""), "abcde";
+}
+
+test "match" {
+    let re = regex.parse("[a-z]+");
+
+    let m = re.match("hello123hello");
+    assert_eq m.start(), 0;
+    assert_eq m.end(), 5;
+    assert_eq m.text(), "hello";
+
+    let m = re.match("123");
+    assert_eq m, nil;
+}
+
+test "match_all" {
+    let re = regex.parse("[a-z]+");
+
+    let matches = re.match_all("hello123world");
+    assert_eq matches.len(), 2;
+    assert_eq matches[0].text(), "hello";
+    assert_eq matches[1].text(), "world";
+
+    let m = matches[0];
+    assert_eq m.start(), 0;
+    assert_eq m.end(), 5;
+    assert_eq m.text(), "hello";
+
+    let m = matches[1];
+    assert_eq m.start(), 8;
+    assert_eq m.end(), 13;
+    assert_eq m.text(), "world";
+
+    let matches = re.match_all("123462.1124");
+    assert_eq matches.len(), 0;
+}
+
+test "struct Match" {
+    let re = regex.parse("[a-z]+");
+
+    let m = re.match("hello123hello");
+    assert_eq m.to_string(), "hello";
+    assert_eq `{m}`, "hello";
+}

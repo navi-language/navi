@@ -1,0 +1,9 @@
+test "Int - string_interpolation" {
+    let n = 2023;
+    assert_eq `Year is {n}`, "Year is 2023";
+}
+
+test "Float - string_interpolation" {
+    let n = 3.1415926;
+    assert_eq `Pi is {n}`, "Pi is 3.1415926";
+}

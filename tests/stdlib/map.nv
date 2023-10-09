@@ -1,0 +1,131 @@
+use std.collections.map;
+use test_harness;
+
+struct Item {
+  name: string
+}
+
+test "<int, string>" {
+  let a = map.new::<int, string>();
+  a.set(1, "a");
+  a.set(2, "B");
+  a.set(3, "c");
+
+  let value, ok = a.get(1);
+  assert ok;
+  assert_eq value, "a";
+
+  let value, ok = a.get(2);
+  assert ok;
+  assert_eq value, "B";
+
+  let value, ok = a.get(3);
+  assert ok;
+  assert_eq value, "c";
+
+  let value, ok = a.get(4);
+  assert !ok;
+  assert_eq value, nil;
+
+  // use the [] to get
+  assert_eq a[2], "B";
+  assert_eq a[5], nil;
+
+  assert_eq a.len(), 3;
+  
+  // clear
+  a.clear();
+  assert a.is_empty();
+}
+
+test "<string, string>" {
+  let a = map.new::<string, string>();
+  a.set("name", "Jason Lee");
+  a.set("city", "Chengdu");
+  a.set("foo", "Foo Bar");
+
+  let value, ok = a.get("name");
+  assert ok;
+  assert_eq value, "Jason Lee";
+
+  let value, ok = a.get("city");
+  assert ok;
+  assert_eq value, "Chengdu";
+
+  assert_eq a["city"], "Chengdu";
+  assert_eq a["age"], nil;
+
+  assert_eq a.len(), 3;
+  a.remove("foo");
+  assert_eq a.len(), 2;
+  assert_eq a["foo"], nil;
+}
+
+test "get & [] | set & []=" {
+  let items = map.new::<string, string>();
+  items.set("name", "Jason Lee");
+  assert_eq items["name"], "Jason Lee";
+  assert_eq items["not-exist"], nil;
+
+  let name, ok = items.get("name");
+  assert ok;
+  assert_eq name, "Jason Lee";
+
+  items.set("name", "Sunli");
+  assert_eq items["name"], "Sunli";
+  items["city"] = "Wuhan";
+  assert_eq items["city"], "Wuhan";
+
+  let items = map.new::<int, int>();
+  items[1] = 192;
+  assert_eq items[1], 192;
+  // FIXME: if the key not exist, this will return nil
+  assert_eq items[2], 0;
+}
+
+test "keys" {
+  let items = map.new::<int, string>();
+  items.set(1, "a");
+  items.set(2, "b");
+  items.set(3, "c");
+
+  let keys = items.keys();
+  assert_eq keys.len(), 3;
+  assert_eq keys[0], 1;
+  assert_eq keys[1], 2;
+  assert_eq keys[2], 3;
+
+  assert_eq items.keys().len(), 3;
+}
+
+test "values" {
+  let items = map.new::<int, string>();
+  items.set(1, "a");
+  items.set(2, "b");
+  items.set(3, "c");
+
+  let values = items.values();
+  assert_eq values.len(), 3;
+  assert_eq values[0], "a";
+  assert_eq values[1], "b";
+  assert_eq values[2], "c";
+
+  let items = map.new::<string, Item>();
+  items.set("a", Item { name: "a" });
+  items.set("b", Item { name: "b" });
+
+  let values = items.values();
+  assert_eq values.len(), 2;
+
+  assert_eq items.values().len(), 2;
+}
+
+test "struct value" {
+  let items = map.new::<string, Item>();
+  items.set("a", Item { name: "a" });
+  items.set("b", Item { name: "b" });
+
+  let item, ok = items.get("a");
+  assert ok;
+  assert_eq item.name, "a";
+}

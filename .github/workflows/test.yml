@@ -18,4 +18,4 @@ jobs:
         run: curl -sSL https://navi-lang.org/install | sh
       - name: Test
         run: |
-          navi test examples/
+          navi test

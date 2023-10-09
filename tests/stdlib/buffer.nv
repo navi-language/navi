@@ -1,0 +1,88 @@
+use std.buffer;
+
+test "new" {
+  let buf = buffer.new();
+  buf.write_string("hello world");
+  assert_eq buf.to_string(), "hello world";
+}
+
+test "write" {
+  let buf = buffer.new();
+  buf.write_string("hello");
+  buf.write_string(" ");
+  buf.write_string("world");
+  assert_eq buf.to_string(), "hello world";
+}
+
+test "write_bytes" {
+  let buf = buffer.new();
+  buf.write([]int {104, 101, 108, 108, 111});
+  buf.write([]int {32});
+  buf.write([]int {119, 111, 114, 108, 100});
+  assert_eq buf.to_string(), "hello world";
+
+  let text = "Hello 你好";
+  let bytes = text.bytes();
+  let buf = buffer.new();
+  buf.write(bytes);
+  assert_eq buf.to_string(), text;
+}
+
+test "reset" {
+  let buf = buffer.new();
+  buf.write_string("hello");
+  assert_eq buf.len(), 5;
+  buf.reset();
+  assert_eq buf.len(), 0;
+}
+
+test "len" {
+  let buf = buffer.new();
+  buf.write_string("hello world");
+  assert_eq buf.len(), 11;
+
+  let buf = buffer.new();
+  buf.write_string("hello 你好");
+  assert_eq buf.len(), 12;
+}
+
+test "get" {
+  let buf = buffer.new();
+  buf.write_string("hello");
+  let b, ok = buf.get(0);
+  assert ok;
+  assert_eq b, 104;
+
+  let b, ok = buf.get(1);
+  assert ok;
+  assert_eq b, 101;
+
+  let b, ok = buf.get(5);
+  assert !ok;
+  assert_eq b, 0;
+}
+
+test "to_string" {
+  let buf = buffer.new();
+  buf.write_string("hello");
+  buf.write_string(" ");
+  buf.write_string("world");
+  assert_eq buf.to_string(), "hello world";
+}
+
+test "encode" {
+  let buf = buffer.new();
+  buf.write_string("hello world");
+
+  assert_eq buf.encode("hex"), "68656c6c6f20776f726c64";
+  assert_eq buf.encode("base64"), "aGVsbG8gd29ybGQ=";
+  assert_eq buf.encode("base64url"), "aGVsbG8gd29ybGQ";
+}
+
+test "truncate" {
+  let buf = buffer.new();
+  buf.write_string("hello world");
+  buf.truncate(5);
+  assert_eq buf.len(), 5;
+  assert_eq buf.to_string(), "hello";
+}

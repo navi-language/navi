@@ -1,0 +1,134 @@
+use std.time;
+use std.io;
+
+test "timestramp" {
+    let t = time.now();
+    assert t.timestamp() > 1695296020, "timestamp should be greater than 1695296020";
+}
+
+test "DateTime - string_interpolation" {
+    let t = time.parse("2023-04-13 09:45:26 +08:00");
+    assert_eq t.to_string(), "2023-04-13T09:45:26+08:00";
+    assert_eq `{t}`, "2023-04-13T09:45:26+08:00";
+}
+
+test "parse" {
+    let t = time.parse("2023-04-13 09:45:26");
+    assert_eq t.timestamp(), 1681379126;
+    assert_eq t.format("%Y-%m-%d"), "2023-04-13";
+    assert_eq t.format("%Y/%m/%d %H:%M"), "2023/04/13 09:45";
+
+    let t = time.parse("2023-04-13 09:45:26 +08:00");
+    assert_eq t.timestamp(), 1681350326;
+    assert_eq t.timezone(), "+08:00";
+
+    let t = time.parse("2023-04-13 09:45:26.123456789 -02:00");
+    assert_eq t.timestamp(), 1681386326;
+    assert_eq t.nanosecond(), 123456789;
+    assert_eq t.timezone(), "-02:00";
+
+    let t =  time.parse("2023-04-13 09:45:59.231 +08:00");
+    assert_eq t.timestamp(), 1681350359;
+    assert_eq t.millisecond(), 231;
+    assert_eq t.microsecond(), 231000;
+    assert_eq t.timezone(), "+08:00";
+}
+
+test "parse with RFC3339" {
+    let t = time.parse("2023-04-13T14:08:33-11:00");
+    assert_eq t.timestamp(), 1681434513;
+    let t = time.parse("2023-04-13T14:08:33+11:00");
+    assert_eq t.timestamp(), 1681355313;
+}
+
+test "iso8601 / to_string" {
+    let t = time.parse("2023-04-13 09:45:26 +07:00");
+    // to_string is original timezone
+    assert_eq t.to_string(), "2023-04-13T09:45:26+07:00";
+    // iso8601 is local timezone
+    assert_eq t.iso8601(), "2023-04-13T10:45:26+08:00";
+}
+
+test "from_timestamp" {
+    let t = time.from_timestamp(1681355313);
+    assert_eq t.to_string(), "2023-04-13T03:08:33Z";
+}
+
+test "inspect" {
+    let t = time.parse("2023-04-13 09:45:26 +07:00");
+    assert_eq `time: {t}`, "time: 2023-04-13T09:45:26+07:00";
+}
+
+test "year / month / day / hour / minute / second / millisecond / microsecond / nanosecond" {
+    let t = time.parse("2023-04-13 09:45:26.123456789 +08:00");
+    assert_eq t.year(), 2023;
+    assert_eq t.month(), 4;
+    assert_eq t.day(), 13;
+    assert_eq t.hour(), 9;
+    assert_eq t.minute(), 45;
+    assert_eq t.second(), 26;
+    assert_eq t.millisecond(), 123;
+    assert_eq t.microsecond(), 123456;
+    assert_eq t.nanosecond(), 123456789;
+}
+
+test "timezone" {
+    let t = time.parse("2023-04-13 09:45:26 +08:00");
+    assert_eq t.timezone(), "+08:00";
+
+    let t = time.parse("2023-04-13 09:45:26 -12:30");
+    assert_eq t.timezone(), "-12:30";
+}
+
+test "sub" {
+    let t1 = time.parse("2023-04-13 09:45:26.129 +08:00");
+    let t2 = time.parse("2023-04-13 09:45:59.231 +08:00");
+
+    assert_eq t2.sub(t1), 33102.milliseconds();
+    assert_eq t1.sub(t2), (-33102).milliseconds();
+
+    let t1 = time.parse("2023-04-13 09:45:26 +08:00");
+    let t2 = time.parse("2023-04-13 09:45:59 +08:00");
+    assert_eq t2.sub(t1), 33.seconds();
+    assert_eq t1.sub(t2), (-33).seconds();
+}
+
+test "calculation" {
+    let t1 = time.parse("2023-04-13 09:45:26.129 +08:00");
+    let t2 = time.parse("2023-04-13 09:45:59.231 +08:00");
+    let t3 = time.parse("2023-04-13 09:45:26.129 +08:00");
+
+    // ==
+    assert_eq t1 == t2, false;
+    // !=
+    assert_eq t1 != t2, true;
+
+    // >
+    assert_eq t1 > t2, false;
+    assert_eq t1 > t3, false;
+    assert_eq t2 > t1, true;
+    assert_eq t3 > t1, false;
+
+    // >=
+    assert_eq t1 >= t2, false;
+    assert_eq t1 >= t3, true;
+    assert_eq t2 >= t1, true;
+    assert_eq t3 >= t1, true;
+
+    // <
+    assert_eq t1 < t2, true;
+    assert_eq t1 < t3, false;
+    assert_eq t2 < t1, false;
+
+    // <=
+    assert_eq t1 <= t2, true;
+    assert_eq t1 <= t3, true;
+    assert_eq t2 <= t1, false;
+    assert_eq t3 <= t1, true;
+
+    // + i64 seconds
+    assert_eq t1 + 33.seconds(), time.parse("2023-04-13 09:45:59.129 +08:00");
+
+    // - i64 seconds
+    assert_eq t2 - 35.seconds(), time.parse("2023-04-13 09:45:24.231 +08:00");
+}
