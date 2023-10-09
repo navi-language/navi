@@ -18,11 +18,13 @@ Navi is a static type, compiled language, we can compile the source code into By
 - Stream computing (Navi Stream): Support stream computing, which can be used for real-time analysis.
 - Cross-platform (Navi Stream): Support running on Linux, Windows, macOS, etc., support iOS, Android, and run on Browser via WASM.
 
-## Installation & Update
+## Installation
 
 ```bash
 curl -sSL https://navi-lang.org/install | sh
 ```
+
+This script also use for upgrade.
 
 ## Usage
 
