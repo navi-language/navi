@@ -24,6 +24,8 @@ Navi is a static type, compiled language, we can compile the source code into By
 curl -sSL https://navi-lang.org/install | sh
 ```
 
+This script also use for upgrade.
+
 ## Usage
 
 Run `navi -h` to get help.
@@ -55,7 +57,7 @@ use std.io;
 io.println("Hello World.");
 
 test "Hello World" {
-  assert 1 == 1
+  assert 1 == 1;
 }
 ```
 
