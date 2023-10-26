@@ -13,6 +13,7 @@ get_latest_release() {
 app_name='Navi'
 bin_name='navi'
 version=$(get_latest_release)
+tmpdir=.tmp_install
 
 platform="$(uname | tr "[A-Z]" "[a-z]")"  # Linux => linux
 arch="$(uname -m | sed 's/x86_64/amd64/')"  # x86_64 => amd64
@@ -31,6 +32,7 @@ libc=''
 download_url=https://github.com/$repo/releases/download/$version/$bin_name-$platform$libc-$arch.tar.gz
 echo $download_url
 
+mkdir -p $tmpdir && cd $tmpdir
 curl -Lo $bin_name.tar.gz $download_url
 tar zxf $bin_name.tar.gz
 
@@ -41,6 +43,9 @@ sudo mv $bin_name /usr/local/bin/$bin_name
 fi
 
 rm $bin_name.tar.gz
+cd ..
+rm -Rf $tmpdir
+
 echo "$app_name $version has installed successfully."
 echo ""
 echo "You can use `$bin_name -h` to get help."
