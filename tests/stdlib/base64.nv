@@ -10,6 +10,8 @@ test "decode" {
   assert_eq base64.decode("aGVsbG8gd29ybGQ="), "hello world";
   assert_eq base64.decode("5rWL6K+VIFVSTCBTYWZl"), "测试 URL Safe";
   assert_eq base64.decode("aHR0cHM6Ly9uYXZpLWxhbmcub3Jn"), "https://navi-lang.org";
+
+  assert_eq base64.decode("invalid"), nil;
 }
 
 test "urlsafe_encode" {
@@ -20,4 +22,6 @@ test "urlsafe_encode" {
 test "urlsafe_decode" {
   assert_eq base64.urlsafe_decode("5rWL6K-VIFVSTCBTYWZl"), "测试 URL Safe";
   assert_eq base64.urlsafe_decode("aGVsbG8gd29ybGQ"), "hello world";
+
+  assert_eq base64.urlsafe_decode("invalid"), nil;
 }

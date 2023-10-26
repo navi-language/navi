@@ -1,0 +1,93 @@
+use std.net.http;
+use std.env;
+
+test "new_request" {
+    let req = http.new_request();
+    assert_eq req.method(), nil;
+    assert_eq req.url(), nil;
+
+    let headers = http.new_headers();
+    headers.set("Content-Type", "application/json");
+    headers.set("Accept-Encoding", "gzip, deflate");
+
+    let query = <string, string> {
+        "foo": "bar",
+        "baz": "1"
+    };
+    
+    let body = "Hello World!".bytes();
+
+    let req = http.new_request("GET", "https://httpbin.org/get", headers, query, body);
+    assert_eq req.method(), "GET";
+    assert_eq req.url(), "https://httpbin.org/get";
+    assert_eq req.headers()!.get("Content-Type"), "application/json";     
+    assert_eq req.headers()!.get("Accept-Encoding"), "gzip, deflate";
+    assert_eq req.query()!.get("foo"), "bar";
+    assert_eq req.query()!.get("baz"), "1";
+    assert_eq req.body()!.to_string(), "Hello World!"; 
+
+    let req = http.new_request(method = "GET", url = "https://httpbin.org/get", headers = headers, query = query, body = body);  
+    assert_eq req.method(), "GET";
+    assert_eq req.url(), "https://httpbin.org/get";
+    assert_eq req.headers()!.get("Content-Type"), "application/json";     
+    assert_eq req.headers()!.get("Accept-Encoding"), "gzip, deflate";
+    assert_eq req.query()!.get("foo"), "bar";
+    assert_eq req.query()!.get("baz"), "1";
+    assert_eq req.body()!.to_string(), "Hello World!"; 
+}
+
+test "chain settter" {
+    let headers = http.new_headers();
+    headers.set("Content-Type", "application/json");
+    headers.set("Accept-Encoding", "gzip, deflate");
+
+    let query = <string, string> {
+        "foo": "bar",
+        "baz": "1"
+    };
+
+    let body = "Hello World!".bytes();
+
+    let req = http.new_request("GET", "https://httpbin.org/get")
+        .set_headers(headers)
+        .set_query(query)
+        .set_body(body);
+    
+    assert_eq req.method(), "GET";
+    assert_eq req.url(), "https://httpbin.org/get";
+    assert_eq req.headers()!.get("Content-Type"), "application/json";
+    assert_eq req.headers()!.get("Accept-Encoding"), "gzip, deflate";
+    assert_eq req.query()!.get("foo"), "bar";
+    assert_eq req.query()!.get("baz"), "1";
+    assert_eq req.body()!.to_string(), "Hello World!";
+}
+
+test "send" {
+    if (env.get("CI") != nil) {
+        return;
+    }
+
+    let req = http.new_request("GET", "https://httpbin.org/get");
+    let res = req.send();
+    assert_eq res.status(), 200;
+
+    let headers = http.new_headers();
+    headers.set("Content-Type", "application/json");
+
+    let req = http.new_request(
+        method = "POST", 
+        url = "https://httpbin.org/post", 
+        query = <string, string> {
+            "foo": "1",
+            "bar": "Foo Bar",
+            "foo": "a",
+        },
+        headers = headers,
+        body = "Hello World!".bytes()
+    );
+    let res = req.send();
+    assert_eq res.status(), 200;
+    assert_eq res.headers().get("Content-Type"), "application/json";
+    assert_eq res.text().contains("Hello World!"), true;
+    assert_eq res.text().contains("https://httpbin.org/post?bar=Foo+Bar&foo=1&foo=a"), true, res.text();
+}

@@ -1,0 +1,287 @@
+use std.net.ip_addr_v4;
+use std.net.ip_addr_v6;
+
+// test cases for ipv4
+// test "ipv4 parse"
+test "ipv4 parse" {
+    let ip = ip_addr_v4.parse("127.0.0.1");
+    assert_ne ip, nil;
+
+    let ip = ip_addr_v4.parse("192.168.88.1");
+    assert_ne ip, nil;
+
+    // FIXME: this should be nil
+    // let ip = ip_addr_v4.parse("this-is-bad-ip");
+    // assert_eq ip, nil;
+}
+
+test "ipv4 new" {
+    let ip = ip_addr_v4.new(127, 0, 0, 1);
+    assert_eq ip.to_string(), "127.0.0.1";
+
+    let ip = ip_addr_v4.new(192, 168, 88, 1);
+    assert_eq ip.to_string(), "192.168.88.1";
+}
+
+test "ipv4 to_octets" {
+    let ip = ip_addr_v4.parse("127.0.0.1")!;
+    let octets = ip.to_octets();
+
+    assert_eq octets[0], 127;
+    assert_eq octets[1], 0;
+    assert_eq octets[2], 0;
+    assert_eq octets[3], 1;
+}
+
+test "ipv4 eq" {
+    let ip1 = ip_addr_v4.new(127, 0, 0, 1);
+    let ip2 = ip_addr_v4.parse("127.0.0.1")!;
+    assert_eq ip1.to_string(), "127.0.0.1";
+    assert_eq ip1, ip2;
+
+    let ip3 = ip_addr_v4.parse("192.168.88.1")!;
+    let ip4 = ip_addr_v4.new(192, 168, 88, 1);
+
+    assert_eq ip3, ip4;
+    assert_ne ip1, ip3;
+    assert_ne ip2, ip4;
+}
+
+// test "is_loopback"
+test "ipv4 is_loopback" {
+    let ip = ip_addr_v4.parse("192.168.88.1")!;
+    assert_ne ip.is_loopback(), true;
+
+    let ip = ip_addr_v4.parse("127.0.0.1")!;
+    assert_eq ip.is_loopback(), true;
+}
+
+// test "is_private"
+test "ipv4 is_private" {
+    let ip = ip_addr_v4.parse("127.0.0.1")!;
+    assert_ne ip.is_private(), true;
+
+    let ip = ip_addr_v4.parse("192.168.88.1")!;
+    assert_eq ip.is_private(), true;
+
+    let ip = ip_addr_v4.parse("192.169.0.2")!;
+    assert_ne ip.is_private(), true;
+
+    let ip = ip_addr_v4.parse("10.0.0.1")!;
+    assert_eq ip.is_private(), true;
+
+    let ip = ip_addr_v4.parse("10.10.10.10")!;
+    assert_eq ip.is_private(), true;
+
+    let ip = ip_addr_v4.parse("172.16.10.10")!;
+    assert_eq ip.is_private(), true;
+
+    let ip = ip_addr_v4.parse("172.32.0.2")!;
+    assert_ne ip.is_private(), true;
+}
+
+// test "ipv4 is_link_local"
+test "ipv4 is_link_local" {
+    let ip = ip_addr_v4.parse("192.168.88.1")!;
+    assert_ne ip.is_link_local(), true;
+
+    let ip = ip_addr_v4.parse("169.254.0.0")!;
+    assert_eq ip.is_link_local(), true;
+}
+
+// test "ipv4 is_multicast"
+test "ipv4 is_multicast" {
+    let ip = ip_addr_v4.parse("192.168.88.1")!;
+    assert_ne ip.is_multicast(), true;
+
+    let ip = ip_addr_v4.parse("224.254.0.0")!;
+    assert_eq ip.is_multicast(), true;
+
+    let ip = ip_addr_v4.parse("236.168.10.65")!;
+    assert_eq ip.is_multicast(), true;
+}
+
+// test "ipv4 is_broadcast"
+test "ipv4 is_broadcast" {
+    let ip = ip_addr_v4.parse("127.0.0.1")!;
+    assert_ne ip.is_broadcast(), true;
+
+    let ip = ip_addr_v4.parse("192.168.88.1")!;
+    assert_ne ip.is_broadcast(), true;
+
+    let ip = ip_addr_v4.parse("255.255.255.255")!;
+    assert_eq ip.is_broadcast(), true;
+}
+
+// test "ipv4 is_documentation"
+test "ipv4 is_documentation" {
+    let ip = ip_addr_v4.parse("223.12.1.233")!;
+    assert_ne ip.is_documentation(), true;
+
+    let ip = ip_addr_v4.parse("192.0.2.0")!;
+    assert_eq ip.is_documentation(), true;
+
+    let ip = ip_addr_v4.parse("198.51.100.65")!;
+    assert_eq ip.is_documentation(), true;
+
+    let ip = ip_addr_v4.parse("203.0.113.6")!;
+    assert_eq ip.is_documentation(), true;
+}
+
+// test "ipv4 is_unspecified"
+test "ipv4 is_unspecified" {
+    let ip = ip_addr_v4.parse("45.22.13.197")!;
+    assert_ne ip.is_unspecified(), true;
+
+    let ip = ip_addr_v4.parse("0.0.0.0")!;
+    assert_eq ip.is_unspecified(), true;
+}
+
+// test "ipv4 to_string"
+test "ipv4 to_string" {
+    let ip = ip_addr_v4.parse("127.0.0.1")!;
+    assert_eq ip.to_string(), "127.0.0.1";
+    assert_ne ip.to_string(), "127.0.0.2";
+}
+
+
+// test cases for ipv6
+// test "ipv6 parse"
+test "ipv6 parse" {
+    let ip = ip_addr_v6.parse("::1")!;
+    assert_eq ip.to_string(), "::1";
+
+    let ip = ip_addr_v6.parse("2001:4860:4860::8888")!;
+    assert_eq ip.to_string(), "2001:4860:4860::8888";
+
+    let ip = ip_addr_v6.parse("2001:4860:4860:0:0:0:0:8888")!;
+    assert_eq ip.to_string(), "2001:4860:4860::8888";
+
+    // FIXME: this should be nil
+    // let ip = ip_addr_v4.parse("this-is-bad-ip")!;
+    // assert_eq ip, nil;
+}
+
+test "ipv6 new" {
+    let ip = ip_addr_v6.new(0, 0, 0, 0, 0, 0, 0, 1);
+    assert_eq ip.to_string(), "::1";
+
+    let ip = ip_addr_v6.new(8193, 18528, 18528, 0, 0, 0, 0, 34952);
+    assert_eq ip.to_string(), "2001:4860:4860::8888";
+}
+
+test "ipv6 to_octets" {
+    let ip = ip_addr_v6.parse("::1")!;
+    let octets = ip.to_octets();
+    assert_eq octets[0], 0;
+    assert_eq octets[1], 0;
+    assert_eq octets[2], 0;
+    assert_eq octets[3], 0;
+    assert_eq octets[4], 0;
+    assert_eq octets[5], 0;
+    assert_eq octets[6], 0;
+    assert_eq octets[7], 0;
+    assert_eq octets[8], 0;
+    assert_eq octets[9], 0;
+    assert_eq octets[10], 0;
+    assert_eq octets[11], 0;
+    assert_eq octets[12], 0;
+    assert_eq octets[13], 0;
+    assert_eq octets[14], 0;
+    assert_eq octets[15], 1;
+}
+
+test "ipv6 eq" {
+    let ip1 = ip_addr_v6.new(0, 0, 0, 0, 0, 0, 0, 1);
+    let ip2 = ip_addr_v6.parse("::1")!;
+    assert_eq ip1, ip2;
+
+    let ip3 = ip_addr_v6.parse("2001:4860:4860::8888")!;
+    let ip4 = ip_addr_v6.new(8193, 18528, 18528, 0, 0, 0, 0, 34952);
+    assert_eq ip3, ip4;
+    assert_ne ip1, ip3;
+    assert_ne ip2, ip4;
+}
+
+// test "ipv6 to_segments"
+test "ipv6 to_segments" {
+    let ip = ip_addr_v6.new(0, 0, 0, 0, 0, 65535, 49162, 767);
+    let segments = ip.to_segments();
+    assert_eq segments[0], 0;
+    assert_eq segments[1], 0;
+    assert_eq segments[2], 0;
+    assert_eq segments[3], 0;
+    assert_eq segments[4], 0;
+    assert_eq segments[5], 65535;
+    assert_eq segments[6], 49162;
+    assert_eq segments[7], 767;
+}
+
+// test "ipv6 is_loopback"
+test "ipv6 is_loopback" {
+    let ip = ip_addr_v6.parse("2001:4860:4860::8888")!;
+    assert_ne ip.is_loopback(), true;
+
+    let ip = ip_addr_v6.parse("::1")!;
+    assert_eq ip.is_loopback(), true;
+}
+
+// test "ipv6 is_multicast"
+test "ipv6 is_multicast" {
+    let ip = ip_addr_v6.parse("2001:4860:4860::8888")!;
+    assert_ne ip.is_multicast(), true;
+
+    let ip = ip_addr_v6.parse("ff00::")!;
+    assert_eq ip.is_multicast(), true;
+
+    let ip = ip_addr_v6.parse("ff02::")!;
+    assert_eq ip.is_multicast(), true;
+
+    let ip = ip_addr_v6.parse("ff02:0:0:0:0:0:0:1")!;
+    assert_eq ip.is_multicast(), true;
+
+    let ip = ip_addr_v6.parse("ff02:0:0:0:0:0:0:9")!;
+    assert_eq ip.is_multicast(), true;
+
+    let ip = ip_addr_v6.parse("ff02:0:0:0:0:0:0:b")!;
+    assert_eq ip.is_multicast(), true;
+}
+
+// test "ipv6 is_unspecified"
+test "ipv6 is_unspecified" {
+    let ip = ip_addr_v6.parse("2001:4860:4860::8888")!;
+    assert_ne ip.is_unspecified(), true;
+
+    let ip = ip_addr_v6.parse("::")!;
+    assert_eq ip.is_unspecified(), true;
+}
+
+// test "ipv6 to_ipv4"
+test "ipv6 to_ipv4" {
+    let ip = ip_addr_v6.new(0, 0, 0, 0, 0, 65535, 49162, 767);
+    let ipv4 = ip.to_ipv4();
+
+    // FIXME: this should be equal
+    // assert_eq ipv4, ip_addr_v4.new(192, 10, 2, 255);
+
+    let ip = ip_addr_v6.new(0, 0, 0, 0, 0, 0, 0, 1);
+    let ipv4 = ip.to_ipv4();
+
+    // FIXME: this should be equal
+    // assert_eq ipv4, ip_addr_v4.new(0, 0, 0, 1);
+}
+
+// test "ipv6 to_ipv4_mapped"
+test "ipv6 to_ipv4_mapped" {
+    let ip = ip_addr_v6.new(0, 0, 0, 0, 0, 65535, 49162, 767);
+    let ipv4 = ip.to_ipv4_mapped();
+
+    // FIXME: this should be equal
+    // assert_eq ipv4, ip_addr_v4.new(192, 10, 2, 255);
+}
+
+// test "ipv6 to_string"
+test "ipv6 to_string" {
+    let ip = ip_addr_v6.new(0, 0, 0, 0, 0, 65535, 49162, 767);
+    assert_eq ip.to_string(), "::ffff:192.10.2.255";
+}

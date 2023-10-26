@@ -11,7 +11,7 @@ struct Candlestick {
     turnover: float,
 }
 
-let candlesticks = []Candlestick{
+let candlesticks = [Candlestick] {
     Candlestick {
         time: 943920000,
         open: 29.5,

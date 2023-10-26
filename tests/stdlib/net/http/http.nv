@@ -1,0 +1,167 @@
+use std.net.http;
+use std.env;
+
+test "request" {
+    if (env.get("CI") != nil) {
+        return;
+    }
+
+    // GET
+    let headers = http.new_headers();
+    let body = "".bytes();
+
+    let query = <string, string> {
+        "foo": "1",
+        "bar": "Foo Bar"
+    };
+
+    let res = http.request("GET", "https://httpbin.org/get", headers, query, body);
+    assert_eq res.status(), 200;
+    assert_eq res.headers().get("Content-Type"), "application/json";
+    assert_eq res.body().to_string().contains("headers"), true;
+
+    // POST
+    let body = "Hello, world!".bytes();
+    let res = http.request("POST", "https://httpbin.org/post", headers = headers, body = body, query = query);
+    assert_eq res.status(), 200;
+    assert_eq res.text().contains("Hello, world!"), true;
+    assert_eq res.body().to_string(), res.text();
+
+    // PUT
+    let body = "Hello, world!".bytes();
+    let res = http.request("PUT", "https://httpbin.org/put", headers, query, body);
+    assert_eq res.status(), 200;
+    assert_eq res.text().contains("Hello, world!"), true;
+
+    // DELETE
+    let body = "Hello, world!".bytes();
+    let res = http.request("DELETE", "https://httpbin.org/delete", headers, query, body);
+    assert_eq res.status(), 200;
+    assert_eq res.text().contains("Hello, world!"), true;
+
+    /// PATCH
+    let body = "Hello, world!".bytes();
+    let res = http.request("PATCH", "https://httpbin.org/patch", headers, query, body);
+    assert_eq res.status(), 200;
+    assert_eq res.text().contains("Hello, world!"), true;
+
+    /// HEAD
+    let body = "".bytes();
+    let res = http.request("HEAD", "https://httpbin.org/get", headers, query, body);
+    assert_eq res.status(), 200;
+}
+
+test "request with kw_args" {
+    if (env.get("CI") != nil) {
+        return;
+    }
+
+    let res = http.request("GET", "https://httpbin.org/get");
+    assert_eq res.status(), 200;
+
+    let headers = http.new_headers();
+    headers.set("FOO", "test-header");
+    let res = http.request("GET", "https://httpbin.org/get", headers = headers);
+    assert_eq res.status(), 200;
+    assert_eq res.text().contains("test-header"), true;
+
+
+    let query = <string, string> {
+        "bar": "1",
+        "foo": "FOO_BAR",
+    };
+    let res = http.request("GET", "https://httpbin.org/get", headers = headers, query = query);
+    assert_eq res.status(), 200;
+    assert_eq res.text().contains("https://httpbin.org/get?bar=1&foo=FOO_BAR"), true, res.text();
+}
+
+test "head" {
+    if (env.get("CI") != nil) {
+        return;
+    }
+
+    let headers = http.new_headers();
+    let query = <string, string> {
+        "foo": "1",
+        "bar": "Foo Bar"
+    };
+    let res = http.head("https://httpbin.org/get", headers = headers, query = query);
+    assert_eq res.status(), 200;
+}
+
+test "get" {
+    if (env.get("CI") != nil) {
+        return;
+    }
+
+    let headers = http.new_headers();
+    let query = <string, string> {
+        "foo": "1",
+        "bar": "Foo Bar",
+        // same key twice
+        "foo": "a",
+    };
+    let res = http.get("https://httpbin.org/get", headers, query);
+    assert_eq res.status(), 200;
+    assert_eq res.headers().get("Content-Type"), "application/json";
+    // Test query key order
+    assert_eq res.text().contains("https://httpbin.org/get?bar=Foo+Bar&foo=1&foo=a"), true, res.text();
+    // TODO: Parse JSON and check args;
+}
+
+test "post" {
+    if (env.get("CI") != nil) {
+        return;
+    }
+
+    let headers = http.new_headers();
+    let body = "Hello, world!".bytes();
+    let res = http.post("https://httpbin.org/post", headers, body = body);
+    assert_eq res.status(), 200;
+    assert_eq res.text().contains("Hello, world!"), true;
+
+    let res = http.post("https://httpbin.org/post", headers, query = <string, string> {
+        "foo": "1",
+        "bar": "Foo Bar"
+    }, body = body);
+    assert_eq res.status(), 200;
+    assert_eq res.text().contains(`"data": "Hello, world!"`), true, res.text();
+    assert_eq res.text().contains("https://httpbin.org/post?bar=Foo+Bar&foo=1"), true, res.text();
+}
+
+test "delete" {
+    if (env.get("CI") != nil) {
+        return;
+    }
+
+
+    let headers = http.new_headers();
+    let body = "Hello, world!".bytes();
+    let res = http.delete("https://httpbin.org/delete", headers, body = body);
+    assert_eq res.status(), 200;
+    assert_eq res.text().contains("Hello, world!"), true;
+}
+
+test "put" {
+    if (env.get("CI") != nil) {
+        return;
+    }
+
+    let headers = http.new_headers();
+    let body = "Hello, world!".bytes();
+    let res = http.put("https://httpbin.org/put", headers, body = body);
+    assert_eq res.status(), 200;
+    assert_eq res.text().contains("Hello, world!"), true;
+}
+
+test "patch" {
+    if (env.get("CI") != nil) {
+        return;
+    }
+
+    let headers = http.new_headers();
+    let body = "Hello, world!".bytes();
+    let res = http.patch("https://httpbin.org/patch", headers, body = body);
+    assert_eq res.status(), 200;
+    assert_eq res.text().contains("Hello, world!"), true;
+}

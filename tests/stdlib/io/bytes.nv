@@ -1,0 +1,44 @@
+use std.io;
+
+test "new_bytes" {
+    let buf = io.new_bytes();
+    assert_eq buf.len(), 0;
+    assert_eq buf.to_string(), "";
+}
+
+test "from_bytes" {
+    let buf = io.from_bytes([int] { 104, 101, 108, 108, 111 });
+    assert_eq buf.len(), 5;
+    assert_eq buf.to_string(), "hello";
+}
+
+test "push" {
+    let buf = io.new_bytes();
+    buf.push(104);
+    buf.push(101);
+    buf.push(108);
+    buf.push(108);
+    buf.push(111);
+
+    assert_eq buf.len(), 5;
+    assert_eq buf.to_string(), "hello";
+}
+
+test "set & get" {
+    let buf = "hello".bytes();
+
+    // Set buf byte, replace with `Hello`.
+    buf.set(0, 72);
+
+    assert_eq buf.get(0), 72;
+    assert_eq buf.get(1), 101;
+    assert_eq buf.to_string(), "Hello";
+}
+
+test "encode" {
+  let buf = "hello world".bytes();
+
+  assert_eq buf.encode("hex"), "68656c6c6f20776f726c64";
+  assert_eq buf.encode("base64"), "aGVsbG8gd29ybGQ=";
+  assert_eq buf.encode("base64url"), "aGVsbG8gd29ybGQ";
+}

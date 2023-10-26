@@ -1,0 +1,10 @@
+param {
+    k1: number = 10,
+    k2: number = 20,
+}
+
+let a: number = query();
+let b: number = query();
+let c: number = query();
+
+export let r = (a * b + c + k1) * k2;

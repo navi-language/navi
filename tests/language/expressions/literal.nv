@@ -1,0 +1,29 @@
+test "boolean" {
+    true;
+    false;
+}
+
+test "int" {
+    10;
+}
+
+test "float" {
+    0.123;
+    231.3434;
+    10.23e+10;
+    2.0e+2;
+}
+
+// test "string" {
+//     "abc";
+//     "abc\n";
+//     "abc\t";
+//     "abc\r";
+//     "abc\\";
+//     "abc\"";
+//     "abc\'";
+// }
+
+test "nil" {
+    let a: int? = nil;
+}

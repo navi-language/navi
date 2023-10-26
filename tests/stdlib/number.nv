@@ -1,9 +1,20 @@
 test "Int - string_interpolation" {
     let n = 2023;
-    assert_eq `Year is {n}`, "Year is 2023";
+    let m: int? = 10;
+    assert_eq `Year is {n}, month is {m}`, "Year is 2023, month is 10";
 }
 
 test "Float - string_interpolation" {
     let n = 3.1415926;
-    assert_eq `Pi is {n}`, "Pi is 3.1415926";
+    let m: float? = 10.0;
+    assert_eq `Pi is {n}, {m}`, "Pi is 3.1415926 10.0";
+}
+
+test "int" {
+    let a = 1;
+    let b = 2;
+    let c: int? = 3;
+
+    assert_eq a + b, 3;
+    assert_eq a + c!, 4;
 }

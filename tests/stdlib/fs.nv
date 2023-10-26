@@ -2,7 +2,6 @@ use std.fs;
 use std.path;
 use std.env;
 use std.io;
-use std.buffer;
 use std.time;
 
 tests {
@@ -25,7 +24,7 @@ tests {
 
     test "open & read" {
         let f = fixture("hello.txt");
-        let buf = f.read();
+        let buf = f.read_all();
         assert_eq buf.to_string(), "Hello, world!\n";
     }
 
@@ -45,7 +44,7 @@ tests {
         // Write a byte \n
         f.write_byte(10);
         // Build a buf
-        let buf = buffer.new();
+        let buf = io.new_buffer();
         buf.write_string("This is Navi.");
         f.write_buffer(buf);
 
@@ -53,7 +52,7 @@ tests {
         f.flush();
 
         let f = fs.open(p);
-        let buf = f.read();
+        let buf = f.read_all();
         assert_eq buf.to_string(), "Hello, world!\nThis is Navi.";
 
         fs.remove_file(p);
@@ -109,19 +108,19 @@ tests {
     }
 
     test "glob" {
-    let paths = []string {};
-    let exts = []string {};
-    fs.glob("tests/**/*.nv", fn(p: string) {
-        paths.push(p);
-        exts.push(path.extension(p));
-    });
+        let paths = [string] {};
+        let exts = [string] {};
+        fs.glob("tests/**/*.nv", fn(p: string) {
+            paths.push(p);
+            exts.push(path.extension(p));
+        });
 
-    assert paths.len() > 0;
-    assert paths.contains("tests/stdlib/path.nv");
-    assert paths.contains("tests/stdlib/fs.nv");
+        assert paths.len() > 0;
+        assert paths.contains("tests/stdlib/path.nv");
+        assert paths.contains("tests/stdlib/fs.nv");
 
-    exts.unique();
-    assert exts.len() == 1;
-    assert exts.contains("nv");
+        exts.unique();
+        assert exts.len() == 1;
+        assert exts.contains("nv");
     }
 }

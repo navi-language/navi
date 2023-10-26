@@ -1,0 +1,24 @@
+use test_harness;
+
+fn add(a: int, b: int): int {
+    return a - b;
+}
+
+test "navi function closure" {
+    let _add = add;
+    assert_eq _add(10, 20), -10;
+}
+
+test "builtin function closure" {
+    let _add = test_harness.f2;
+    assert_eq _add(10, 20), -10;
+}
+
+test "capture values" {
+    let a = 10;
+    let b = 20;
+    let _add = fn(): int {
+        return add(a, b);
+    };
+    assert_eq _add(), -10;
+}

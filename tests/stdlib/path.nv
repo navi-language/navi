@@ -9,6 +9,7 @@ test "base" {
   assert_eq path.base("src/doesnt_exist.rs"), "doesnt_exist.rs";
   assert_eq path.base("/foo/bar/dar"), "dar";
   assert_eq path.base("/foo/bar/dar/"), "dar";
+  assert_eq path.base(""), "";
 }
 
 test "dir" {

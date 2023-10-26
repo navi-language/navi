@@ -178,26 +178,22 @@ test "nanoseconds" {
 
 test "eq" {
     let a = 1.seconds();
-    assert_ne a, nil;
     assert_ne a, 2.seconds();
     assert_eq a, 1.seconds();
     assert_eq a, 1000.milliseconds();
 
     let a = 3.1415.seconds();
-    assert_ne a, nil;
     assert_ne a, 3.141592.seconds();
     assert_ne a, 2.seconds();
     assert_eq a, 3.1415.seconds();
     assert_eq a, 3141.5.milliseconds();
 
     let a = 1.5.minutes();
-    assert_ne a, nil;
     assert_ne a, 2.minutes();
     assert_eq a, 1.5.minutes();
     assert_eq a, 90.seconds();
 
     let a = 320.milliseconds();
-    assert_ne a, nil;
     assert_ne a, 321.milliseconds();
     assert_eq a, 320.milliseconds();
     assert_eq a, 0.32.seconds();

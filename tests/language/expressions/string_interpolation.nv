@@ -1,0 +1,8 @@
+test "string interpolation" {
+    assert_eq ``, "";
+    assert_eq `{10}`, "10";
+    assert_eq `{10 + 20}`, "30";
+    assert_eq `hello {"world"}`, "hello world";
+    assert_eq `hello {"world" + "!"}`, "hello world!";
+    assert_eq `hello {"world" + "!"} {"foo"}`, "hello world! foo";
+}

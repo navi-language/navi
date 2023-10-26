@@ -20,20 +20,20 @@ test "len" {
 
 test "bytes" {
   let s = "hello world.";
-  let bytes = s.bytes();
-  assert_eq bytes.len(), 12;
-  assert_eq bytes[0], 104;
-  assert_eq bytes[1], 101;
-  assert_eq bytes[2], 108;
-  assert_eq bytes[3], 108;
-  assert_eq bytes[4], 111;
-  assert_eq bytes[5], 32;
-  assert_eq bytes[6], 119;
-  assert_eq bytes[7], 111;
-  assert_eq bytes[8], 114;
-  assert_eq bytes[9], 108;
-  assert_eq bytes[10], 100;
-  assert_eq bytes[11], 46;
+  let buf = s.bytes();
+  assert_eq buf.len(), 12;
+  assert_eq buf.get(0), 104;
+  assert_eq buf.get(1), 101;
+  assert_eq buf.get(2), 108;
+  assert_eq buf.get(3), 108;
+  assert_eq buf.get(4), 111;
+  assert_eq buf.get(5), 32;
+  assert_eq buf.get(6), 119;
+  assert_eq buf.get(7), 111;
+  assert_eq buf.get(8), 114;
+  assert_eq buf.get(9), 108;
+  assert_eq buf.get(10), 100;
+  assert_eq buf.get(11), 46;
 
   let s = "👋🏻 你好";
   assert_eq s.bytes().len(), 15;
@@ -201,4 +201,9 @@ test "to_float" {
   assert_parse_float("123abc", 0.0, false);
   assert_parse_float("123.456.789", 0.0, false);
   assert_parse_float("abc", 0.0, false);
+}
+
+test "is_empty" {
+  assert_eq "".is_empty(), true;
+  assert_eq "hello".is_empty(), false;
 }

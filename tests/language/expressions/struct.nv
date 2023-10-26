@@ -1,0 +1,27 @@
+struct T {
+    a: int,
+    b: string,
+}
+
+impl T {
+    fn add(n: int) {
+        self.a += n;
+    }
+}
+
+test "struct member" {
+    let t = T { a: 10, b: "foo" };
+    assert_eq t.a, 10;
+    assert_eq t.b, "foo";
+    t.a = 33;
+    t.b = "bar";
+    assert_eq t.a, 33;
+    assert_eq t.b, "bar";
+}
+
+test "call method" {
+    let t = T { a: 10, b: "foo" };
+    assert_eq t.a, 10;
+    t.add(5);
+    assert_eq t.a, 15;
+}

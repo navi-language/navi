@@ -2,19 +2,19 @@ struct Item {
   name: string
 }
 
-test "[]int" {
-  let items = []int { 1, 2, 3 };
+test "[int]" {
+  let items = [int] { 1, 2, 3 };
 
   assert_eq items.len(), 3;
   assert_eq items[0], 1;
   assert_eq items[1], 2;
   assert_eq items[2], 3;
   // FIXME: expect this return nil
-  assert_eq items[4], 0;
+  // assert_eq items[4], 0;
 }
 
-test "[]string" {
-  let items = []string { "foo", "bar", "baz" };
+test "[string]" {
+  let items = [string] { "foo", "bar", "baz" };
 
   assert_eq items.len(), 3;
   assert_eq items[0], "foo";
@@ -22,8 +22,8 @@ test "[]string" {
   assert_eq items[2], "baz";
 }
 
-test "[]Item" {
-  let items = []Item {
+test "[Item]" {
+  let items = [Item] {
     Item { name: "foo" },
     Item { name: "bar" },
     Item { name: "baz" },
@@ -36,53 +36,32 @@ test "[]Item" {
 }
 
 test "get & [] | set & []=" {
-  let items = []string { "foo", "bar", "baz" };
+  let items = [string] { "foo", "bar", "baz" };
   
   assert_eq items[0], "foo";
-  let v, ok = items.get(0);
-  assert ok;
-  assert_eq v, "foo";
+  assert_eq items.get(0), "foo";
 
   items[0] = "qux";
   assert_eq items[0], "qux";
   items.set(0, "quux");
-  let v, ok = items.get(0);
-  assert ok;
-  assert_eq v, "quux";
-
-  let v, ok = items.get(3);
-  assert !ok;
-  assert_eq v, nil;
-
-  assert_eq items[3], nil;
+  assert_eq items.get(0), "quux";
+  assert_eq items.get(3), nil;
 
   // With int
-  let items = []int { 10, 15, 20 };
+  let items = [int] { 10, 15, 20 };
   assert_eq items[0], 10;
-  let v, ok = items.get(0);
-  assert ok;
-  assert_eq v, 10;
+  assert_eq items.get(0), 10;
 
   items[0] = 100;
   assert_eq items[0], 100;
   items.set(0, 1000);
-  let v, ok = items.get(0);
-  assert ok;
-  assert_eq v, 1000;
-
-  let v, ok = items.get(2);
-  assert ok;
-  assert_eq v, 20;
-
-  let v, ok = items.get(3);
-  assert !ok;
-  assert_eq v, 0;
-  // FIXME: expect this return nil
-  assert_eq items[3], 0;
+  assert_eq items.get(0), 1000;
+  assert_eq items.get(2), 20;
+  assert_eq items.get(3), nil;
 }
 
 test "push / push_back | pop / pop_back" {
-  let items = []string {};
+  let items = [string] {};
   items.push("foo");
   items.push_back("bar");
 
@@ -90,20 +69,13 @@ test "push / push_back | pop / pop_back" {
   assert_eq items[0], "foo";
   assert_eq items[1], "bar";
 
-  let item, ok = items.pop();
-  assert ok;
-  assert_eq item, "bar";
-
-  let item, ok = items.pop_back();
-  assert ok;
-  assert_eq item, "foo";
-
-  let item, ok = items.pop();
-  assert !ok;
+  assert_eq items.pop(), "bar";
+  assert_eq items.pop_back(), "foo";
+  assert_eq items.pop(), nil;
 }
 
 test "shift / pop_front | unshift / push_front" {
-  let items = []string {};
+  let items = [string] {};
   items.unshift("foo");
   items.push_front("bar");
 
@@ -111,20 +83,22 @@ test "shift / pop_front | unshift / push_front" {
   assert_eq items[0], "bar";
   assert_eq items[1], "foo";
 
-  let item, ok = items.shift();
-  assert ok;
-  assert_eq item, "bar";
+  assert_eq items.shift(), "bar";
+  assert_eq items.len(), 1;
+  assert_eq items.shift(), "foo";
+  assert_eq items.len(), 0;
+  assert_eq items.shift(), nil;
 
-  let item, ok = items.pop_front();
-  assert ok;
-  assert_eq item, "foo";
-
-  let item, ok = items.shift();
-  assert !ok;
+  let items = [string] { "foo", "bar" };
+  assert_eq items.pop_front(), "foo";
+  assert_eq items.len(), 1;
+  assert_eq items.pop_front(), "bar";
+  assert_eq items.len(), 0;
+  assert_eq items.pop_front(), nil;
 }
 
 test "is_empty" {
-  let items = []string {};
+  let items = [string] {};
   assert items.is_empty();
 
   items.push("foo");
@@ -132,7 +106,7 @@ test "is_empty" {
 }
 
 test "len" {
-  let items = []string {};
+  let items = [string] {};
   assert_eq items.len(), 0;
 
   items.push("foo");
@@ -141,62 +115,62 @@ test "len" {
 
 test "join" {
   // string
-  let items = []string { "foo", "bar", "baz" };
+  let items = [string] { "foo", "bar", "baz" };
   assert_eq items.join(","), "foo,bar,baz";
   assert_eq items.join(" "), "foo bar baz";
 }
 
 test "contains" {
   // string
-  let items = []string { "a", "b", "c" };
+  let items = [string] { "a", "b", "c" };
 
   assert items.contains("a");
   assert items.contains("b");
   assert !items.contains("d");
 
   // int
-  let items = []int { 1, 2, 3 };
+  let items = [int] { 1, 2, 3 };
   assert items.contains(1);
   assert items.contains(2);
   assert !items.contains(4);
 
   // float
-  let items = []float { 2.1, 3.14, 4.2 };
+  let items = [float] { 2.1, 3.14, 4.2 };
   assert items.contains(2.1);
   assert items.contains(2.10);
   assert items.contains(3.14);
   assert !items.contains(2.12);
 
   // bool
-  let items = []bool { true, true };
+  let items = [bool] { true, true };
   assert items.contains(true);
   assert !items.contains(false);
 }
 
 test "sort" {
   // string 
-  let items = []string { "c", "a", "b" };
+  let items = [string] { "c", "a", "b" };
   items.sort();
   assert_eq items[0], "a";
   assert_eq items[1], "b";
   assert_eq items[2], "c";
 
   // int
-  let items = []int { 3, 1, 2 };
+  let items = [int] { 3, 1, 2 };
   items.sort();
   assert_eq items[0], 1;
   assert_eq items[1], 2;
   assert_eq items[2], 3;
 
   // float
-  let items = []float { 3.14, 1.0, 2.1 };
+  let items = [float] { 3.14, 1.0, 2.1 };
   items.sort();
   assert_eq items[0], 1.0;
   assert_eq items[1], 2.1;
   assert_eq items[2], 3.14;
 
   // bool
-  let items = []bool { true, false, true };
+  let items = [bool] { true, false, true };
   items.sort();
   assert_eq items[0], false;
   assert_eq items[1], true;
@@ -205,28 +179,28 @@ test "sort" {
 
 test "reverse" {
   // string
-  let items = []string { "a", "b", "c" };
+  let items = [string] { "a", "b", "c" };
   items.reverse();
   assert_eq items[0], "c";
   assert_eq items[1], "b";
   assert_eq items[2], "a";
 
   // int
-  let items = []int { 9, 12, 3 };
+  let items = [int] { 9, 12, 3 };
   items.reverse();
   assert_eq items[0], 3;
   assert_eq items[1], 12;
   assert_eq items[2], 9;
 
   // float
-  let items = []float { 9.0, 12.0, 3.0 };
+  let items = [float] { 9.0, 12.0, 3.0 };
   items.reverse();
   assert_eq items[0], 3.0;
   assert_eq items[1], 12.0;
   assert_eq items[2], 9.0;
 
   // bool
-  let items = []bool { true, false, false };
+  let items = [bool] { true, false, false };
   items.reverse();
   assert_eq items[0], false;
   assert_eq items[1], false;
@@ -235,7 +209,7 @@ test "reverse" {
 
 test "unique" {
   // int
-  let items = []int { 1, 2, 3, 1, 2, 3 };
+  let items = [int] { 1, 2, 3, 1, 2, 3 };
   items.unique();
   assert_eq items.len(), 3;
   assert_eq items[0], 1;
@@ -243,7 +217,7 @@ test "unique" {
   assert_eq items[2], 3;
 
   // float
-  let items = []float { 1.0, 2.0, 2.00, 4.23, 2.1, 1.0, 3.14 };
+  let items = [float] { 1.0, 2.0, 2.00, 4.23, 2.1, 1.0, 3.14 };
   items.unique();
   assert_eq items.len(), 5;
   assert_eq items[0], 1.0;
@@ -253,14 +227,14 @@ test "unique" {
   assert_eq items[4], 3.14;
 
   // bool
-  let items = []bool { true, true, false, false, true };
+  let items = [bool] { true, true, false, false, true };
   items.unique();
   assert_eq items.len(), 2;
   assert_eq items[0], true;
   assert_eq items[1], false;
 
   // string
-  let items = []string { "a", "b", "a", "b", "c" };
+  let items = [string] { "a", "b", "a", "b", "c" };
   items.unique();
   assert_eq items.len(), 3;
   assert_eq items[0], "a";

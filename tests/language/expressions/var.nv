@@ -1,0 +1,40 @@
+test "global var" {
+    let a = 10;
+    assert_eq a, 10;
+    a = 20;
+    assert_eq a, 20;
+}
+
+test "shadow global var" {
+    let a = 10;
+    assert_eq a, 10;
+
+    {
+        let a = "abc";
+        assert_eq a, "abc";
+    }
+
+    assert_eq a, 10;
+}
+
+fn foo() {
+    let a = 10;
+    assert_eq a, 10;
+}
+
+test "local var" {
+    let a = 20;
+    foo();
+    assert_eq a, 20;
+}
+
+fn foo2() {
+    let a = 10;
+    assert_eq a, 10;
+    let a = "abc";
+    assert_eq a, "abc";
+}
+
+test "local var shadow" {
+    foo2();
+}

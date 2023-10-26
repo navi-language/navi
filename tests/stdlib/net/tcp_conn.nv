@@ -1,0 +1,41 @@
+use std.net.tcp_conn;
+use std.io;
+
+test "tcp_conn connect" {
+    // create a tcp server with netcat: `nc -l 0.0.0.0 5555`
+    let conn = tcp_conn.connect("127.0.0.1:5555");
+    let buf = "hello world!".bytes();
+    conn.write_all(buf);
+    conn.close();
+}
+
+test "tcp_conn connect_to_any" {
+    let addrs = [string] {
+        "127.0.0.1:8080",
+        "127.0.0.1:5555"
+    };
+    let conn = tcp_conn.connect_to_any(addrs);
+    let buf = "hello world!".bytes();
+    conn.write_all(buf);
+    conn.close();
+}
+
+test "tcp_conn local_addr" {
+    let addrs = [string] {
+        "127.0.0.1:8080",
+        "127.0.0.1:5555"
+    };
+    let conn = tcp_conn.connect_to_any(addrs);
+    let local_addr = conn.local_addr();
+    assert_eq local_addr.split(":")[0], "127.0.0.1";
+    assert_ne local_addr.split(":")[0], "192.168.88.1";
+}
+
+test "tcp_conn remote_addr" {
+    let conn = tcp_conn.connect("127.0.0.1:5555");
+    let remote_addr = conn.remote_addr();
+    assert_eq remote_addr.split(":")[0], "127.0.0.1";
+    assert_eq remote_addr.split(":")[1], "5555";
+    assert_ne remote_addr.split(":")[1], "5554";
+}
+

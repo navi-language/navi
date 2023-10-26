@@ -15,26 +15,26 @@ test "parse" {
 }
 
 test "to_string" {
-  let my_url = url.parse("http://navi-lang.org");
+  let my_url = url.parse("http://navi-lang.org")!;
   assert_eq my_url.to_string(), "http://navi-lang.org";
 
-  let my_url = url.parse("http://navi-lang.org/foo/bar?id=1&name=foo");
+  let my_url = url.parse("http://navi-lang.org/foo/bar?id=1&name=foo")!;
   assert_eq my_url.to_string(), "http://navi-lang.org/foo/bar?id=1&name=foo";
 
-  let my_url = url.parse("https://navi-lang.org:8080/foo/bar?id=1&name=foo#this-is-hash");
+  let my_url = url.parse("https://navi-lang.org:8080/foo/bar?id=1&name=foo#this-is-hash")!;
   assert_eq my_url.to_string(), "https://navi-lang.org:8080/foo/bar?id=1&name=foo#this-is-hash";
 }
 
 test "URL - string_interpolation" {
-  let my_url = url.parse("http://navi-lang.org");
+  let my_url = url.parse("http://navi-lang.org")!;
   assert_eq `{my_url}`, "http://navi-lang.org";
 }
 
 test "scheme / set_scheme" {
-  let my_url = url.parse("http://navi-lang.org");
+  let my_url = url.parse("http://navi-lang.org")!;
   assert_eq my_url.scheme(), "http";
 
-  let my_url = url.parse("https://navi-lang.org");
+  let my_url = url.parse("https://navi-lang.org")!;
   assert_eq my_url.scheme(), "https";
 
   my_url.set_scheme("ftp");
@@ -45,7 +45,7 @@ test "scheme / set_scheme" {
   assert_eq my_url.scheme(), "ftp";
 
   // custom scheme
-  let my_url = url.parse("navi://navi-lang.org");
+  let my_url = url.parse("navi://navi-lang.org")!;
   assert_eq my_url.scheme(), "navi";
   assert_eq my_url.to_string(), "navi://navi-lang.org";
   
@@ -58,10 +58,10 @@ test "scheme / set_scheme" {
 }
 
 test "host / set_host" {
-  let my_url = url.parse("http://navi-lang.org");
+  let my_url = url.parse("http://navi-lang.org")!;
   assert_eq my_url.host(), "navi-lang.org";
 
-  let my_url = url.parse("http://navi-lang.org/foo/bar?id=1&name=foo");
+  let my_url = url.parse("http://navi-lang.org/foo/bar?id=1&name=foo")!;
   assert_eq my_url.host(), "navi-lang.org";
 
   my_url.set_host("navi-lang.org");
@@ -70,25 +70,25 @@ test "host / set_host" {
 }
 
 test "port / set_port" {
-  let my_url = url.parse("http://navi-lang.org");
+  let my_url = url.parse("http://navi-lang.org")!;
   assert_eq my_url.port(), 80;
 
-  let my_url = url.parse("https://navi-lang.org");
+  let my_url = url.parse("https://navi-lang.org")!;
   assert_eq my_url.port(), 443;
 
-  let my_url = url.parse("ws://navi-lang.org");
+  let my_url = url.parse("ws://navi-lang.org")!;
   assert_eq my_url.port(), 80;
 
-  let my_url = url.parse("wss://navi-lang.org");
+  let my_url = url.parse("wss://navi-lang.org")!;
   assert_eq my_url.port(), 443;
 
-  let my_url = url.parse("ftp://navi-lang.org");
+  let my_url = url.parse("ftp://navi-lang.org")!;
   assert_eq my_url.port(), 21;
 
-  let my_url = url.parse("vscode://navi-lang.org");
+  let my_url = url.parse("vscode://navi-lang.org")!;
   assert_eq my_url.port(), 0;
 
-  let my_url = url.parse("http://navi-lang.org:8080");
+  let my_url = url.parse("http://navi-lang.org:8080")!;
   assert_eq my_url.port(), 8080;
 
   my_url.set_port(8081);
@@ -97,10 +97,10 @@ test "port / set_port" {
 }
 
 test "path / set_path" {
-  let my_url = url.parse("http://navi-lang.org");
+  let my_url = url.parse("http://navi-lang.org")!;
   assert_eq my_url.path(), "/";
 
-  let my_url = url.parse("http://navi-lang.org/foo/bar?id=1&name=foo");
+  let my_url = url.parse("http://navi-lang.org/foo/bar?id=1&name=foo")!;
   assert_eq my_url.path(), "/foo/bar";
 
   my_url.set_path("/foo/bar/baz");
@@ -109,10 +109,10 @@ test "path / set_path" {
 }
 
 test "query / set_query" {
-  let my_url = url.parse("http://navi-lang.org");
+  let my_url = url.parse("http://navi-lang.org")!;
   assert_eq my_url.query(), "";
 
-  let my_url = url.parse("http://navi-lang.org/foo/bar?id=1&name=foo");
+  let my_url = url.parse("http://navi-lang.org/foo/bar?id=1&name=foo")!;
   assert_eq my_url.query(), "id=1&name=foo";
 
   my_url.set_query("id=2&name=bar");
@@ -121,10 +121,10 @@ test "query / set_query" {
 }
 
 test "fragment / set_fragment" {
-  let my_url = url.parse("http://navi-lang.org");
+  let my_url = url.parse("http://navi-lang.org")!;
   assert_eq my_url.fragment(), "";
 
-  let my_url = url.parse("http://navi-lang.org/foo/bar?id=1&name=foo#this-is-hash");
+  let my_url = url.parse("http://navi-lang.org/foo/bar?id=1&name=foo#this-is-hash")!;
   assert_eq my_url.fragment(), "this-is-hash";
 
   my_url.set_fragment("this-is-new-hash");
@@ -133,11 +133,11 @@ test "fragment / set_fragment" {
 }
 
 test "username / set_username | password / set_password" {
-  let my_url = url.parse("redis://localhost:6379");
+  let my_url = url.parse("redis://localhost:6379")!;
   assert_eq my_url.username(), "";
   assert_eq my_url.password(), "";
 
-  let my_url = url.parse("redis://user:pass@localhost:6379");
+  let my_url = url.parse("redis://user:pass@localhost:6379")!;
   assert_eq my_url.username(), "user";
   assert_eq my_url.password(), "pass";
 

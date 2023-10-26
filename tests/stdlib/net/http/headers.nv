@@ -1,0 +1,94 @@
+use std.net.http;
+
+test "new_headers" {
+    let headers = http.new_headers();
+    headers.set("User-Agent", "navi-http/0.1.0");
+    headers.set("Content-Type", "application/json");
+
+    assert_eq headers.get("User-Agent"), "navi-http/0.1.0";
+    assert_eq headers.get("Content-Type"), "application/json";
+}
+
+test "to_string" {
+    let headers = http.new_headers();
+    headers.set("Content-Type", "application/json");
+    headers.set("User-Agent", "navi-http/0.1.0");
+
+    let s = headers.to_string();
+    assert_eq s, "content-type: application/json\r\nuser-agent: navi-http/0.1.0\r\n";
+}
+
+test "apppend" {
+    let headers = http.new_headers();
+    headers.append("Accept-Encoding", "gzip");
+    headers.append("Accept-Encoding", "deflate");
+    headers.append("Accept-Encoding", "br");
+
+    assert_eq headers.get("Accept-Encoding"), "gzip";
+    assert_eq headers.get_all("Accept-Encoding").join(", "), "gzip, deflate, br";
+}
+
+test "set & set & remove" {
+    let headers = http.new_headers();
+    headers.set("User-Agent", "navi-http/0.1.0");
+    headers.set("Content-Type", "application/json");
+
+    assert_eq headers.get("User-Agent"), "navi-http/0.1.0";
+    assert_eq headers.get("Content-Type"), "application/json";
+    assert_eq headers.get("not-exist-key"), nil;
+
+    // case insensitive
+    assert_eq headers.get("user-agent"), "navi-http/0.1.0";
+    assert_eq headers.get("content-type"), "application/json";
+
+    // Override
+    headers.set("User-Agent", "navi-http/0.1.1");
+    assert_eq headers.get("User-Agent"), "navi-http/0.1.1";
+
+    // Override by case insensitive
+    headers.set("user-agent", "navi-http/0.1.2");
+    assert_eq headers.get("User-Agent"), "navi-http/0.1.2";
+    assert_eq headers.get("user-agent"), "navi-http/0.1.2";
+
+    // Remove
+    headers.remove("User-Agent");
+    assert_eq headers.get("User-Agent"), nil;
+    assert_eq headers.get("foo-nil"), nil;
+}
+
+test "keys" {
+    let headers = http.new_headers();
+    headers.set("User-Agent", "navi-http/0.1.0");
+    headers.set("Content-Type", "application/json");
+
+    let keys = headers.keys();
+    keys.sort();
+    assert_eq keys.len(), 2;
+    assert_eq keys[0], "content-type";
+    assert_eq keys[1], "user-agent";
+}
+
+test "len" {
+    let headers = http.new_headers();
+    assert_eq headers.len(), 0;
+
+    headers.set("User-Agent", "navi-http/0.1.0");
+    headers.set("Content-Type", "application/json");
+    assert_eq headers.len(), 2;
+}
+
+test "is_empty" {
+    let headers = http.new_headers();
+    assert_eq headers.is_empty(), true;
+
+    headers.set("User-Agent", "navi-http/0.1.0");
+    assert_eq headers.is_empty(), false;
+}
+
+test "contains_key" {
+    let headers = http.new_headers();
+    assert_eq headers.contains_key("User-Agent"), false;
+
+    headers.set("User-Agent", "navi-http/0.1.0");
+    assert_eq headers.contains_key("User-Agent"), true;
+}
