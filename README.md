@@ -10,6 +10,13 @@ Navi is a static type, compiled language, we can compile the source code into By
 
 > Navi named after the **Navy** and **Navigator** words, which emphasize its navigation and leadership functions, and also borrowed the language naming of the [Na'vi](https://learnnavi.org) tribe in the movie "Avatar". This name means that Navi leads users to navigate in the ocean of data analysis and decision-making, and also symbolizes the recognition and support of the diversity and flexibility of data analysis and decision-making.
 
+## Language Design
+
+- Simple syntax.
+- No implicit type conversion.
+- No null pointer panic, safe runtime.
+- Scripted running, with the same compilation speed and execution performance as Go.
+
 ## Features
 
 - Provided for general programming language (Navi), indicator engine (Navi Stream).
