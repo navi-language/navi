@@ -16,6 +16,7 @@ version=$(get_latest_release)
 tmpdir=.tmp_install
 
 # if args has version override it and not eq "latest"
+# curl -sSL https://navi-lang.org/install | sh -s -- v0.9.0-nightly
 if test $# -eq 1; then
   if test "$1" != "latest"; then
     version="$1"

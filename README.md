@@ -31,6 +31,12 @@ Navi is a static type, compiled language, we can compile the source code into By
 curl -sSL https://navi-lang.org/install | sh
 ```
 
+Or install a specific version:
+
+```bash
+curl -sSL https://navi-lang.org/install | sh -s -- v0.9.0-nightly
+```
+
 This script also use for upgrade.
 
 ## Usage
