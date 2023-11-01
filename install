@@ -15,6 +15,15 @@ bin_name='navi'
 version=$(get_latest_release)
 tmpdir=.tmp_install
 
+# if args has version override it and not eq "latest"
+if test $# -eq 1; then
+  if test "$1" != "latest"; then
+    version="$1"
+
+    echo "Install ${version}"
+  fi
+fi
+
 platform="$(uname | tr "[A-Z]" "[a-z]")"  # Linux => linux
 arch="$(uname -m | sed 's/x86_64/amd64/')"  # x86_64 => amd64
 
