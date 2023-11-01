@@ -1,8 +1,8 @@
 # Navi
 
-Navi (/ˈnævi/) is a high-performance programming language &amp; indicator engine, which is used to perform complex calculations and analysis based on market data.
+Navi (/ˈnævi/) is a high-performance programming language &amp; indicator engine, which is used to perform complex computations and analysis for securities investment.
 
-We designed to be used in the quantitative trading system, and can be used in other scenarios where complex calculations are required.
+It's particularly suited for use in the quantitative trading system, and can be used in other scenarios requiring complex computations and high performance.
 
 Navi is written in Rust, which has high scalability and extremely high computing performance.
 
@@ -31,7 +31,7 @@ Navi is a static type, compiled language, we can compile the source code into By
 curl -sSL https://navi-lang.org/install | sh
 ```
 
-This script also use for upgrade.
+This script is also used for upgrading.
 
 Or install a specific version:
 
@@ -93,7 +93,7 @@ $ navi run examples/macd/main.nv
 
 ## Development Tools
 
-We build a Navi LSP for provided a Language Server Protocol for Navi Stream, to provide a lot of features for most IDEs (VS Code, VIM ...).
+Provides a Language Server Protocol(LSP) for Navi and Navi Stream, supporting most IDEs like VS Code, VIM, etc.
 
 ### VS Code Extension
 
