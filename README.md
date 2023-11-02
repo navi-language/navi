@@ -1,23 +1,19 @@
 # Navi
 
-Navi (/ˈnævi/) is a high-performance programming language &amp; indicator engine, which is used to perform complex computations and analysis for securities investment.
-
-It's particularly suited for use in the quantitative trading system, and can be used in other scenarios requiring complex computations and high performance.
-
-Navi is written in Rust, which has high scalability and extremely high computing performance.
+Navi (/ˈnævi/) is a high-performance programming &amp; stream computing language written in Rust, which is originally designed for complex and high-performance computing, or as a glue language embedded into heterogeneous services in the finance system.
 
 Navi is a static type, compiled language, we can compile the source code into Bytecode (Without JIT) or Machine Code (With JIT). From the theoretical point of view of programming language design, Navi is comparable to Go, Rust, etc., and the performance is comparable to Go, Rust, C, etc.
 
 > Navi named after the **Navy** and **Navigator** words, which emphasize its navigation and leadership functions, and also borrowed the language naming of the [Na'vi](https://learnnavi.org) tribe in the movie "Avatar". This name means that Navi leads users to navigate in the ocean of data analysis and decision-making, and also symbolizes the recognition and support of the diversity and flexibility of data analysis and decision-making.
 
-## Language Design
+## Language Design Philosophy
 
 - Simple syntax.
 - No implicit type conversion.
 - No null pointer panic, safe runtime.
 - Scripted running, with the same compilation speed and execution performance as Go.
 
-## Features
+## Functionalities
 
 - Provided for general programming language (Navi), indicator engine (Navi Stream).
 - High performance: Navi is a static type, compiled language, which is comparable to Go, Rust, and C.
