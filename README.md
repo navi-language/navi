@@ -42,11 +42,11 @@ In addition to its capabilities as a statically-typed, compiled language, Navi o
 
   Running on Linux, Windows, macOS, and through WebAssembly (WASM), it extends its reach to iOS, Android, and Web Browsers.
 
-- **Native Cloud Support**
+- **Native Cloud Support (WIP)**
 
   With its standard library, Navi enables seamless manipulation of cloud computing resources as if they were local.
 
-- **Native Financial Support**
+- **Native Financial Support (WIP)**
 
   Navi is equipped with native support for incremental financial data computation, making it ideal for real-time calculation and analysis of stock market data.
   It boasts a rich set of scientific computing capabilities, includes built-in functions for technical stock market indicators, and standard library support for
