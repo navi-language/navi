@@ -14,51 +14,43 @@ In addition to its capabilities as a statically-typed, compiled language, Navi o
 
 - **No Implicit Type Conversion**
 
-  Navi introduces robust optional types and error handling mechanisms, allowing developers to write safer code with clear pathways for managing the absence of values and the propagation of errors.
+  The language enforces explicit type conversion to prevent unexpected behavior and errors, ensuring that data types are managed with intention and clarity.
   
-- **Enhanced Optional Types and Error Handling**
+- **Enhanced Optional Type and Error Handling**
 
-  Optional and Error like Rust, but more simple s
+  With modern optional type and error handling, Navi allows developers to gracefully manage exceptional cases and abnormal data.
   
 - **No NULL Pointer Panic, Safe Runtime**
 
-  No NULL pointer exceptions. Once you passed compile, the program will run stably.
+  No NULL pointer exceptions. Once your code compiles, you can expect consistent and reliable execution.
   
-- **Scripted Running**
+- **Scripted or Compilied Execution**
 
-  Supports script-like execution, but offering same performance comparable to Go.
+  Supports script-like execution, but offering same performance comparable to compiled languages like Go.
 
 ## Functionalities
 
 - **Versatile Programming**
 
-  Provided serves as a general programming language (Navi), while also a streaming computing engine (Navi Stream).
+  Provided serves as a general programming language (Navi), while also a streaming computing engine (Navi Stream) which enabling efficient and real-time data analysis for dynamic services.
 
 - **High Performance**
 
   As a statically-typed, compiled language, which is comparable to Go, Rust, and C.
   
-- **User-Friendly Syntax**
+- **Cross-platform**
 
-  Borrowing the syntax of excellent programming languages such as TypeScript, Rust, and Ruby, making it more intuitive and accessible for developers.
+  Running on Linux, Windows, macOS, and through WebAssembly (WASM), it extends its reach to iOS, Android, and Web Browsers.
 
-- **Stream Computing (Navi Stream)**
+- **Native Cloud Computing Support**
 
-  Support stream computing, enabling efficient and real-time data analysis for dynamic services.
-  
+  With its standard library, Navi enables seamless manipulation of cloud computing resources as if they were local.
+
 - **Native Financial Support**
 
   Navi is equipped with native support for incremental financial data computation, making it ideal for real-time calculation and analysis of stock market data.
   It boasts a rich set of scientific computing capabilities, includes built-in functions for technical stock market indicators, and standard library support for
   LongPort OpenAPI, significantly reducing development costs for algorithmic trading.
-  
-- **Native Cloud Computing Support**
-
-  With its standard library, Navi enables seamless manipulation of cloud computing resources as if they were local, simplifying the integration and management of cloud services within services or applications.
-  
-- **Cross-platform**
-
-  Running on Linux, Windows, macOS, and through WebAssembly (WASM), it extends its reach to iOS, Android, and Web Browsers.
 
 ## Installation
 
