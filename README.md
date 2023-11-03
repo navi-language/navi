@@ -1,25 +1,56 @@
 # Navi
 
-Navi (/ˈnævi/) is a high-performance programming &amp; stream computing language written in Rust, which is originally designed for complex and high-performance computing, or as a glue language embedded into heterogeneous services in the finance system.
+Navi (/ˈnævi/) is a high-performance programming and stream computing language developed in Rust, originally designed for complex and high-performance computing tasks. It is also suited as a glue language embedded within heterogeneous services in financial systems.
 
-Navi is a static type, compiled language, we can compile the source code into Bytecode (Without JIT) or Machine Code (With JIT). From the theoretical point of view of programming language design, Navi is comparable to Go, Rust, etc., and the performance is comparable to Go, Rust, C, etc.
+In addition to its capabilities as a statically-typed, compiled language, Navi offers the convenience of script-like execution. It can compile source code into Bytecode (without JIT) or Machine Code (with JIT), providing a flexible development workflow. Theoretically, Navi delivering competitive performance on par with Go, Rust, and C.
 
-> Navi named after the **Navy** and **Navigator** words, which emphasize its navigation and leadership functions, and also borrowed the language naming of the [Na'vi](https://learnnavi.org) tribe in the movie "Avatar". This name means that Navi leads users to navigate in the ocean of data analysis and decision-making, and also symbolizes the recognition and support of the diversity and flexibility of data analysis and decision-making.
+> The name "Navi" is inspired by the concepts of the **Navy** and **Navigator**, emphasizing its role in guiding users through the vast expanse of financial data analysis and decision-making. It also pays tribute to the [Na'vi](https://learnnavi.org) tribe from the movie "Avatar," whose harmonious coexistence with nature is reflected in Navi's high performance and efficiency in the utilization of computational resources. The [Na'vi](https://learnnavi.org) unique ability to connect with the living world of Pandora through their braids finds a parallel in Navi's cross-platform capabilities and native Cloud support, ensuring seamless operation across various systems and environments. This symbolizes Navi's commitment to supporting a diversity of application environments and adaptability.
 
 ## Language Design Philosophy
 
-- Simple syntax.
-- No implicit type conversion.
-- No null pointer panic, safe runtime.
-- Scripted running, with the same compilation speed and execution performance as Go.
+- **Simple and Clean Syntax**
+
+  Designed with a straightforward and clean syntax.
+
+- **No Implicit Type Conversion**
+
+  The language enforces explicit type conversion to prevent unexpected behavior and errors, ensuring that data types are managed with intention and clarity.
+  
+- **Modern Optional Type and Error Handling**
+
+  With modern optional type and error handling, Navi allows developers to gracefully manage exceptional cases and abnormal data.
+  
+- **No NULL Pointer Panic, Safe Runtime**
+
+  No NULL pointer exceptions. Once your code compiles, you can expect consistent and reliable execution.
+  
+- **Scripted or Compilied Execution**
+
+  Supports script-like execution, but offering same performance comparable to compiled languages like Go.
 
 ## Functionalities
 
-- Provided for general programming language (Navi), indicator engine (Navi Stream).
-- High performance: Navi is a static type, compiled language, which is comparable to Go, Rust, and C.
-- Easy to use: Borrowing the syntax of excellent programming languages such as TypeScript, Rust, and Ruby, Navi syntax is more user-friendly.
-- Stream computing (Navi Stream): Support stream computing, which can be used for real-time analysis.
-- Cross-platform (Navi Stream): Support running on Linux, Windows, macOS, etc., support iOS, Android, and run on Browser via WASM.
+- **Versatile Programming**
+
+  Serves as a general programming language (Navi), while also a streaming computing engine (Navi Stream) which enabling efficient and real-time data analysis for dynamic services.
+
+- **High Performance**
+
+  As a statically-typed, compiled language, which is comparable to Go, Rust, and C.
+  
+- **Cross-platform**
+
+  Running on Linux, Windows, macOS, and through WebAssembly (WASM), it extends its reach to iOS, Android, and Web Browsers.
+
+- **Native Cloud Support**
+
+  With its standard library, Navi enables seamless manipulation of cloud computing resources as if they were local.
+
+- **Native Financial Support**
+
+  Navi is equipped with native support for incremental financial data computation, making it ideal for real-time calculation and analysis of stock market data.
+  It boasts a rich set of scientific computing capabilities, includes built-in functions for technical stock market indicators, and standard library support for
+  LongPort OpenAPI, significantly reducing development costs for programmatic trading.
 
 ## Installation
 
