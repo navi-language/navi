@@ -16,7 +16,7 @@ In addition to its capabilities as a statically-typed, compiled language, Navi o
 
   The language enforces explicit type conversion to prevent unexpected behavior and errors, ensuring that data types are managed with intention and clarity.
   
-- **Enhanced Optional Type and Error Handling**
+- **Modern Optional Type and Error Handling**
 
   With modern optional type and error handling, Navi allows developers to gracefully manage exceptional cases and abnormal data.
   
@@ -32,7 +32,7 @@ In addition to its capabilities as a statically-typed, compiled language, Navi o
 
 - **Versatile Programming**
 
-  Provided serves as a general programming language (Navi), while also a streaming computing engine (Navi Stream) which enabling efficient and real-time data analysis for dynamic services.
+  Serves as a general programming language (Navi), while also a streaming computing engine (Navi Stream) which enabling efficient and real-time data analysis for dynamic services.
 
 - **High Performance**
 
@@ -42,7 +42,7 @@ In addition to its capabilities as a statically-typed, compiled language, Navi o
 
   Running on Linux, Windows, macOS, and through WebAssembly (WASM), it extends its reach to iOS, Android, and Web Browsers.
 
-- **Native Cloud Computing Support**
+- **Native Cloud Support**
 
   With its standard library, Navi enables seamless manipulation of cloud computing resources as if they were local.
 
@@ -50,7 +50,7 @@ In addition to its capabilities as a statically-typed, compiled language, Navi o
 
   Navi is equipped with native support for incremental financial data computation, making it ideal for real-time calculation and analysis of stock market data.
   It boasts a rich set of scientific computing capabilities, includes built-in functions for technical stock market indicators, and standard library support for
-  LongPort OpenAPI, significantly reducing development costs for algorithmic trading.
+  LongPort OpenAPI, significantly reducing development costs for programmatic trading.
 
 ## Installation
 
