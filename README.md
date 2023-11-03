@@ -30,9 +30,9 @@ In addition to its capabilities as a statically-typed, compiled language, Navi o
 
 ## Functionalities
 
-- **Versatile Programming**
+- **Dual-Domain Programming**
 
-  Serves as a general programming language (Navi), while also a streaming computing engine (Navi Stream) which enabling efficient and real-time data analysis for dynamic services.
+  Serves as a dual-purpose language, functioning as both a general-purpose programming language and a domain-specific language optimized for incremental computation.
 
 - **High Performance**
 
