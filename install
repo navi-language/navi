@@ -10,6 +10,15 @@ get_latest_release() {
 		sed -E 's/.*"([^"]+)".*/\1/'                                       # Pluck JSON value
 }
 
+get_last_nightly_release() {
+  curl --silent "https://api.github.com/repos/$repo/releases" | # Get latest release from GitHub api
+    grep '"tag_name":' |                                               # Get tag line
+    sed -E 's/.*"([^"]+)".*/\1/' |                                       # Pluck JSON value
+    grep "nightly" | head -n 1
+}
+
+echo $(get_last_nightly_release)
+
 app_name='Navi'
 bin_name='navi'
 version=$(get_latest_release)
@@ -18,10 +27,10 @@ tmpdir=.tmp_install
 # if args has version override it and not eq "latest"
 # curl -sSL https://navi-lang.org/install | sh -s -- v0.9.0-nightly
 if test $# -eq 1; then
-  if test "$1" != "latest"; then
+  if test "$1" = "nightly"; then
+    version=$(get_last_nightly_release)
+  elif test "$1" != "latest"; then
     version="$1"
-
-    echo "Install ${version}"
   fi
 fi
 
