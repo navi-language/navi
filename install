@@ -69,9 +69,13 @@ curl -Lo $bin_name.tar.gz $download_url
 tar zxf $bin_name.tar.gz
 
 if test $(id -u) -eq 0; then
-mv $bin_name /usr/local/bin/$bin_name
+  mv navi /usr/local/bin/navi
+
+  # mv navi-lsp-server to /usr/local/bin/navi-lsp-server if exist
+  test -f navi-lsp-server && mv navi-lsp-server /usr/local/bin/navi-lsp-server
 else
-sudo mv $bin_name /usr/local/bin/$bin_name
+  sudo mv navi /usr/local/bin/navi
+  test -f navi-lsp-server && sudo mv navi-lsp-server /usr/local/bin/navi-lsp-server
 fi
 
 rm $bin_name.tar.gz
