@@ -4,34 +4,47 @@ type curl > /dev/null || { echo "curl: not found"; exit 1; }
 
 repo='navi-language/navi'
 
+# request github api, and check if the response is ok
+fetch_github_api() {
+  url="$1"
+  curl --silent --fail "$url" || { echo "Failed to fetch $url"; exit 1; }
+}
+
 get_latest_release() {
-	curl --silent "https://api.github.com/repos/$repo/releases/latest" | # Get latest release from GitHub api
-		grep '"tag_name":' |                                               # Get tag line
-		sed -E 's/.*"([^"]+)".*/\1/'                                       # Pluck JSON value
+  fetch_github_api "https://api.github.com/repos/$repo/releases/latest" | # Get latest release from GitHub api
+    grep '"tag_name":' |                                               # Get tag line
+    sed -E 's/.*"([^"]+)".*/\1/'                                       # Pluck JSON value
 }
 
 get_last_nightly_release() {
-  curl --silent "https://api.github.com/repos/$repo/releases" | # Get latest release from GitHub api
+  fetch_github_api "https://api.github.com/repos/$repo/releases" | # Get latest release from GitHub api
     grep '"tag_name":' |                                               # Get tag line
     sed -E 's/.*"([^"]+)".*/\1/' |                                       # Pluck JSON value
     grep "nightly" | head -n 1
 }
 
-echo $(get_last_nightly_release)
-
 app_name='Navi'
 bin_name='navi'
-version=$(get_latest_release)
 tmpdir=.tmp_install
 
 # if args has version override it and not eq "latest"
-# curl -sSL https://navi-lang.org/install | sh -s -- v0.9.0-nightly
 if test $# -eq 1; then
   if test "$1" = "nightly"; then
+    # curl -sSL https://navi-lang.org/install | sh -s -- nightly
     version=$(get_last_nightly_release)
   elif test "$1" != "latest"; then
+    # curl -sSL https://navi-lang.org/install | sh -s -- v0.9.0-nightly
     version="$1"
   fi
+else
+  # curl -sSL https://navi-lang.org/install | sh
+  version=$(get_latest_release)
+fi
+
+# if version is empty, exit
+if test -z "$version"; then
+  echo "No release version found"
+  exit 1
 fi
 
 platform="$(uname | tr "[A-Z]" "[a-z]")"  # Linux => linux
