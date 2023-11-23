@@ -1,0 +1,27 @@
+struct A {
+    value: int,
+}
+
+impl A {
+    fn to_string(): string {
+        return `A { value: ${self.value} }`;
+    }
+}
+
+test "to_string" {
+    assert_eq `${10}`, "10";
+    assert_eq `${true}`, "true";
+    assert_eq `${false}`, "false";
+}
+
+test "array to_string" {
+    let a = [int] {1, 2, 3};
+    assert_eq `${a}`, "[1, 2, 3]";
+
+    let a:[[A]] = [[A]] {
+        [A] { A { value: 10 }, A { value: 20 } },
+        [A] { A { value: 30 }, A { value: 40 } },
+    };
+    assert_eq `${a}`, "[[A { value: 10 }, A { value: 20 }], [A { value: 30 }, A { value: 40 }]]";
+}
+

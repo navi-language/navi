@@ -1,9 +1,9 @@
 use nvs.t;
 
-let s = t.new(k1 = 5.0, k2 = 3.0);
-s.execute(a = 7.0, b = 2.0, c = 9.0);
+let s = t.new(k1: 5.0, k2: 3.0);
+s.execute(a: 7.0, b: 2.0, c: 9.0);
 assert s.r == 84.0;
 
-let s = t.new(k2 = 3.0);
-s.execute(a = 7.0, b = 2.0, c = 9.0);
+let s = t.new(k2: 3.0);
+s.execute(a: 7.0, b: 2.0, c: 9.0);
 assert s.r == 99.0;

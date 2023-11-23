@@ -1,3 +1,5 @@
+use foo;
+
 test "init array" {
     let array = [int] { 10, 20, 30, 40, 50 };
     assert_eq array[0], 10;
@@ -53,4 +55,10 @@ test "init struct array" {
     assert_eq points[2].x, 50;
     assert_eq points[2].y, 60;
     assert_eq points.len(), 3;
+}
+
+test "init foreign struct" {
+    let t = foo.T1 { a: 10, b: "def" };
+    assert_eq t.a, 10;
+    assert_eq t.b, "def";
 }

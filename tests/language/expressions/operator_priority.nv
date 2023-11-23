@@ -1,3 +1,0 @@
-test "operator priority" {
-    assert_eq (10 + 20) * 5, 150;
-}

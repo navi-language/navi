@@ -1,0 +1,407 @@
+use std.json;
+use std.value;
+
+test "from" {
+    // from_bool
+    let obj = value.from_bool(true);
+    assert_eq obj.is_bool(), true;
+    assert_eq obj.bool(), true;
+    obj = value.from_bool(false);
+    assert_eq obj.bool(), false;
+
+    // from_int
+    let obj = value.from_int(123456);
+    assert_eq obj.is_int(), true;
+    assert_eq obj.int(), 123456;
+    obj = value.from_int(-123456);
+    assert_eq obj.int(), -123456;
+
+    // from_float
+    let obj = value.from_float(1.23);
+    assert_eq obj.is_float(), true;
+    assert_eq obj.float(), 1.23;
+    obj = value.from_float(-1.23);
+    assert_eq obj.float(), -1.23;
+
+    // from_string
+    let obj = value.from_string("Jason Lee");
+    assert_eq obj.is_string(), true;
+    assert_eq obj.string(), "Jason Lee";
+}
+
+test "operator==" {
+    let a = value.from_int(1);
+    let b = value.from_int(1);
+    let c = value.from_bool(true);
+
+    assert_eq a, b;
+    assert_ne a, c;
+    assert_ne b, c;
+
+    // int
+    assert_eq value.from_int(1), value.from_int(1);
+    assert_ne value.from_int(1), value.from_int(2);
+
+    // float
+    assert_eq value.from_float(1.23), value.from_float(1.23);
+    assert_ne value.from_float(1.23), value.from_float(2.34);
+
+    // bool
+    assert_eq value.from_bool(true), value.from_bool(true);
+    assert_eq value.from_bool(false), value.from_bool(false);
+    assert_ne value.from_bool(true), value.from_bool(false);
+
+    // string
+    assert_eq value.from_string("Jason Lee"), value.from_string("Jason Lee");
+    assert_ne value.from_string("Jason Lee"), value.from_string("Sunli");
+
+    // null
+    assert_eq json.parse("null"), json.parse("null");
+    assert_ne json.parse("null"), json.parse("false");
+
+    // array
+    assert_eq json.parse("[1, 2, 3]"), json.parse("[1, 2, 3]");
+    assert_ne json.parse("[1, 2, 3]"), json.parse("[1, 2, 4]");
+    assert_ne json.parse("[1, 2, 3]"), json.parse("[1, 2, 3, 4]");
+
+    // objects
+    assert_eq json.parse(`{"name": "Jason Lee", "city": "Chengdu"}`), json.parse(`{"name": "Jason Lee", "city": "Chengdu"}`);
+    assert_eq json.parse(`{"name": "Jason Lee", "city": "Chengdu"}`), json.parse(`{"city": "Chengdu", "name": "Jason Lee"}`);
+    assert_ne json.parse(`{"name": "Jason Lee", "city": "Chengdu"}`), json.parse(`{"name": "Sunli", "city": "Wuhan"}`);
+    assert_ne json.parse(`{"name": "Jason Lee", "city": "Chengdu"}`), json.parse(`{"name": "Jason Lee"}`);
+}
+
+test "get" {
+    let obj = json.parse(`{
+        "name": "Jason Lee",
+        "id": 123456,
+        "enabled": true,
+        "float": 1.23,
+        "profile": {
+            "city": "Chengdu"
+        },
+        "null_val": null
+    }`);
+
+    let name = obj.get("name");
+    assert_ne name, nil;
+    assert_eq name?.string(), "Jason Lee";
+
+    assert_eq obj.get("id")?.int(), 123456;
+    assert_eq obj.get("name")?.string(), "Jason Lee";
+    assert_eq obj.get("enabled")?.bool(), true;
+    assert_eq obj.get("float")?.float(), 1.23;
+
+    assert_eq obj.get("null_val")?.is_null(), true;
+    assert_eq obj.get("not-exist-key")?.is_null(), nil;
+    assert_eq obj.get("not-exist-key"), nil;
+
+    let profile = obj.get("profile")!;
+    assert_eq profile.get("city")?.string(), "Chengdu";
+}
+
+test "set" {
+    let obj = json.parse(`{}`);
+    obj.set("name", value.from_string("Jason Lee"));
+    assert_eq obj.get("name")?.string(), "Jason Lee";
+
+    // nested set
+    let obj = json.parse(`{}`);
+    obj.insert("profile").set("city", value.from_string("Chengdu"));
+    assert_eq obj.get("profile")?.get("city")?.string(), "Chengdu";
+
+    assert_eq obj.to_json(), `{"profile":{"city":"Chengdu"}}`;
+}
+
+test "insert" {
+    let obj = json.parse(`{}`);
+    obj.insert("name").set_string("Jason Lee");
+    assert_eq obj.get("name")?.string(), "Jason Lee";
+
+    // nested insert
+    let obj = json.parse(`{}`);
+    obj.insert("profile").insert("city").set_string("Chengdu");
+    assert_eq obj.get("profile")?.get("city")?.string(), "Chengdu";
+    assert_eq obj.to_json(), `{"profile":{"city":"Chengdu"}}`;
+}
+
+test "string & is_string" {
+    let obj = json.parse(`{ "foo": "bar" }`);
+    let v = obj.get("foo");
+    assert_ne v, nil;
+    assert_ne v?.string(), nil;
+    assert_eq v?.is_string(), true;
+    assert_eq v?.string(), "bar";
+
+    // is_string on nil
+    assert_eq obj.get("not-exist-key")?.is_string(), nil;
+
+    // set_string
+    let obj = value.from_string("foo");
+    assert_eq obj.is_string(), true;
+    obj.set_string("bar");
+    assert_eq obj.string(), "bar";
+}
+
+test "int & is_int" {
+    assert_eq value.from_int(7282).is_int(), true;
+    assert_eq value.from_int(7282).int(), 7282;
+    assert_eq value.from_int(-7282).is_int(), true;
+    assert_eq value.from_int(-7282).int(), -7282;
+    assert_eq value.from_int(0).is_int(), true;
+    assert_eq value.from_int(0).int(), 0;
+
+    assert_eq value.from_float(0.0).is_int(), false;
+
+    // set_int
+    let obj = value.from_int(7282);
+    obj.set_int(1234);
+    assert_eq obj.is_int(), true;
+    assert_eq obj.int(), 1234;
+
+    // safe get to int
+    assert_eq value.from_float(3.1415926).int(), 3;
+    assert_eq value.from_float(-3.1415926).int(), -3;
+}
+
+test "float & is_float" {
+    assert_eq value.from_float(3.1415926).is_float(), true;
+    assert_eq value.from_float(3.1415926).float(), 3.1415926;
+    assert_eq value.from_float(-3.1415926).is_float(), true;
+    assert_eq value.from_float(-3.1415926).float(), -3.1415926;
+    assert_eq value.from_float(0.0).is_float(), true;
+    assert_eq value.from_float(0.0).float(), 0.0;
+
+    assert_eq value.from_int(0).is_float(), false;
+    assert_eq value.from_int(100).is_float(), false;
+
+    // set_float
+    let obj = value.from_float(3.1415926);
+    obj.set_float(2.7182818);
+    assert_eq obj.is_float(), true;
+    assert_eq obj.float(), 2.7182818;
+
+    // safe get float
+    assert_eq value.from_int(3).float(), 3.0;
+    assert_eq value.from_int(-3).float(), -3.0;
+}
+
+test "bool & is_bool" {
+    assert_eq value.from_bool(true).is_bool(), true;
+    assert_eq value.from_bool(true).bool(), true;
+    assert_eq value.from_bool(false).is_bool(), true;
+    assert_eq value.from_bool(false).bool(), false;
+
+    assert_eq value.from_int(0).is_bool(), false;
+
+    // set_bool
+    let obj = value.from_bool(true);
+    obj.set_bool(false);
+    assert_eq obj.is_bool(), true;
+    assert_eq obj.bool(), false;
+}
+
+test "array & is_array & set_array" {
+    let obj = json.parse(`["Navi", "Rust", null, {
+        "name": "Jason Lee",
+        "id": 123456
+    }]`);
+
+    assert_eq obj.is_array(), true;
+    assert_eq obj.array()?.len(), 4;
+    assert_eq obj.array()?.get(0)?.string(), "Navi";
+    assert_eq obj.array()?.get(1)?.string(), "Rust";
+    assert_eq obj.array()?.get(2)?.is_null(), true;
+    assert_eq obj.array()?.get(3)?.is_object(), true;
+    assert_eq obj.array()?.get(3)?.get("name")?.string(), "Jason Lee";
+    assert_eq obj.array()?.get(3)?.get("id")?.int(), 123456;
+
+    // set_array
+    obj.set_array([value.Value] {
+        value.from_string("Navi"),
+        value.from_string("Rust")
+    });
+    assert_eq obj.array()?.len(), 2;
+    assert_eq obj.array()?.get(0)?.string(), "Navi";
+    assert_eq obj.array()?.get(1)?.string(), "Rust";
+    assert_eq obj.to_json(), `["Navi","Rust"]`;
+
+    let obj = json.parse(`[1, 2, 3]`);
+    assert_eq obj.array()?.len(), 3;
+    assert_eq obj.array()?.get(0)?.int(), 1;
+    assert_eq obj.array()?.get(1)?.int(), 2;
+    assert_eq obj.array()?.get(2)?.int(), 3;
+
+    obj.array()?.set(1, value.from_int(4));
+    assert_eq obj.array()?.get(1)?.int(), 4;
+}
+
+test "object & is_object & set_object" {
+    let obj = json.parse(`{
+        "name": "Jason Lee",
+        "id": 123456,
+        "enabled": true,
+        "float": 1.23,
+        "profile": {
+            "city": "Chengdu"
+        },
+        "tags": ["Navi", "Rust"]
+    }`);
+
+    assert_eq obj.is_object(), true;
+    assert_eq obj.get("name")?.is_object(), false;
+    assert_eq obj.get("profile")?.is_object(), true;
+    assert_eq obj.get("tags")?.is_object(), false;
+
+    // object
+    assert_eq obj.object()?.get("name")?.string(), "Jason Lee";
+    assert_eq obj.object()?["name"]?.string(), "Jason Lee";
+    assert_eq obj.get("profile")?.object()?.get("city")?.string(), "Chengdu";
+
+    // set_object
+    let obj = json.parse(`{}`);
+    let profile_obj = <string, value.Value> { "city": value.from_string("Beijing") };
+    obj.set_object(profile_obj);
+    assert_eq obj.to_json(), `{"city":"Beijing"}`;
+}
+
+test "pointer" {
+    let obj = json.parse(`{
+        "name": "Jason Lee",
+        "id": 123456,
+        "enabled": true,
+        "float": 1.23,
+        "profile": {
+            "city": "Chengdu",
+            "location": {
+                "lat": 30.67,
+                "lng": 104.06
+            }
+        },
+        "tags": ["Navi", "Rust"]
+    }`);
+
+    assert_eq obj.pointer("/name")?.string(), "Jason Lee";
+    assert_eq obj.pointer("/name/not-exist"), nil;
+    assert_eq obj.pointer("/profile/city")?.string(), "Chengdu";
+    assert_eq obj.pointer("/profile/location/lat")?.float(), 30.67;
+    assert_eq obj.pointer("/profile/location/lng")?.float(), 104.06;
+
+    let profile = obj.pointer("/profile");
+    assert_eq profile?.get("city")?.string(), "Chengdu";
+
+    let tags = obj.pointer("/tags")?.array();
+    assert_eq tags?.len(), 2;
+    assert_eq tags?.get(0)?.string(), "Navi";
+    assert_eq tags?.get(1)?.string(), "Rust";
+
+    assert_eq obj.pointer("/tags/0")?.string(), "Navi";
+    assert_eq obj.pointer("/tags/1")?.string(), "Rust";
+}
+
+test "string interpolation" {
+    // null
+    let obj = json.parse(`null`);
+    assert_eq `${obj}`, "null";
+
+    // bool
+    let obj = value.from_bool(true);
+    assert_eq `${obj}`, "true";
+    let obj = value.from_bool(false);
+    assert_eq `${obj}`, "false";
+
+    // int
+    let obj = value.from_int(123456);
+    assert_eq `${obj}`, "123456";
+
+    // float
+    let obj = value.from_float(1.23);
+    assert_eq `${obj}`, "1.23";
+
+    // string
+    let obj = value.from_string("Jason Lee");
+    assert_eq `${obj}`, "Jason Lee";
+
+    // array
+    let obj = json.parse(`["Navi", "Rust", 2, true, null, false, 3.1415]`);
+    assert_eq `${obj}`, `[Navi, Rust, 2, true, null, false, 3.1415]`;
+
+    // object
+    let obj = json.parse(`{
+        "name": "Jason Lee",
+        "id": 123456
+    }`);
+    assert_eq `${obj}`, `{name: Jason Lee, id: 123456}`;
+}
+
+test "insert" {
+    let obj = json.parse(`{}`);
+    obj.insert("name").set_string("Jason Lee");
+    obj.insert("id").set_int(123456);
+
+    assert_eq obj.to_json(), `{"name":"Jason Lee","id":123456}`;
+}
+
+test "remove" {
+    let obj = json.parse(`{"name":"Jason Lee","id":123456}`);
+    obj.remove("name");
+    assert_eq obj.to_json(), `{"id":123456}`;
+}
+
+test "clone" {
+    let old_obj = json.parse(`{ 
+        "int": 1,
+        "float": 1.23,
+        "string": "Jason Lee",
+        "bool": true,
+        "null": null,
+        "array": [2, 1, 3],
+        "object": {
+            "a": 1
+        }
+    }`);
+    let new_obj = old_obj.clone();
+
+    assert_eq new_obj, json.parse(`{"array":[2,1,3],"null":null,"string":"Jason Lee","object":{"a":1},"int":1,"float":1.23,"bool":true}`);
+    assert_eq old_obj, json.parse(`{"bool":true,"null":null,"object":{"a":1},"int":1,"float":1.23,"array":[2,1,3],"string":"Jason Lee"}`);
+
+    new_obj.insert("new_key").set_string("new_value");
+    new_obj.get("object")?.object()?["a"] = value.from_int(2);
+    new_obj.get("array")?.array()?.clear();
+    new_obj.get("float")?.set_float(3.14);
+    new_obj.get("string")?.set_string("Sunli");
+    new_obj.get("bool")?.set_bool(false);
+    new_obj.get("int")?.set_int(3);
+    new_obj.get("null")?.set_int(3);
+
+    assert_eq new_obj, json.parse(`{"null":3,"object":{"a":2},"float":3.14,"bool":false,"new_key":"new_value","int":3,"array":[],"string":"Sunli"}`);
+    assert_eq old_obj, json.parse(`{"bool":true,"null":null,"object":{"a":2},"int":1,"float":1.23,"array":[],"string":"Jason Lee"}`);
+}
+
+test "equal" {
+    let obj1 = json.parse(`{ 
+        "int": 1,
+        "float": 1.23,
+        "string": "Jason Lee",
+        "bool": true,
+        "null": null,
+        "array": [2, 1, 3],
+        "object": {
+            "a": 1,
+            "sub_arr": ["a", "c", "d"]
+        }
+    }`);
+    let obj2 = json.parse(`{ 
+        "int": 1,
+        "float": 1.23,
+        "string": "Jason Lee",
+        "bool": true,
+        "null": null,
+        "array": [2, 1, 3],
+        "object": {
+            "a": 1,
+            "sub_arr": ["a", "c", "d"]
+        }
+    }`);
+    assert obj1 == obj2;
+}

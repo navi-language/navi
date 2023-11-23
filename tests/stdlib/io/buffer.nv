@@ -1,77 +1,77 @@
 use std.io;
 
 test "new_buffer" {
-  let buf = io.new_buffer();
-  buf.write_string("hello world");
-  assert_eq buf.to_string(), "hello world";
+    let buf = io.new_buffer();
+    buf.write_string("hello world");
+    assert_eq buf.to_string(), "hello world";
 }
 
 test "write_string" {
-  let buf = io.new_buffer();
-  buf.write_string("hello");
-  buf.write_string(" ");
-  buf.write_string("world");
-  assert_eq buf.to_string(), "hello world";
+    let buf = io.new_buffer();
+    buf.write_string("hello");
+    buf.write_string(" ");
+    buf.write_string("world");
+    assert_eq buf.to_string(), "hello world";
 }
 
 test "write" {
-  let buf = io.new_buffer();
-  buf.write(io.from_bytes([int] {104, 101, 108, 108, 111}));
-  buf.write(io.from_bytes([int] {32}));
-  buf.write(io.from_bytes([int] {119, 111, 114, 108, 100}));
-  assert_eq buf.to_string(), "hello world";
+    let buf = io.new_buffer();
+    buf.write(io.new_bytes_from_array([int] { 104, 101, 108, 108, 111 }));
+    buf.write(io.new_bytes_from_array([int] { 32 }));
+    buf.write(io.new_bytes_from_array([int] { 119, 111, 114, 108, 100 }));
+    assert_eq buf.to_string(), "hello world";
 
-  let buf = io.new_buffer();
-  buf.write("Hello 你好".bytes());
-  assert_eq buf.to_string(), "Hello 你好";
+    let buf = io.new_buffer();
+    buf.write("Hello 你好".bytes());
+    assert_eq buf.to_string(), "Hello 你好";
 }
 
 test "reset" {
-  let buf = io.new_buffer();
-  buf.write_string("hello");
-  assert_eq buf.len(), 5;
-  buf.reset();
-  assert_eq buf.len(), 0;
+    let buf = io.new_buffer();
+    buf.write_string("hello");
+    assert_eq buf.len(), 5;
+    buf.reset();
+    assert_eq buf.len(), 0;
 }
 
 test "len" {
-  let buf = io.new_buffer();
-  buf.write_string("hello world");
-  assert_eq buf.len(), 11;
+    let buf = io.new_buffer();
+    buf.write_string("hello world");
+    assert_eq buf.len(), 11;
 
-  let buf = io.new_buffer();
-  buf.write_string("hello 你好");
-  assert_eq buf.len(), 12;
+    let buf = io.new_buffer();
+    buf.write_string("hello 你好");
+    assert_eq buf.len(), 12;
 }
 
 test "get" {
-  let buf = io.new_buffer();
-  buf.write_string("hello");
-  let b, ok = buf.get(0);
-  assert ok;
-  assert_eq b, 104;
+    let buf = io.new_buffer();
+    buf.write_string("hello");
+    let b, ok = buf.get(0);
+    assert ok;
+    assert_eq b, 104;
 
-  let b, ok = buf.get(1);
-  assert ok;
-  assert_eq b, 101;
+    let b, ok = buf.get(1);
+    assert ok;
+    assert_eq b, 101;
 
-  let b, ok = buf.get(5);
-  assert !ok;
-  assert_eq b, 0;
+    let b, ok = buf.get(5);
+    assert !ok;
+    assert_eq b, 0;
 }
 
 test "to_string" {
-  let buf = io.new_buffer();
-  buf.write_string("hello");
-  buf.write_string(" ");
-  buf.write_string("world");
-  assert_eq buf.to_string(), "hello world";
+    let buf = io.new_buffer();
+    buf.write_string("hello");
+    buf.write_string(" ");
+    buf.write_string("world");
+    assert_eq buf.to_string(), "hello world";
 }
 
 test "truncate" {
-  let buf = io.new_buffer();
-  buf.write_string("hello world");
-  buf.truncate(5);
-  assert_eq buf.len(), 5;
-  assert_eq buf.to_string(), "hello";
+    let buf = io.new_buffer();
+    buf.write_string("hello world");
+    buf.truncate(5);
+    assert_eq buf.len(), 5;
+    assert_eq buf.to_string(), "hello";
 }

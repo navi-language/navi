@@ -10,7 +10,7 @@ test "timestramp" {
 test "DateTime - string_interpolation" {
     let t = time.parse("2023-04-13 09:45:26 +08:00");
     assert_eq t.to_string(), "2023-04-13T09:45:26+08:00";
-    assert_eq `{t}`, "2023-04-13T09:45:26+08:00";
+    assert_eq `${t}`, "2023-04-13T09:45:26+08:00";
 }
 
 test "parse" {
@@ -28,7 +28,7 @@ test "parse" {
     assert_eq t.nanosecond(), 123456789;
     assert_eq t.timezone(), "-02:00";
 
-    let t =  time.parse("2023-04-13 09:45:59.231 +08:00");
+    let t = time.parse("2023-04-13 09:45:59.231 +08:00");
     assert_eq t.timestamp(), 1681350359;
     assert_eq t.millisecond(), 231;
     assert_eq t.microsecond(), 231000;
@@ -59,7 +59,7 @@ test "from_timestamp" {
 
 test "inspect" {
     let t = time.parse("2023-04-13 09:45:26 +07:00");
-    assert_eq `time: {t}`, "time: 2023-04-13T09:45:26+07:00";
+    assert_eq `time: ${t}`, "time: 2023-04-13T09:45:26+07:00";
 }
 
 test "year / month / day / hour / minute / second / millisecond / microsecond / nanosecond" {
@@ -73,6 +73,17 @@ test "year / month / day / hour / minute / second / millisecond / microsecond / 
     assert_eq t.millisecond(), 123;
     assert_eq t.microsecond(), 123456;
     assert_eq t.nanosecond(), 123456789;
+}
+
+test "weekday" {
+    let t = time.parse("2023-10-29 09:45:26 +08:00");
+    assert_eq t.weekday(), 7;
+    let t = time.parse("2023-10-30 09:45:26 +08:00");
+    assert_eq t.weekday(), 1;
+    let t = time.parse("2023-10-31 09:45:26 +08:00");
+    assert_eq t.weekday(), 2;
+    let t = time.parse("2023-11-04 09:45:26 +08:00");
+    assert_eq t.weekday(), 6;
 }
 
 test "timezone" {
@@ -135,3 +146,31 @@ test "calculation" {
     // - i64 seconds
     assert_eq t2 - 35.seconds(), time.parse("2023-04-13 09:45:24.231 +08:00");
 }
+
+test "utc" {
+    let t = time.parse("2023-04-13 09:45:26.123456789 +08:00");
+    let utc_t = t.utc();
+    assert_eq utc_t.hour(), 1;
+    assert_eq utc_t.to_string(), "2023-04-13T01:45:26.123456789Z";
+}
+
+test "to_offset" {
+    let t = time.parse("2023-04-13 09:45:26.123456789 +08:00");
+    let utc_t = t.to_offset("+00:00");
+    assert_eq utc_t.hour(), 1;
+    assert_eq utc_t.minute(), 45;
+    assert_eq utc_t.to_string(), "2023-04-13T01:45:26.123456789Z";
+
+    // Pacific Time
+    let t1 = t.to_offset("-08:00");
+    assert_eq t1.hour(), 17;
+    assert_eq t1.minute(), 45;
+    assert_eq t1.to_string(), "2023-04-12T17:45:26.123456789-08:00";
+
+    // New Delhi
+    let t2 = t.to_offset("+05:30");
+    assert_eq t2.hour(), 7;
+    assert_eq t2.minute(), 15;
+    assert_eq t2.to_string(), "2023-04-13T07:15:26.123456789+05:30";
+}
+

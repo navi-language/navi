@@ -22,25 +22,57 @@ tests {
         fs.remove_dir_all(p);
     }
 
-    test "open & read" {
-        let f = fixture("hello.txt");
-        let buf = f.read_all();
+    test "fs.read" {
+        let buf = fs.read(path.join("tests/fixtures", "hello.txt"));
         assert_eq buf.to_string(), "Hello, world!\n";
+    }
+
+    test "fs.read_to_string" {
+        let s = fs.read_to_string(path.join("tests/fixtures", "hello.txt"));
+        assert_eq s, "Hello, world!\n";
+    }
+
+    test "open" {
+        let f = fs.open(path.join("tests/fixtures", "hello.txt"));
+        assert_eq f.read_to_string(), "Hello, world!\n";
+    }
+
+    test "read_to_end" {
+        let f = fixture("hello.txt");
+        let buf = io.new_buffer();
+        let n = f.read_to_end(buf);
+        assert_eq n, 14;
+        assert_eq buf.to_string(), "Hello, world!\n";
+    }
+
+    test "read" {
+        let f = fixture("hello.txt");
+        let buf = io.new_bytes(5);
+        let n = f.read(buf);
+        assert_eq n, 5;
+        assert_eq buf.to_string(), "Hello";
+    }
+
+    test "read_to_string" {
+        let f = fixture("hello.txt");
+        let s = f.read_to_string();
+        assert_eq s, "Hello, world!\n";
     }
 
     test "File -> string_interpolation" {
         let f = fixture("hello.txt");
-        assert_eq `file: {f}`, "file: <object std.fs.File>";
+        assert_eq `file: ${f}`, "file: <std.fs.File>";
     }
 
     test "create & write_string & write & remove_file & flush" {
-        let p = tmp_filepath("test-std-file-write.txt"); 
+        let p = tmp_filepath("test-std-file-write.txt");
         let f = fs.create(p);
 
         // Write a string
         f.write_string("Hello");
         // Write a bytes
-        f.write(", world!".bytes());
+        let n = f.write(", world!".bytes());
+        assert_eq n, 8;
         // Write a byte \n
         f.write_byte(10);
         // Build a buf
@@ -52,7 +84,8 @@ tests {
         f.flush();
 
         let f = fs.open(p);
-        let buf = f.read_all();
+        let buf = io.new_buffer();
+        f.read_to_end(buf);
         assert_eq buf.to_string(), "Hello, world!\nThis is Navi.";
 
         fs.remove_file(p);
@@ -110,10 +143,7 @@ tests {
     test "glob" {
         let paths = [string] {};
         let exts = [string] {};
-        fs.glob("tests/**/*.nv", fn(p: string) {
-            paths.push(p);
-            exts.push(path.extension(p));
-        });
+        fs.glob("tests/**/*.nv", fn(p: string) {paths.push(p);exts.push(path.extension(p));});
 
         assert paths.len() > 0;
         assert paths.contains("tests/stdlib/path.nv");

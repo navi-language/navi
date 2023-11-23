@@ -55,3 +55,11 @@ test "call builtin function with multiple return values" {
     assert_eq a, 2;
     assert_eq b, 1;
 }
+
+fn call_optional(a: string, b: int?): string {
+    return `${a}${b}`;
+}
+
+test "call with optional args" {
+    assert_eq call_optional("abc", 20), "abc20";
+}

@@ -1,0 +1,14 @@
+test "array access" {
+    let a = [int] { 10, 20, 30, 40 };
+    assert_eq a[0], 10;
+    assert_eq a[1], 20;
+    assert_eq a[2], 30;
+    assert_eq a[3], 40;
+}
+
+test "map access" {
+    let m = <string, int> { "a": 10, "b": 20, "c": 30 };
+    assert_eq m["a"], 10;
+    assert_eq m["b"], 20;
+    assert_eq m["c"], 30;
+}

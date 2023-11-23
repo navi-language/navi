@@ -1,0 +1,43 @@
+test "boolean" {
+    true;
+    false;
+}
+
+test "int" {
+    10;
+}
+
+test "float" {
+    0.123;
+    231.3434;
+    10.23e+10;
+    2.0e+2;
+}
+
+test "string" {
+    assert_eq "abc", "abc";
+    assert_eq "abc\n", `abc\n`;
+    assert_eq "abc\n".len(), 4;
+    assert_eq "abc\t", `abc\t`;
+    assert_eq "abc\t".len(), 4;
+    assert_eq "abc\r", `abc\r`;
+    assert_eq "abc\r".len(), 4;
+    assert_eq "abc\\", `abc\\`;
+    assert_eq "abc\\".len(), 4;
+    assert_eq "abc\"", `abc"`;
+    assert_eq "abc\"".len(), 4;
+    assert_eq "abc\'", `abc'`;
+    assert_eq "abc\'".len(), 4;
+    assert_eq "a\b", "ab";
+    assert_eq "a\cd", "acd";
+}
+
+test "multiline string" {
+    let s = `abc
+    hello`;
+    assert_eq s, "abc\n    hello";
+}
+
+test "nil" {
+    let a: int? = nil;
+}

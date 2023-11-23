@@ -10,10 +10,10 @@ tests {
     }
 
     test "unwrap" {
-        let user: User? = User { 
+        let user: User? = User {
             email: "huacnlee@gmail.com",
             admin: true,
-            profile: nil,
+            profile: nil
         };
 
         assert_eq user?.email, "huacnlee@gmail.com";
@@ -35,12 +35,12 @@ tests {
         let rr: Profile?? = user?.profile;
         assert_eq user?.profile?.bio, nil;
 
-        // let user: User? = User { 
-        //     email: "huacnlee@gmail.com", 
+        // let user: User? = User {
+        //     email: "huacnlee@gmail.com",
         //     admin: true,
-        //     profile: Profile { 
+        //     profile: Profile {
         //         bio: "Hello, world!"
-        //     } 
+        //     }
         // };
         // assert_ne user, nil;
         // assert_ne user?.profile, nil;

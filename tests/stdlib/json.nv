@@ -1,0 +1,84 @@
+use std.json;
+use std.value;
+
+test "parse" {
+    // null
+    let obj = json.parse(`null`);
+    assert_eq obj.is_null(), true;
+
+    // string
+    let obj = json.parse(`"foo"`);
+    assert_eq obj.string()!, "foo";
+
+    // int
+    let obj = json.parse(`123`);
+    assert_eq obj.int()!, 123;
+
+    // float
+    let obj = json.parse(`123.0`);
+    assert_eq obj.float()!, 123.0;
+
+    // bool
+    let obj = json.parse(`true`);
+    assert_eq obj.bool()!, true;
+    let obj = json.parse(`false`);
+    assert_eq obj.bool()!, false;
+
+    // object
+    let obj = json.parse(`{
+        "name": "Jason Lee",
+        "id": 123456,
+        "enabled": true,
+        "float": 1.23,
+        "profile": {
+            "city": "Chengdu"
+        }
+    }`);
+    assert_eq obj.get("name")?.string()!, "Jason Lee";
+    assert_eq obj.get("name")?.string()!, "Jason Lee";
+
+    // array
+    let obj = json.parse(`["Navi", "Rust"]`);
+    assert_eq obj.array()?.get(0)?.string()!, "Navi";
+    assert_eq obj.array()?.get(1)?.string()!, "Rust";
+}
+
+test "to_string" {
+    let obj = json.parse(`{
+        "name": "Jason Lee",
+        "id": 123456,
+        "enabled": true,
+        "float": 1.23,
+        "profile": {
+            "city": "Chengdu"
+        },
+        "tags": ["Navi", "Rust"],
+        "null": null
+    }`);
+    assert_eq json.to_string(obj), `{"name":"Jason Lee","null":null,"id":123456,"enabled":true,"profile":{"city":"Chengdu"},"float":1.23,"tags":["Navi","Rust"]}`;
+    assert_eq json.to_string(obj, pretty: true), `{\n  "name": "Jason Lee",\n  "null": null,\n  "id": 123456,\n  "enabled": true,\n  "profile": {\n    "city": "Chengdu"\n  },\n  "float": 1.23,\n  "tags": [\n    "Navi",\n    "Rust"\n  ]\n}`;
+}
+
+test "to_json" {
+    let obj = json.parse(`{
+        "name": "Jason Lee",
+        "id": 123456,
+        "enabled": true,
+        "float": 1.23,
+        "profile": {
+            "city": "Chengdu"
+        },
+        "tags": ["Navi", "Rust"],
+        "null": null
+    }`);
+
+    assert_eq obj.to_json(), `{"name":"Jason Lee","null":null,"id":123456,"enabled":true,"profile":{"city":"Chengdu"},"float":1.23,"tags":["Navi","Rust"]}`;
+    assert_eq obj.to_json(pretty: true), `{\n  "name": "Jason Lee",\n  "null": null,\n  "id": 123456,\n  "enabled": true,\n  "profile": {\n    "city": "Chengdu"\n  },\n  "float": 1.23,\n  "tags": [\n    "Navi",\n    "Rust"\n  ]\n}`;
+    assert_eq obj.get("profile")?.to_json(), `{"city":"Chengdu"}`;
+    assert_eq obj.get("name")?.to_json(), `"Jason Lee"`;
+    assert_eq obj.get("id")?.to_json(), `123456`;
+    assert_eq obj.get("enabled")?.to_json(), `true`;
+    assert_eq obj.get("float")?.to_json(), `1.23`;
+    assert_eq obj.get("tags")?.to_json(), `["Navi","Rust"]`;
+    assert_eq obj.get("tags")?.to_json(pretty: true), `[\n  "Navi",\n  "Rust"\n]`;
+}

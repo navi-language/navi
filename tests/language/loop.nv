@@ -1,0 +1,27 @@
+test "loop" {
+    let i = 0;
+    loop {
+        if (i >= 10) {
+            break;
+        }
+        i += 1;
+    }
+    assert_eq i, 10;
+}
+
+test "loop continue" {
+    let i = 0;
+    let j = 0;
+    loop {
+        if (i >= 10) {
+            break;
+        }
+        if (j >= 5) {
+            i += 1;
+            continue;
+        }
+        j += 1;
+    }
+    assert_eq i, 10;
+    assert_eq j, 5;
+}

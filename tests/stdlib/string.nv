@@ -1,209 +1,245 @@
 test "string" {
-  let s = "hello world.";
-  assert_eq s, "hello world.";
+    let s = "hello world.";
+    assert_eq s, "hello world.";
 
-  s = "hello";
-  assert_eq s, "hello";
+    s = "hello";
+    assert_eq s, "hello";
 }
 
 test "String - string_interpolation" {
-  let s = "hello";
-  assert_eq `{s}`, "hello";
+    let s = "hello";
+    assert_eq `${s}`, "hello";
 }
 
 test "len" {
-  assert_eq "hello world.".len(), 12;
-  assert_eq "👋🏻 你好".len(), 5;
-  assert_eq "Hello 世界".len(), 8;
-  assert_eq "".len(), 0;
+    assert_eq "hello world.".len(), 12;
+    assert_eq "👋🏻 你好".len(), 5;
+    assert_eq "Hello 世界".len(), 8;
+    assert_eq "".len(), 0;
 }
 
 test "bytes" {
-  let s = "hello world.";
-  let buf = s.bytes();
-  assert_eq buf.len(), 12;
-  assert_eq buf.get(0), 104;
-  assert_eq buf.get(1), 101;
-  assert_eq buf.get(2), 108;
-  assert_eq buf.get(3), 108;
-  assert_eq buf.get(4), 111;
-  assert_eq buf.get(5), 32;
-  assert_eq buf.get(6), 119;
-  assert_eq buf.get(7), 111;
-  assert_eq buf.get(8), 114;
-  assert_eq buf.get(9), 108;
-  assert_eq buf.get(10), 100;
-  assert_eq buf.get(11), 46;
+    let s = "hello world.";
+    let buf = s.bytes();
+    assert_eq buf.len(), 12;
+    assert_eq buf.get(0), 104;
+    assert_eq buf.get(1), 101;
+    assert_eq buf.get(2), 108;
+    assert_eq buf.get(3), 108;
+    assert_eq buf.get(4), 111;
+    assert_eq buf.get(5), 32;
+    assert_eq buf.get(6), 119;
+    assert_eq buf.get(7), 111;
+    assert_eq buf.get(8), 114;
+    assert_eq buf.get(9), 108;
+    assert_eq buf.get(10), 100;
+    assert_eq buf.get(11), 46;
 
-  let s = "👋🏻 你好";
-  assert_eq s.bytes().len(), 15;
-  assert_eq "Hello 世界".bytes().len(), 12;
+    let s = "👋🏻 你好";
+    assert_eq s.bytes().len(), 15;
+    assert_eq "Hello 世界".bytes().len(), 12;
 }
 
 test "contains" {
-  let s = "hello world.";
-  assert s.contains("hello");
-  assert s.contains("world");
-  assert s.contains("hello world");
-  assert s.contains("llo wor");
-  assert s.contains("hello world.");
+    let s = "hello world.";
+    assert s.contains("hello");
+    assert s.contains("world");
+    assert s.contains("hello world");
+    assert s.contains("llo wor");
+    assert s.contains("hello world.");
 }
 
 test "to_lowercase" {
-  let s = "Hello World";
-  assert_eq s.to_lowercase(), "hello world";
+    let s = "Hello World";
+    assert_eq s.to_lowercase(), "hello world";
 }
 
 test "to_uppercase" {
-  let s = "Hello World";
-  assert_eq s.to_uppercase(), "HELLO WORLD";
+    let s = "Hello World";
+    assert_eq s.to_uppercase(), "HELLO WORLD";
 }
 
 test "substring" {
-  let s = "hello world.";
-  assert_eq s.substring(0, 5), "hello";
-  assert_eq s.substring(6, 11), "world";
-  assert_eq s.substring(0, 11), "hello world";
+    let s = "hello world.";
+    assert_eq s.substring(0, 5), "hello";
+    assert_eq s.substring(6, 11), "world";
+    assert_eq s.substring(0, 11), "hello world";
 
-  assert_eq s.substring(0, 0), "";
-  assert_eq s.substring(-1, 2), "he";
-  assert_eq s.substring(-1, -2), "";
+    assert_eq s.substring(0, 0), "";
+    assert_eq s.substring(-1, 2), "he";
+    assert_eq s.substring(-1, -2), "";
 
-  let s = "👋🏻 你好";
-  assert_eq s.substring(0, 2), "👋🏻";
-  assert_eq s.substring(3, 5), "你好";
+    let s = "👋🏻 你好";
+    assert_eq s.substring(0, 2), "👋🏻";
+    assert_eq s.substring(3, 5), "你好";
 }
 
 test "replace" {
-  let s = "hello world.";
-  assert_eq s.replace("hello", "hi"), "hi world.";
-  assert_eq s.replace("world", "earth"), "hello earth.";
+    let s = "hello world.";
+    assert_eq s.replace("hello", "hi"), "hi world.";
+    assert_eq s.replace("world", "earth"), "hello earth.";
 
-  let s = "foo/bar/dar";
-  assert_eq s.replace("/", "-"), "foo-bar-dar";
+    let s = "foo/bar/dar";
+    assert_eq s.replace("/", "-"), "foo-bar-dar";
 }
 
 test "starts_with" {
-  let s = "hello world.";
-  assert s.starts_with("hello");
-  assert s.starts_with("he");
-  assert !s.starts_with("Hello");
-  assert !s.starts_with("Ab");
+    let s = "hello world.";
+    assert s.starts_with("hello");
+    assert s.starts_with("he");
+    assert !s.starts_with("Hello");
+    assert !s.starts_with("Ab");
 }
 
 test "ends_with" {
-  let s = "hello world.";
-  assert s.ends_with("world.");
-  assert s.ends_with(".");
-  assert !s.ends_with("World.");
-  assert !s.ends_with("Ab");
+    let s = "hello world.";
+    assert s.ends_with("world.");
+    assert s.ends_with(".");
+    assert !s.ends_with("World.");
+    assert !s.ends_with("Ab");
 }
 
 test "split" {
-  let s = "hello world.";
-  let parts = s.split(" ");
-  assert_eq parts.len(), 2;
-  assert_eq parts[0], "hello";
-  assert_eq parts[1], "world.";
-  assert_eq parts.join(" "), s;
+    let s = "hello world.";
+    let parts = s.split(" ");
+    assert_eq parts.len(), 2;
+    assert_eq parts[0], "hello";
+    assert_eq parts[1], "world.";
+    assert_eq parts.join(" "), s;
 
-  let parts = s.split("");
-  assert_eq parts.len(), 12;
-  assert_eq parts[0], "h";
-  assert_eq parts[5], " ";
-  assert_eq parts[10], "d";
-  assert_eq parts[11], ".";
-  assert_eq parts.join(""), s;
+    let parts = s.split("");
+    assert_eq parts.len(), 12;
+    assert_eq parts[0], "h";
+    assert_eq parts[5], " ";
+    assert_eq parts[10], "d";
+    assert_eq parts[11], ".";
+    assert_eq parts.join(""), s;
 
-  let parts = "ab  cd ".split(" ");
-  assert_eq parts.len(), 4;
-  assert_eq parts[0], "ab";
-  assert_eq parts[1], "";
-  assert_eq parts[2], "cd";
-  assert_eq parts[3], "";
-  assert_eq parts.join(" "), "ab  cd ";
+    let parts = "ab  cd ".split(" ");
+    assert_eq parts.len(), 4;
+    assert_eq parts[0], "ab";
+    assert_eq parts[1], "";
+    assert_eq parts[2], "cd";
+    assert_eq parts[3], "";
+    assert_eq parts.join(" "), "ab  cd ";
 }
 
 test "trim / trim_start / trim_end" {
-  let s = "  hello world.  ";
+    let s = "  hello world.  ";
 
-  assert_eq s.trim(), "hello world.";
-  assert_eq s.trim_start(), "hello world.  ";
-  assert_eq s.trim_end(), "  hello world.";
+    assert_eq s.trim(), "hello world.";
+    assert_eq s.trim_start(), "hello world.  ";
+    assert_eq s.trim_end(), "  hello world.";
 
-  let s = "\n\r  hello world.  \n\r";
-  assert_eq s.trim(), "hello world.";
-  assert_eq s.trim_start(), "hello world.  \n\r";
-  assert_eq s.trim_end(), "\n\r  hello world.";
-} 
+    let s = "\n\r  hello world.  \n\r";
+    assert_eq s.trim(), "hello world.";
+    assert_eq s.trim_start(), "hello world.  \n\r";
+    assert_eq s.trim_end(), "\n\r  hello world.";
+}
 
 test "strip_prefix / strip_suffix" {
-  let s = "Hello world!";
-  assert_eq s.strip_prefix("Hello"), " world!";
-  assert_eq s.strip_prefix("H"), "ello world!";
-  assert_eq s.strip_prefix("h"), "Hello world!";
-  assert_eq s.strip_prefix("Hello world!"), "";
-  assert_eq s.strip_prefix(""), "Hello world!";
+    let s = "Hello world!";
+    assert_eq s.strip_prefix("Hello"), " world!";
+    assert_eq s.strip_prefix("H"), "ello world!";
+    assert_eq s.strip_prefix("h"), "Hello world!";
+    assert_eq s.strip_prefix("Hello world!"), "";
+    assert_eq s.strip_prefix(""), "Hello world!";
 
-  assert_eq s.strip_suffix("world!"), "Hello ";
-  assert_eq s.strip_suffix("World!"), "Hello world!";
-  assert_eq s.strip_suffix("!"), "Hello world";
-  assert_eq s.strip_suffix("Hello world!"), "";
-  assert_eq s.strip_suffix(""), "Hello world!";
-} 
+    assert_eq s.strip_suffix("world!"), "Hello ";
+    assert_eq s.strip_suffix("World!"), "Hello world!";
+    assert_eq s.strip_suffix("!"), "Hello world";
+    assert_eq s.strip_suffix("Hello world!"), "";
+    assert_eq s.strip_suffix(""), "Hello world!";
+}
 
 test "repeat" {
-  let s = "-+";
-  assert_eq s.repeat(3), "-+-+-+";
-  assert_eq s.repeat(0), "";
-  assert_eq s.repeat(-1), "";
+    let s = "-+";
+    assert_eq s.repeat(3), "-+-+-+";
+    assert_eq s.repeat(0), "";
+    assert_eq s.repeat(-1), "";
 }
 
 fn assert_parse_int(s: string, expected_val: int, expected_ok: bool) {
-  let n, ok = s.to_int();
-  assert_eq ok, expected_ok;
-  assert_eq n, expected_val;
+    let n, ok = s.to_int();
+    assert_eq ok, expected_ok;
+    assert_eq n, expected_val;
 }
 
 test "to_int" {
-  assert_parse_int("123", 123, true);
-  assert_parse_int("-123", -123, true);
-  assert_parse_int("0", 0, true);
-  assert_parse_int("1", 1, true);
-  assert_parse_int("-1", -1, true);
-  assert_parse_int("123456789", 123456789, true);
-  assert_parse_int("-123456789", -123456789, true);
-  assert_parse_int("123456789123456789", 123456789123456789, true);
-  assert_parse_int("-123456789123456789", -123456789123456789, true);
+    assert_parse_int("123", 123, true);
+    assert_parse_int("-123", -123, true);
+    assert_parse_int("0", 0, true);
+    assert_parse_int("1", 1, true);
+    assert_parse_int("-1", -1, true);
+    assert_parse_int("123456789", 123456789, true);
+    assert_parse_int("-123456789", -123456789, true);
+    assert_parse_int("123456789123456789", 123456789123456789, true);
+    assert_parse_int("-123456789123456789", -123456789123456789, true);
 
-  assert_parse_int("123a", 0, false);
-  assert_parse_int("a123", 0, false);
-  assert_parse_int("123 456", 0, false);
-  assert_parse_int("abc", 0, false);
-  assert_parse_int("3.14", 0, false);
+    assert_parse_int("123a", 0, false);
+    assert_parse_int("a123", 0, false);
+    assert_parse_int("123 456", 0, false);
+    assert_parse_int("abc", 0, false);
+    assert_parse_int("3.14", 0, false);
 }
 
 fn assert_parse_float(s: string, expected_val: float, expected_ok: bool) {
-  let n, ok = s.to_float();
-  assert_eq ok, expected_ok;
-  assert_eq n, expected_val;
+    let n, ok = s.to_float();
+    assert_eq ok, expected_ok;
+    assert_eq n, expected_val;
 }
 
 test "to_float" {
-  assert_parse_float("123", 123.0, true);
-  assert_parse_float("-123", -123.0, true);
-  assert_parse_float("0", 0.0, true);
-  assert_parse_float("123.456", 123.456, true);
-  assert_parse_float("-123.456", -123.456, true);
-  assert_parse_float("123.01234567890123", 123.01234567890123, true);
-  assert_parse_float("-123.01234567890123", -123.01234567890123, true);
-  
-  assert_parse_float("123abc", 0.0, false);
-  assert_parse_float("123.456.789", 0.0, false);
-  assert_parse_float("abc", 0.0, false);
+    assert_parse_float("123", 123.0, true);
+    assert_parse_float("-123", -123.0, true);
+    assert_parse_float("0", 0.0, true);
+    assert_parse_float("123.456", 123.456, true);
+    assert_parse_float("-123.456", -123.456, true);
+    assert_parse_float("123.01234567890123", 123.01234567890123, true);
+    assert_parse_float("-123.01234567890123", -123.01234567890123, true);
+
+    assert_parse_float("123abc", 0.0, false);
+    assert_parse_float("123.456.789", 0.0, false);
+    assert_parse_float("abc", 0.0, false);
 }
 
 test "is_empty" {
-  assert_eq "".is_empty(), true;
-  assert_eq "hello".is_empty(), false;
+    assert_eq "".is_empty(), true;
+    assert_eq "hello".is_empty(), false;
+}
+
+test "operator" {
+    assert "a" == "a";
+    assert "a" != "b";
+    assert "a" < "b";
+    assert "a" <= "b";
+    assert "b" > "a";
+    assert "b" >= "a";
+    assert "a" < "aa";
+    assert "a" <= "aa";
+    assert "aa" > "a";
+    assert "aa" >= "a";
+    assert "a" < "ab";
+    assert "a" <= "ab";
+    assert "ab" > "a";
+    assert "ab" >= "a";
+    assert "a" < "ba";
+    assert "a" <= "ba";
+    assert "ba" > "a";
+    assert "ba" >= "a";
+
+    assert "a" + "b" == "ab";
+    assert "a" + "" == "a";
+
+    // with variable
+    let a = "a";
+    let a1 = a;
+    let b = "b";
+
+    assert a == "a";
+    assert a == a1;
+    assert a != b;
+    assert a < b;
+    assert b > a;
+    assert a + b == "ab";
 }

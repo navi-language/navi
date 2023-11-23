@@ -1,0 +1,81 @@
+use std.io;
+
+struct A {
+    value: int,
+}
+
+impl A {
+    fn operator==(b: A): bool {
+        return self.value == b.value;
+    }
+
+    fn operator!=(b: A): bool {
+        return self.value != b.value;
+    }
+
+    fn to_string(): string {
+        return `Value { value: ${self.value} }`;
+    }
+}
+
+test "optional equal" {
+    let a: A?  = A { value: 10 };
+    let b = A { value: 20 };
+    assert !(a == b);
+    
+    let a: A?  = A { value: 10 };
+    let b = A { value: 10 };
+    assert a == b;
+    
+    let a: A?????? = nil;
+    let b: A??? = nil;
+    assert a == b;
+}
+
+test "optional not equal" {
+    let a: A?  = A { value: 10 };
+    let b = A { value: 20 };
+    assert a != b;
+    
+    let a: A?  = A { value: 10 };
+    let b = A { value: 10 };
+    assert !(a != b);
+    
+    let a: A?????? = nil;
+    let b: A??? = nil;
+    assert !(a != b);
+}
+
+test "array" {
+    let a: [int] = [int] {1, 2, 3};
+    let b: [int] = [int] {1, 2};
+    assert !(a == b);
+
+    let a: [int] = [int] {1, 2, 3};
+    let b: [int] = [int] {1, 2};
+    assert a != b;
+
+    let a: [int] = [int] {1, 2, 3};
+    let b: [int] = [int] {1, 2, 3};
+    assert a == b;
+
+    let a: [[int]] = [[int]] { [int] { 1, 2, 3}, [int] { 10, 20, 30} };
+    let b: [[int]] = [[int]] { [int] { 1, 2, 3}, [int] { 10, 20, 30} };
+    assert a == b;
+
+    let a: [[int]] = [[int]] { [int] { 1, 2, 3}, [int] { 10, 20, 30} };
+    let b: [[int]] = [[int]] { [int] { 1, 2, 3}, [int] { 10, 201, 30} };
+    assert a != b;
+
+    let a: [int]???? = [int] {1, 2, 3};
+    let b: [int]?? = [int] {1, 20, 3};
+    assert a != b;
+
+    let a = [A] { A { value: 10}, A { value: 20}, A { value: 30} };
+    let b = [A] { A { value: 10}, A { value: 20}, A { value: 30} };
+    assert a == b;
+
+    let a = [A] { A { value: 10}, A { value: 20}, A { value: 30} };
+    let b = [A] { A { value: 10}, A { value: 201}, A { value: 30} };
+    assert a != b;
+}

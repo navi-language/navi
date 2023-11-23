@@ -1,0 +1,30 @@
+use test_harness;
+
+tests {
+    test "call_kw_args" {
+        let value = test_harness.kw_args(10, 20, mul: 10, Div: 2);
+        assert value == -50;
+
+        value = test_harness.kw_args(50, 20, Div: 2, mul: 10);
+        assert value == 150;
+
+        value = test_harness.kw_args(50, 20, mul: 10);
+        assert value == 75;
+
+        value = test_harness.kw_args(50, 20, Div: 10);
+        assert value == 24;
+    }
+
+    fn my_kw_args_fn(a: string, name: string = "Jason", id: int = 123): string {
+        return `${a},${name},${id}`;
+    }
+
+    test "my_kw_args_fn" {
+        assert_eq my_kw_args_fn("a"), "a,Jason,123";
+
+        assert_eq my_kw_args_fn("a", id: 1), "a,Jason,1";
+        assert_eq my_kw_args_fn("a", name: "b"), "a,b,123";
+        assert_eq my_kw_args_fn("a", name: "b", id: 1), "a,b,1";
+        assert_eq my_kw_args_fn("a", id: 1, name: "b"), "a,b,1";
+    }
+}

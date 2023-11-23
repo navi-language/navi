@@ -1,0 +1,20 @@
+use std.yaml;
+
+test "parse" {
+    let obj = yaml.parse(`foo: bar\nbaz:\n  dar:\n    - qux\n    - quux\n`);
+
+    assert_eq obj.get("foo")?.string(), "bar";
+    assert_eq obj.to_json(), `{"baz":{"dar":["qux","quux"]},"foo":"bar"}`;
+}
+
+test "to_string" {
+    let obj = yaml.parse(`foo: bar\nbaz:\n  dar:\n    - qux\n    - quux\n`);
+    assert_eq yaml.to_string(obj), "baz:\n  dar:\n  - qux\n  - quux\nfoo: bar\n";
+}
+
+test "to_yaml" {
+    let obj = yaml.parse(`foo: bar\nbaz:\n  dar:\n    - qux\n    - quux\n`);
+    assert_eq obj.to_yaml(), `baz:\n  dar:\n  - qux\n  - quux\nfoo: bar\n`;
+    let value = yaml.parse("foo: bar");
+    assert_eq value.to_yaml(), "foo: bar\n";
+}

@@ -22,3 +22,12 @@ test "capture values" {
     };
     assert_eq _add(), -10;
 }
+
+test "call from rust" {
+    test_harness.callback(10, 20, fn(n: int) {
+        assert_eq n, -10;
+    });
+    assert_eq test_harness.callback2(10, 20, fn(a: int, b: int): int {
+        return a - b;
+    }), -10;
+}

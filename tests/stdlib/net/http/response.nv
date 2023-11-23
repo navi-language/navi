@@ -4,38 +4,38 @@ test "new_response" {
     let headers = http.new_headers();
     headers.set("Content-Type", "application/json");
     let body = "Hello, world!".bytes();
-    let res = http.new_response(200, headers, body);
-    assert_eq res.status(), 200;
-    assert_eq res.headers().get("Content-Type"), "application/json";
+    let res = http.new_response(status: 200, headers: headers, body: body);
+    assert_eq res.status, 200;
+    assert_eq res.headers.get("Content-Type"), "application/json";
     assert_eq res.text().contains("Hello, world!"), true;
 
     let res = http.new_response();
-    assert_eq res.status(), 0;
-    assert_eq res.headers().len(), 0;
+    assert_eq res.status, 0;
+    assert_eq res.headers.len(), 0;
     assert_eq res.text(), "";
 
-    let res = http.new_response(headers = headers, status = 200, body = body);
-    assert_eq res.status(), 200;
-    assert_eq res.headers().get("Content-Type"), "application/json";
+    let res = http.new_response(headers: headers, status: 200, body: body);
+    assert_eq res.status, 200;
+    assert_eq res.headers.get("Content-Type"), "application/json";
     assert_eq res.text().contains("Hello, world!"), true;
 }
 
 test "status & status_text" {
-    let res = http.new_response(200);
-    assert_eq res.status(), 200;
+    let res = http.new_response(status: 200);
+    assert_eq res.status, 200;
     assert_eq res.status_text(), "200 OK";
 
-    let res = http.new_response(status = 201);
-    assert_eq res.status(), 201;
+    let res = http.new_response(status: 201);
+    assert_eq res.status, 201;
     assert_eq res.status_text(), "201 Created";
 
-    let res = http.new_response(status = 404);
-    assert_eq res.status(), 404;
+    let res = http.new_response(status: 404);
+    assert_eq res.status, 404;
     assert_eq res.status_text(), "404 Not Found";
 
-    let res = http.new_response(status = 500);
-    assert_eq res.status(), 500;
-    assert_eq res.status_text(), "500 Internal Server Error";    
+    let res = http.new_response(status: 500);
+    assert_eq res.status, 500;
+    assert_eq res.status_text(), "500 Internal Server Error";
 }
 
 test "headers" {
@@ -43,14 +43,20 @@ test "headers" {
     headers.set("Content-Type", "application/json");
     headers.set("Content-Length", "123");
 
-    let res = http.new_response(headers = headers);
-    assert_eq res.headers().get("Content-Type"), "application/json";
-    assert_eq res.headers().get("Content-Length"), "123";
+    let res = http.new_response(headers: headers);
+    assert_eq res.headers.get("Content-Type"), "application/json";
+    assert_eq res.headers.get("Content-Length"), "123";
 }
 
 test "body & text" {
     let body = "Hello, world!".bytes();
-    let res = http.new_response(body = body);
-    assert_eq res.body(), body;
+    let res = http.new_response(body: body);
+    assert_eq res.body, body;
     assert_eq res.text(), "Hello, world!";
+}
+
+test "json" {
+    let body = "{\"name\":\"John\"}".bytes();
+    let res = http.new_response(body: body);
+    assert_eq res.json().get("name")?.string(), "John";
 }

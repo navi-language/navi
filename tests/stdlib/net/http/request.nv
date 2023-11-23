@@ -1,93 +1,180 @@
 use std.net.http;
 use std.env;
+use test_harness;
+use std.io;
 
 test "new_request" {
+    let server = test_harness.start_http_server();
     let req = http.new_request();
-    assert_eq req.method(), nil;
-    assert_eq req.url(), nil;
+    assert_eq req.method, "GET";
+    assert_eq req.url, "";
 
     let headers = http.new_headers();
     headers.set("Content-Type", "application/json");
     headers.set("Accept-Encoding", "gzip, deflate");
 
-    let query = <string, string> {
-        "foo": "bar",
-        "baz": "1"
-    };
-    
-    let body = "Hello World!".bytes();
-
-    let req = http.new_request("GET", "https://httpbin.org/get", headers, query, body);
-    assert_eq req.method(), "GET";
-    assert_eq req.url(), "https://httpbin.org/get";
-    assert_eq req.headers()!.get("Content-Type"), "application/json";     
-    assert_eq req.headers()!.get("Accept-Encoding"), "gzip, deflate";
-    assert_eq req.query()!.get("foo"), "bar";
-    assert_eq req.query()!.get("baz"), "1";
-    assert_eq req.body()!.to_string(), "Hello World!"; 
-
-    let req = http.new_request(method = "GET", url = "https://httpbin.org/get", headers = headers, query = query, body = body);  
-    assert_eq req.method(), "GET";
-    assert_eq req.url(), "https://httpbin.org/get";
-    assert_eq req.headers()!.get("Content-Type"), "application/json";     
-    assert_eq req.headers()!.get("Accept-Encoding"), "gzip, deflate";
-    assert_eq req.query()!.get("foo"), "bar";
-    assert_eq req.query()!.get("baz"), "1";
-    assert_eq req.body()!.to_string(), "Hello World!"; 
-}
-
-test "chain settter" {
-    let headers = http.new_headers();
-    headers.set("Content-Type", "application/json");
-    headers.set("Accept-Encoding", "gzip, deflate");
-
-    let query = <string, string> {
-        "foo": "bar",
-        "baz": "1"
-    };
+    let query = <string, string> { "foo": "bar", "baz": "1" };
 
     let body = "Hello World!".bytes();
 
-    let req = http.new_request("GET", "https://httpbin.org/get")
-        .set_headers(headers)
-        .set_query(query)
-        .set_body(body);
-    
-    assert_eq req.method(), "GET";
-    assert_eq req.url(), "https://httpbin.org/get";
-    assert_eq req.headers()!.get("Content-Type"), "application/json";
-    assert_eq req.headers()!.get("Accept-Encoding"), "gzip, deflate";
-    assert_eq req.query()!.get("foo"), "bar";
-    assert_eq req.query()!.get("baz"), "1";
-    assert_eq req.body()!.to_string(), "Hello World!";
+    let req = http.new_request(
+        method: "GET",
+        url: server.url("/get"),
+        headers: headers,
+        query: query,
+        body: body
+    );
+    assert_eq req.method, "GET";
+    assert_eq req.url, server.url("/get");
+    assert_eq req.headers.get("Content-Type"), "application/json";
+    assert_eq req.headers.get("Accept-Encoding"), "gzip, deflate";
+    assert_eq req.query.get("foo"), "bar";
+    assert_eq req.query.get("baz"), "1";
+    assert_eq req.body?.to_string(), "Hello World!";
+
+    let req = http.new_request(
+        method: "GET",
+        url: server.url("/get"),
+        headers: headers,
+        query: query,
+        body: body
+    );
+    assert_eq req.method, "GET";
+    assert_eq req.url, server.url("/get");
+    assert_eq req.headers.get("Content-Type"), "application/json";
+    assert_eq req.headers.get("Accept-Encoding"), "gzip, deflate";
+    assert_eq req.query.get("foo"), "bar";
+    assert_eq req.query.get("baz"), "1";
+    assert_eq req.body?.to_string(), "Hello World!";
 }
 
 test "send" {
-    if (env.get("CI") != nil) {
-        return;
-    }
+    let server = test_harness.start_http_server();
 
-    let req = http.new_request("GET", "https://httpbin.org/get");
+    let req = http.new_request(method: "GET", url: server.url("/get"));
     let res = req.send();
-    assert_eq res.status(), 200;
+    assert_eq res.status, 200;
 
     let headers = http.new_headers();
     headers.set("Content-Type", "application/json");
 
     let req = http.new_request(
-        method = "POST", 
-        url = "https://httpbin.org/post", 
-        query = <string, string> {
-            "foo": "1",
-            "bar": "Foo Bar",
-            "foo": "a",
-        },
-        headers = headers,
-        body = "Hello World!".bytes()
+        method: "POST",
+        url: server.url("/post"),
+        query: <string, string> { "foo": "1", "bar": "Foo Bar", "foo": "a" },
+        headers: headers,
+        body: "Hello World!".bytes()
     );
     let res = req.send();
-    assert_eq res.status(), 200;
-    assert_eq res.headers().get("Content-Type"), "application/json";
+    assert_eq res.status, 200;
+    assert_eq res.headers.get("Content-Type"), "application/json; charset=utf-8";
     assert_eq res.text().contains("Hello World!"), true;
-    assert_eq res.text().contains("https://httpbin.org/post?bar=Foo+Bar&foo=1&foo=a"), true, res.text();
+    assert_eq res.text().contains(server.url("/post?bar=Foo+Bar&foo=a")), true, res.text();
+
+    let data = res.json();
+    assert_eq data.pointer("/args/bar")?.string(), "Foo Bar";
+    assert_eq data.get("url")?.string(), server.url("/post?bar=Foo+Bar&foo=a");
+    assert_eq data.get("headers")?.get("content-type")?.string(), "application/json";
+}
+
+test "method" {
+    let req = http.new_request();
+    assert_eq req.method, "GET";
+
+    req.method = "POST";
+    assert_eq req.method, "POST";
+}
+
+test "url" {
+    let req = http.new_request();
+    assert_eq req.url, "";
+
+    req.url = "http://example.com";
+    assert_eq req.url, "http://example.com";
+}
+
+test "headers" {
+    let req = http.new_request();
+    assert_eq req.headers.len(), 0;
+
+    let headers = http.new_headers();
+    headers.set("Content-Type", "application/json");
+    headers.set("Accept-Encoding", "gzip, deflate");
+
+    req.headers = headers;
+    assert_eq req.headers.len(), 2;
+    assert_eq req.headers.get("Content-Type"), "application/json";
+    assert_eq req.headers.get("Accept-Encoding"), "gzip, deflate";
+}
+
+test "query" {
+    let req = http.new_request();
+    assert_eq req.query.len(), 0;
+
+    let query = <string, string> { "foo": "bar", "baz": "1" };
+
+    req.query = query;
+    assert_eq req.query.len(), 2;
+    assert_eq req.query.get("foo"), "bar";
+    assert_eq req.query.get("baz"), "1";
+}
+
+test "basic_auth" {
+    let server = test_harness.start_http_server();
+    let req = http.new_request(method: "GET", url: server.url("/basic-auth/test-user/test-passwd")).set_basic_auth(
+        "test-user",
+        "test-passwd"
+    );
+    let res = req.send();
+    assert_eq res.status, 200, res.text();
+
+    let data = res.json();
+    assert_eq data.get("authenticated")?.bool(), true;
+}
+
+test "timeout" {
+    let server = test_harness.start_http_server();
+
+    let req = http.new_request(method: "GET", url: server.url("/get"), timeout: 5.2.seconds());
+    assert_eq req.timeout, 5.2.seconds();
+    req.timeout = 3.2.seconds();
+    assert_eq req.timeout, 3.2.seconds();
+
+    let res = req.send();
+    assert_eq res.status, 200, res.text();
+}
+
+struct MyRequest {
+    req: http.Request
+}
+
+test "http.Request" {
+    let req: http.Request = http.new_request();
+    assert_eq req.method, "GET";
+
+    let my_req = MyRequest { req: req };
+    assert_eq my_req.req.method, "GET";
+}
+
+test "chunk" {
+    let server = test_harness.start_http_server();
+
+    let req = http.new_request(method: "GET", url: server.url("/stream/3"));
+    let res = req.send();
+    assert_eq res.status, 200;
+
+    let bodies = [string] {};
+    while (true) {
+        let chunk = res.chunk();
+        if (chunk == nil) {
+            break;
+        }
+
+        bodies.push(chunk!.to_string());
+    }
+
+    assert_eq bodies.len(), 3;
+    assert_eq bodies[0].trim(), `{"args":{},"data":"","headers":{"accept":"*/*","host":"${server.addr}"},"id":0,"method":"GET","url":"http://${server.addr}/stream/3"}`;
+    assert_eq bodies[1].trim(), `{"args":{},"data":"","headers":{"accept":"*/*","host":"${server.addr}"},"id":1,"method":"GET","url":"http://${server.addr}/stream/3"}`;
+    assert_eq bodies[2].trim(), `{"args":{},"data":"","headers":{"accept":"*/*","host":"${server.addr}"},"id":2,"method":"GET","url":"http://${server.addr}/stream/3"}`;
 }

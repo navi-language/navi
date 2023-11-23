@@ -1,0 +1,12 @@
+use std.process;
+use std.io;
+
+test "pid" {
+    let pid = process.pid();
+    assert pid > 0, `pid is ${pid}`;
+}
+
+test "args" {
+    let args = process.args();
+    assert_eq args.contains("test"), true, `args is ${args}`;
+}

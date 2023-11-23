@@ -1,0 +1,12 @@
+test "float as int" {
+    assert_eq 123.54 as int, 123;
+}
+
+test "int as float" {
+    assert_eq 123 as float, 123.0;
+}
+
+test "bool as int" {
+    assert_eq true as int, 1;
+    assert_eq false as int, 0;
+}

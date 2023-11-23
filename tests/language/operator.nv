@@ -1,0 +1,58 @@
+test "test" {
+    assert 1 + 2 == 3;
+    assert 1 - 2 == -1;
+    assert 1 * 2 == 2;
+    assert 1 / 2 == 0;
+    assert 1 % 2 == 1;
+    assert 1 == 1;
+    assert 1 != 2;
+    assert 1 < 2;
+    assert 1 <= 2;
+    assert 1 > 0;
+    assert 1 >= 0;
+    assert -1 == -1;
+
+    let a: string? = nil;
+    assert a?.len() == nil;
+    let a: string? = "Hello";
+    assert a?.len() == 5;
+}
+
+test "test assignment" {
+    let a = 1;
+    a += 1;
+    assert a == 2;
+
+    a -= 1;
+    assert a == 1;
+
+    a *= 2;
+    assert a == 2;
+
+    a /= 2;
+    assert a == 1;
+
+    let a = 10;
+    a %= 3;
+    assert a == 1;
+}
+
+test "operator priority" {
+    assert_eq 1 + 2 * 3, 7;
+    assert_eq 1 * 2 + 3, 5;
+    assert_eq 1 + 2 * 3 + 4, 11;
+    assert_eq 1 + 2 * 3 + 4 * 5, 27;
+
+    assert_eq (1 + 2) * 3, 9;
+    assert_eq (1 + 2) * (3 + 4), 21;
+    assert_eq (1 + 2) * (3 + 4) * (5 + 6), 231;
+
+    assert_eq -(1 + 2), -3;
+    assert_eq -(1 + 2) * 3, -9;
+    assert_eq -(1 + 2) * -(3 + 4), 21;
+
+    assert_eq 20 * 3 / 2, 30;
+    assert_eq 20 / 2 * 3, 30;
+    assert_eq 20 / 2 * 3 / 4, 7;
+}
+

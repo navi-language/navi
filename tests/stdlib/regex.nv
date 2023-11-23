@@ -11,12 +11,12 @@ test "parse" {
 
 test "Regex - string_interpolation" {
     let re = regex.parse("[a-z0-9]+");
-    assert_eq `{re}`, "[a-z0-9]+";
+    assert_eq `${re}`, "[a-z0-9]+";
 }
 
 test "Match - string_interpolation" {
-    let m = regex.parse("[a-z0-9]+").match("hello123");
-    assert_eq `{m}`, "hello123";
+    let m = regex.parse("[a-z0-9]+").find("hello123");
+    assert_eq `${m}`, "hello123";
 }
 
 test "is_match" {
@@ -34,14 +34,71 @@ test "is_match" {
 
 test "replace" {
     let re = regex.parse("[a-z]");
-    assert re.replace("hello", "x") == "xello";
-    assert re.replace("hello123", "x") == "xello123";
+    assert_eq re.replace("hello", "x"), "xello";
+    assert_eq re.replace("hello123", "x"), "xello123";
+
+    let re = regex.parse("([\\d]+)([\\w]+)");
+    assert_eq re.replace("abc123def456", "$2 $1"), "abcdef456 123";
+    assert_eq re.replace("abc123def456", "$2 $1", expand: false), "abc$2 $1";
 }
 
 test "replace_all" {
     let re = regex.parse("[a-z]+");
-    assert re.replace_all("hello", "x") == "x";
-    assert re.replace_all("hello123hello", "x") == "x123x";
+    assert_eq re.replace_all("hello", "x"), "x";
+    assert_eq re.replace_all("hello123hello", "x"), "x123x";
+
+    let re = regex.parse("([\\d]+)");
+    assert_eq re.replace_all("abc123def456", "[$1]"), "abc[123]def[456]";
+    assert_eq re.replace_all("abc123def456", "[$1]", expand: false), "abc[$1]def[$1]";
+}
+
+test "replace_with" {
+    let re = regex.parse("([a-z]+)");
+    let s = re.replace_with(
+        "abc123def456",
+        fn(caps: regex.Captures?): string {
+            let s = caps!.get(1)!.text;
+            return s.to_uppercase();
+        }
+    );
+    assert_eq s, "ABC123def456";
+
+    // test no expand
+    let s = re.replace_with("abc123def456", fn(caps: regex.Captures?): string {return "$1 $2";});
+    assert_eq s, "$1 $2123def456";
+}
+
+test "replace_all_with" {
+    let re = regex.parse("([a-z]+)([\\d]+)");
+    let s = re.replace_all_with(
+        "abc123, def456",
+        fn(caps: regex.Captures?): string {
+            let s = caps!.get(1)!.text;
+            let n = caps!.get(2)!.text;
+
+            return `${s.to_uppercase()}-${n}`;
+        }
+    );
+    assert_eq s, "ABC-123, DEF-456";
+
+    // test no expand
+    let s = re.replace_all_with(
+        "abc123, def456",
+        fn(caps: regex.Captures?): string {
+            return "$1 $2";
+        }
+    );
+    assert_eq s, "$1 $2, $1 $2";
+
+    let re = regex.parse("(?m)^\\s*([#]+)\\s*");
+    let s = re.replace_all_with(
+        "# hello\n## world\n## world1\n### world2",
+        fn(caps: regex.Captures?): string {
+            let s = caps!.get(1)!.text;
+            return `[${s}] `;
+        }
+    );
+    assert_eq s, "[#] hello\n[##] world\n[##] world1\n[###] world2";
 }
 
 test "split" {
@@ -53,44 +110,66 @@ test "split" {
     assert_eq parts.join(""), "abcde";
 }
 
-test "match" {
+test "find" {
     let re = regex.parse("[a-z]+");
 
-    let m = re.match("hello123hello")!;
-    assert_eq m.start(), 0;
-    assert_eq m.end(), 5;
-    assert_eq m.text(), "hello";
+    let m = re.find("hello123hello")!;
+    assert_eq m.start, 0;
+    assert_eq m.end, 5;
+    assert_eq m.text, "hello";
 
-    let m = re.match("123");
+    let m = re.find("123");
     assert_eq m, nil;
 }
 
-test "match_all" {
+test "find_all" {
     let re = regex.parse("[a-z]+");
 
-    let matches = re.match_all("hello123world");
+    let matches = re.find_all("hello123world");
     assert_eq matches.len(), 2;
     assert_eq matches[0].text(), "hello";
     assert_eq matches[1].text(), "world";
 
     let m = matches[0];
-    assert_eq m.start(), 0;
-    assert_eq m.end(), 5;
-    assert_eq m.text(), "hello";
+    assert_eq m.start, 0;
+    assert_eq m.end, 5;
+    assert_eq m.text, "hello";
 
     let m = matches[1];
-    assert_eq m.start(), 8;
-    assert_eq m.end(), 13;
-    assert_eq m.text(), "world";
+    assert_eq m.start, 8;
+    assert_eq m.end, 13;
+    assert_eq m.text, "world";
 
-    let matches = re.match_all("123462.1124");
+    let matches = re.find_all("123462.1124");
     assert_eq matches.len(), 0;
 }
 
 test "struct Match" {
     let re = regex.parse("[a-z]+");
 
-    let m = re.match("hello123hello")!;
+    let m = re.find("hello123hello")!;
     assert_eq m.to_string(), "hello";
-    assert_eq `{m}`, "hello";
+    assert_eq `${m}`, "hello";
+}
+
+test "captures" {
+    let re = regex.parse("(\\d{4})-(\\d{2})-(\\d{2})");
+    let caps = re.captures("2010-03-14")!;
+
+    assert_eq caps.len(), 4;
+    assert_eq caps.get(0)?.text, "2010-03-14";
+    assert_eq caps.get(0)?.start, 0;
+    assert_eq caps.get(0)?.end, 10;
+
+    assert_eq caps.get(1)?.text, "2010";
+    assert_eq caps.get(1)?.start, 0;
+    assert_eq caps.get(1)?.end, 4;
+
+    assert_eq caps.get(2)?.text, "03";
+    assert_eq caps.get(2)?.start, 5;
+    assert_eq caps.get(2)?.end, 7;
+
+    assert_eq caps.get(3)?.text, "14";
+    assert_eq caps.get(3)?.start, 8;
+    assert_eq caps.get(3)?.end, 10;
 }

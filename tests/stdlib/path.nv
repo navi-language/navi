@@ -1,79 +1,61 @@
 use std.path;
 
 test "absolute" {
-  let full_path = path.absolute("tests/fixtures/hello.txt");
-  assert full_path.len() > 0;
+    let full_path = path.absolute("tests/fixtures/hello.txt");
+    assert full_path.len() > 0;
 }
 
 test "base" {
-  assert_eq path.base("src/doesnt_exist.rs"), "doesnt_exist.rs";
-  assert_eq path.base("/foo/bar/dar"), "dar";
-  assert_eq path.base("/foo/bar/dar/"), "dar";
-  assert_eq path.base(""), "";
+    assert_eq path.base("src/doesnt_exist.rs"), "doesnt_exist.rs";
+    assert_eq path.base("/foo/bar/dar"), "dar";
+    assert_eq path.base("/foo/bar/dar/"), "dar";
+    assert_eq path.base(""), "";
 }
 
 test "dir" {
-  assert_eq path.dir("src/doesnt_exist.rs"), "src";
-  assert_eq path.dir("/foo/bar/dar"), "/foo/bar";
+    assert_eq path.dir("src/doesnt_exist.rs"), "src";
+    assert_eq path.dir("/foo/bar/dar"), "/foo/bar";
 }
 
 test "extension" {
-  assert_eq path.extension("foo.txt"), "txt";
-  assert_eq path.extension("foo"), "";
-  assert_eq path.extension(".foo"), "";
-  assert_eq path.extension("foo.txt/bar"), "";
-  assert_eq path.extension("foo.txt/bar.txt"), "txt";
-  assert_eq path.extension("foo/bar.txt"), "txt";
-  assert_eq path.extension("foo/bar"), "";
-  assert_eq path.extension("foo/bar/"), "";
-  assert_eq path.extension("foo.bar.dar"), "dar";
+    assert_eq path.extension("foo.txt"), "txt";
+    assert_eq path.extension("foo"), "";
+    assert_eq path.extension(".foo"), "";
+    assert_eq path.extension("foo.txt/bar"), "";
+    assert_eq path.extension("foo.txt/bar.txt"), "txt";
+    assert_eq path.extension("foo/bar.txt"), "txt";
+    assert_eq path.extension("foo/bar"), "";
+    assert_eq path.extension("foo/bar/"), "";
+    assert_eq path.extension("foo.bar.dar"), "dar";
 }
 
 test "exists" {
-  assert path.exists("tests/fixtures/hello.txt");
-  assert !path.exists("src/doesnt_exist.rs");
+    assert path.exists("tests/fixtures/hello.txt");
+    assert !path.exists("src/doesnt_exist.rs");
 }
 
 test "is_dir" {
-  assert path.is_dir("tests/fixtures");
-  assert !path.is_dir("tests/fixtures/hello.txt");
+    assert path.is_dir("tests/fixtures");
+    assert !path.is_dir("tests/fixtures/hello.txt");
 }
 
 test "is_file" {
-  assert path.is_file("tests/fixtures/hello.txt");
-  assert !path.is_file("tests/fixtures");
+    assert path.is_file("tests/fixtures/hello.txt");
+    assert !path.is_file("tests/fixtures");
 }
 
 test "is_symlink" {
-  assert !path.is_symlink("tests/fixtures/hello.txt");
-  assert !path.is_symlink("tests/fixtures");
+    assert !path.is_symlink("tests/fixtures/hello.txt");
+    assert !path.is_symlink("tests/fixtures");
 }
 
 test "is_absolute" {
-  assert path.is_absolute("/foo/bar");
-  assert !path.is_absolute("foo/bar");
+    assert path.is_absolute("/foo/bar");
+    assert !path.is_absolute("foo/bar");
 }
 
 test "join" {
-  assert_eq path.join("src", "doesnt_exist.rs"), "src/doesnt_exist.rs";
-  assert_eq path.join("/foo/bar", "dar"), "/foo/bar/dar";
-  assert_eq path.join("/foo/bar/", path.join("dar", "test.zip")), "/foo/bar/dar/test.zip";
-}
-
-test "cwd" {
-  let cwd = path.cwd();
-  assert cwd.len() > 0;
-  assert path.is_absolute(cwd);
-}
-
-// NOTE: becafeful with this test, it will change your cwd
-test "chdir" {
-  let cwd = path.cwd();
-  let new_path = path.join(cwd, "tests");
-
-  assert path.chdir(new_path);
-  assert_eq path.cwd(), new_path;
-
-  // revert back to original cwd
-  assert path.chdir(cwd);
+    assert_eq path.join("src", "doesnt_exist.rs"), "src/doesnt_exist.rs";
+    assert_eq path.join("/foo/bar", "dar"), "/foo/bar/dar";
+    assert_eq path.join("/foo/bar/", path.join("dar", "test.zip")), "/foo/bar/dar/test.zip";
 }

@@ -1,0 +1,37 @@
+use std.net.http;
+use std.net.http.multipart;
+use test_harness;
+use std.json;
+
+test "request set_form" {
+    let server = test_harness.start_http_server();
+    let form = <string, string> { "foo": "bar", "message": "Hello, 世界!" };
+    let req = http.new_request(method: "POST", url: server.url("/post"));
+    req.set_form(form);
+
+    let res = req.send();
+    assert_eq res.status, 200;
+
+    let body = res.json();
+
+    let content_type = body.get("headers")?.get("content-type")?.string();
+    assert_eq content_type, "application/x-www-form-urlencoded";
+
+    assert_eq body.get("data")?.string(), "foo=bar&message=Hello%2C+%E4%B8%96%E7%95%8C%21";
+}
+
+test "new_request with form optional" {
+    let server = test_harness.start_http_server();
+    let form = <string, string> { "foo": "bar", "message": "Hello, 世界!" };
+    let req = http.new_request(method: "POST", url: server.url("/post"), form: form);
+
+    let res = req.send();
+    assert_eq res.status, 200;
+
+    let body = res.json();
+
+    let content_type = body.get("headers")?.get("content-type")?.string();
+    assert_eq content_type, "application/x-www-form-urlencoded";
+
+    assert_eq body.get("data")?.string(), "foo=bar&message=Hello%2C+%E4%B8%96%E7%95%8C%21";
+}

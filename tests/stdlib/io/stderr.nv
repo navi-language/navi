@@ -1,0 +1,21 @@
+use std.io;
+use std.env;
+
+test "write" {
+    if (env.get("TEST_STDOUT") == nil) {
+        return;
+    }
+
+    let stderr = io.stderr();
+    let n = stderr.write("Hello, world!\n".bytes());   
+    assert_eq n, 14;
+}
+
+test "write_string" {
+    if (env.get("TEST_STDOUT") == nil) {
+        return;
+    }
+
+    let stderr = io.stderr();
+    stderr.write_string("Hello, world!\n");   
+}

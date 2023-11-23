@@ -1,0 +1,34 @@
+use std.querystring;
+use std.json;
+
+test "parse" {
+    let obj = querystring.parse(`name=Sunli&id=123456&profile[city]=Wuhan&tags[]=Rust&tags[]=Navi`);
+    assert_eq obj.to_json(), `{"name":"Sunli","id":"123456","profile":{"city":"Wuhan"},"tags":["Rust","Navi"]}`;
+
+    let obj = querystring.parse(`name=Jason+Lee&id=123456&profile[city]=Chengdu&tags[0]=Rust&tags[1]=Navi`);
+    assert_eq obj.to_json(), `{"name":"Jason Lee","id":"123456","profile":{"city":"Chengdu"},"tags":["Rust","Navi"]}`;
+}
+
+test "to_string" {
+    let obj = json.parse(`{
+        "name": "Jason Lee",
+        "id": 123456,
+        "profile": {
+            "city": "Chengdu"
+        },
+        "tags": ["Rust", "Navi"]
+    }`);
+    assert_eq querystring.to_string(obj), `name=Jason+Lee&id=123456&profile[city]=Chengdu&tags[0]=Rust&tags[1]=Navi`;
+}
+
+test "to_querystring" {
+    let obj = json.parse(`{
+        "name": "Jason Lee",
+        "id": 123456,
+        "profile": {
+            "city": "Chengdu"
+        },
+        "tags": ["Rust", "Navi"]
+    }`);
+    assert_eq obj.to_querystring(), `name=Jason+Lee&id=123456&profile[city]=Chengdu&tags[0]=Rust&tags[1]=Navi`;
+}

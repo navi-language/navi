@@ -9,11 +9,15 @@ test "map.new::<int, string>" {
     a.set(1, "a");
     a.set(2, "B");
     a.set(3, "c");
+    a.set(2, "B1");
 
     assert_eq a.get(1), "a";
-    assert_eq a.get(2), "B";
+    assert_eq a.get(2), "B1";
     assert_eq a.get(3), "c";
     assert_eq a.get(4), nil;
+
+    a[2] = "B";
+    assert_eq `${a}`, `{1: a, 2: B, 3: c}`;
 
     // use the [] to get
     assert_eq a[2], "B";
@@ -30,6 +34,7 @@ test "map.new::<int, string>" {
 test "<string, string>" {
     let a = <string, string> {};
     a.set("name", "Jason Lee");
+    a.set("city", "Wuhan");
     a.set("city", "Chengdu");
     a.set("foo", "Foo Bar");
 
@@ -37,8 +42,10 @@ test "<string, string>" {
     assert_eq a.get("city"), "Chengdu";
     assert_eq a.get("not-exist"), nil;
 
+    a["city"] = "Wuhan";
+    assert_eq `${a}`, `{name: Jason Lee, city: Wuhan, foo: Foo Bar}`;
 
-    assert_eq a["city"], "Chengdu";
+    assert_eq a["city"], "Wuhan";
     // FIXME: assert this will panic
     // assert_eq a["age"], nil;
 
@@ -110,4 +117,31 @@ test "struct value" {
     items.set("b", Item { name: "b" });
 
     assert_eq items.get("a")?.name, "a";
+}
+
+test "clear" {
+    let items = <string, string> {
+        "name": "Jason",
+        "city": "Chengdu",
+    };
+
+    assert_eq items.len(), 2;
+    items.clear();
+    assert_eq items.len(), 0;
+}
+
+test "clone" {
+    let items = <string, string> {
+        "name": "Jason",
+        "city": "Chengdu",
+    };
+    let items2 = items.clone();
+    items["name"] = "Sunli";
+    items2["city"] = "Wuhan";
+
+    assert_eq items["name"], "Sunli";
+    assert_eq items["city"], "Chengdu";
+
+    assert_eq items2["name"], "Jason";
+    assert_eq items2["city"], "Wuhan";
 }

@@ -2,4 +2,4 @@ use std.io;
 
 let name = "Navi";
 
-io.println(`Hello world, this is {name}.`);
+io.println(`Hello world, this is ${name}.`);

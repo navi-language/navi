@@ -1,0 +1,210 @@
+use std.process;
+use std.env;
+use std.path;
+use std.fs;
+
+test "run" {
+    if (env.platform() == "windows") {
+        return;
+    }
+
+    let args = [string] { "-c", "printenv" };
+    let envs = <string, string> { "ENV1": "hello", "ENV2": "Foo Bar" };
+
+    let output = process.run("sh", args: args, envs: envs, stdout: "piped");
+    assert_eq output.status, 0, output;
+    assert_eq output.stderr.to_string().trim(), "";
+
+    let stdout = output.stdout.to_string();
+    assert_eq stdout.contains("ENV1=hello"), true, stdout;
+    assert_eq stdout.contains("ENV2=Foo Bar"), true, stdout;
+}
+
+test "run on windows" {
+    if (env.platform() != "windows") {
+        return;
+    }
+
+}
+
+test "run stderr" {
+    if (env.platform() == "windows") {
+        return;
+    }
+
+    let output = process.run(
+        "sh",
+        args: [string] { "-c", "echo This message goes to stderr >&2" },
+        stderr: "piped"
+    );
+    assert_eq output.status, 0;
+    assert_eq output.stderr.to_string().trim(), "This message goes to stderr";
+}
+
+test "run with args" {
+    if (env.platform() == "windows") {
+        return;
+    }
+
+    let args = [string] { "arg1", "arg2", "arg3" };
+    let output = process.run("echo", args: args, stdout: "piped", stderr: "piped");
+    assert_eq output.status, 0;
+    assert_eq output.stderr.to_string(), "";
+    assert_eq output.stdout.to_string().trim(), "arg1 arg2 arg3";
+
+    let output = process.run(
+        "sh",
+        args: [string] { "-c", `echo "hello world\nnext line." | wc -l` },
+        stdout: "piped",
+        stderr: "piped"
+    );
+    assert_eq output.status, 0;
+    assert_eq output.stderr.to_string(), "";
+    assert_eq output.stdout.to_string().trim(), "2";
+
+    let output = process.run(
+        "sh",
+        args: [string] { "-c", `echo "hello world" && echo foo bar dar` },
+        stdout: "piped",
+        stderr: "piped"
+    );
+    assert_eq output.status, 0, output.stderr.to_string();
+    assert_eq output.stderr.to_string(), "";
+    assert_eq output.stdout.to_string().trim(), "hello world\nfoo bar dar";
+
+    let output = process.run(
+        "sh",
+        args: [string] { "-c", "echo", `"hello world"`, "&&", "echo foo bar dar" },
+        stdout: "piped",
+        stderr: "piped"
+    );
+    assert_eq output.status, 0, output.stderr.to_string();
+    assert_eq output.stdout.to_string().trim(), "";
+}
+
+test "run with env" {
+    if (env.platform() == "windows") {
+        return;
+    }
+
+    let envs = <string, string> { "ENV1": "hello", "ENV2": "Foo Bar" };
+    let output = process.run("printenv", envs: envs, stdout: "piped", stderr: "piped");
+    assert_eq output.status, 0;
+    assert_eq output.stderr.to_string(), "";
+
+    let stdout = output.stdout.to_string();
+    assert_eq stdout.contains("ENV1=hello"), true, stdout;
+    assert_eq stdout.contains("ENV2=Foo Bar"), true, stdout;
+}
+
+test "run stdin" {
+    if (env.platform() == "windows") {
+        return;
+    }
+
+    let filename = path.join(env.tmpdir(), "test-run-in");
+    if (fs.exists(filename)) {
+        fs.remove_file(filename);
+    }
+    let f = fs.create(filename);
+    f.write_string("Hello, world!");
+    f.flush();
+
+    let output = process.run("cat", stdin: "null");
+    assert_eq output.status, 0;
+    assert_eq output.stderr.to_string(), "";
+    assert_eq output.stdout.to_string(), "";
+
+    let output = process.run("cat", stdin: "piped");
+    assert_eq output.status, 0;
+    assert_eq output.stderr.to_string(), "";
+    assert_eq output.stdout.to_string(), "";
+
+    let output = process.run("cat", stdin: filename, stdout: "piped");
+    assert_eq output.status, 0;
+    assert_eq output.stderr.to_string(), "";
+    assert_eq output.stdout.to_string(), "Hello, world!";
+    fs.remove_file(filename);
+}
+
+test "run stdout" {
+    if (env.platform() == "windows") {
+        return;
+    }
+
+    let output = process.run("echo", args: [string] { "Hello, world!" }, stdout: "null");
+    assert_eq output.status, 0;
+    assert_eq output.stderr.to_string(), "";
+    assert_eq output.stdout.to_string().trim(), "";
+
+    let output = process.run("echo", args: [string] { "Hello, world!" }, stdout: "piped");
+    assert_eq output.status, 0;
+    assert_eq output.stderr.to_string(), "";
+    assert_eq output.stdout.to_string().trim(), "Hello, world!";
+
+    let f = path.join(env.tmpdir(), "test-run-stdout");
+    if (fs.exists(f)) {
+        fs.remove_file(f);
+    }
+    let output = process.run("echo", args: [string] { "Hello, world!" }, stdout: f);
+    assert_eq output.status, 0, `run failed, ${output.stderr} file: ${f}`;
+    assert_eq output.stderr.to_string(), "";
+    assert_eq output.stdout.to_string(), "";
+    let out = fs.read_to_string(f);
+    assert_eq out, "Hello, world!\n", f;
+
+    // test when file exist
+    let output = process.run("echo", args: [string] { "Hello, world!" }, stdout: f);
+    assert_eq output.status, 0, `run failed, ${output.stderr} file: ${f}`;
+    let out = fs.read_to_string(f);
+    assert_eq out, "Hello, world!\nHello, world!\n", f;
+    fs.remove_file(f);
+}
+
+test "run stderr" {
+    if (env.platform() == "windows") {
+        return;
+    }
+
+    let output = process.run(
+        "sh",
+        args: [string] { "-c", "echo Hello, world! >&2" },
+        stderr: "null"
+    );
+    assert_eq output.status, 0;
+    assert_eq output.stderr.to_string(), "";
+    assert_eq output.stdout.to_string(), "";
+
+    let output = process.run(
+        "sh",
+        args: [string] { "-c", "echo Hello, world! >&2" },
+        stderr: "piped"
+    );
+    assert_eq output.status, 0;
+    assert_eq output.stderr.to_string().trim(), "Hello, world!";
+    assert_eq output.stdout.to_string(), "";
+
+    let f = path.join(env.tmpdir(), "test-run-stderr");
+    if (fs.exists(f)) {
+        fs.remove_file(f);
+    }
+    let output = process.run("sh", args: [string] { "-c", "echo Hello, world! >&2" }, stderr: f);
+    assert_eq output.status, 0, `run failed, ${output.stderr} file: ${f}`;
+    assert_eq output.stderr.to_string(), "";
+    assert_eq output.stdout.to_string(), "";
+    let out = fs.read_to_string(f);
+    assert_eq out, "Hello, world!\n", f;
+    fs.remove_file(f);
+}
+
+test "run with cwd" {
+    if (env.platform() == "windows") {
+        return;
+    }
+
+    let cwd = env.tmpdir();
+    let full_path = path.absolute(cwd);
+    let output = process.run("pwd", args: [string] { "-L" }, cwd: cwd, stdout: "piped");
+    assert_eq output.status, 0;
+    assert_eq output.stdout.to_string().trim(), full_path;
+}

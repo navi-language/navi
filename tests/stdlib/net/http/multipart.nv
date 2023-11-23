@@ -1,0 +1,44 @@
+use std.net.http;
+use std.net.http.multipart;
+use test_harness;
+use std.json;
+
+test "request set_multipart" {
+    let server = test_harness.start_http_server();
+
+    let form = multipart.new_form();
+    form.set_text("name", "Jason Lee");
+    form.set_text("city", "Chengdu");
+    form.set_bytes("content", "Hello, world!".bytes());
+    let req = http.new_request(method: "POST", url: server.url("/post"));
+    req.set_multipart(form);
+
+    let res = req.send();
+    assert_eq res.status, 200;
+
+    let body = res.json();
+    assert_eq body.get("method")?.string(), "POST";
+
+    let content_type = body.get("headers")?.get("content-type")?.string();
+    assert_eq content_type?.contains("multipart/form-data; boundary="), true, body;
+
+    let data = body.get("data")?.string();
+    assert_eq data?.contains(`Content-Disposition: form-data; name="name"`), true, data;
+    assert_eq data?.contains(`Content-Disposition: form-data; name="city"`), true, data;
+    assert_eq data?.contains(`Content-Disposition: form-data; name="content"\r\n\r\nHello, world!`), true, data;
+}
+
+test "new_request with multipart optional" {
+    let server = test_harness.start_http_server();
+    let form = multipart.new_form();
+    form.set_text("name", "Jason Lee");
+    let req = http.new_request(method: "POST", url: server.url("/post"), multipart: form);
+    let res = req.send();
+
+    assert_eq res.status, 200;
+    let body = res.json();
+    let content_type = body.get("headers")?.get("content-type")?.string();
+    assert_eq content_type?.contains("multipart/form-data; boundary="), true, body;
+    let data = body.get("data")?.string();
+    assert_eq data?.contains(`Content-Disposition: form-data; name="name"`), true, data;
+}

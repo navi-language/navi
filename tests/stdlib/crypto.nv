@@ -13,13 +13,13 @@ test "uuid" {
 
 test "Hash - string_interpolation" {
   let hash = crypto.hash("md5");
-  assert_eq `{hash}`, "<Hash: MD5>";
+  assert_eq `${hash}`, "<Hash: MD5>";
   let hash = crypto.hash("sha1");
-  assert_eq `{hash}`, "<Hash: SHA1>";
+  assert_eq `${hash}`, "<Hash: SHA1>";
   let hash = crypto.hash("sha256");
-  assert_eq `{hash}`, "<Hash: SHA256>";
+  assert_eq `${hash}`, "<Hash: SHA256>";
   let hash = crypto.hash("sha512");
-  assert_eq `{hash}`, "<Hash: SHA512>";
+  assert_eq `${hash}`, "<Hash: SHA512>";
 }
 
 test "hash - MD5" {
@@ -60,13 +60,13 @@ test "hash - Sha512" {
 
 test "hmac - string_interpolation" {
   let mac = crypto.hmac("md5", "123");
-  assert_eq `{mac}`, "<HMAC: MD5>";
+  assert_eq `${mac}`, "<HMAC: MD5>";
   let mac = crypto.hmac("sha1", "123");
-  assert_eq `{mac}`, "<HMAC: SHA1>";
+  assert_eq `${mac}`, "<HMAC: SHA1>";
   let mac = crypto.hmac("sha256", "123");
-  assert_eq `{mac}`, "<HMAC: SHA256>";
+  assert_eq `${mac}`, "<HMAC: SHA256>";
   let mac = crypto.hmac("sha512", "123");
-  assert_eq `{mac}`, "<HMAC: SHA512>";
+  assert_eq `${mac}`, "<HMAC: SHA512>";
 }
 
 test "hmac - MD5" {

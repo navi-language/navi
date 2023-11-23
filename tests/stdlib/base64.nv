@@ -1,27 +1,28 @@
 use std.base64;
 
 test "encode" {
-  assert_eq base64.encode("hello world"), "aGVsbG8gd29ybGQ=";
-  assert_eq base64.encode("测试 URL Safe"), "5rWL6K+VIFVSTCBTYWZl";
-  assert_eq base64.encode("https://navi-lang.org"), "aHR0cHM6Ly9uYXZpLWxhbmcub3Jn";
+    assert_eq base64.encode("hello world"), "aGVsbG8gd29ybGQ=";
+    assert_eq base64.encode("测试 URL Safe"), "5rWL6K+VIFVSTCBTYWZl";
+    assert_eq base64.encode("https://navi-lang.org"), "aHR0cHM6Ly9uYXZpLWxhbmcub3Jn";
 }
 
 test "decode" {
-  assert_eq base64.decode("aGVsbG8gd29ybGQ="), "hello world";
-  assert_eq base64.decode("5rWL6K+VIFVSTCBTYWZl"), "测试 URL Safe";
-  assert_eq base64.decode("aHR0cHM6Ly9uYXZpLWxhbmcub3Jn"), "https://navi-lang.org";
+    assert_eq base64.decode("aGVsbG8gd29ybGQ="), "hello world";
+    assert_eq base64.decode("5rWL6K+VIFVSTCBTYWZl"), "测试 URL Safe";
+    assert_eq base64.decode("aHR0cHM6Ly9uYXZpLWxhbmcub3Jn"), "https://navi-lang.org";
 
-  assert_eq base64.decode("invalid"), nil;
+    assert_eq base64.decode("invalid"), nil;
 }
 
 test "urlsafe_encode" {
-  assert_eq base64.urlsafe_encode("测试 URL Safe"), "5rWL6K-VIFVSTCBTYWZl";
-  assert_eq base64.urlsafe_encode("hello world"), "aGVsbG8gd29ybGQ";
+    assert_eq base64.urlsafe_encode("测试 URL Safe"), "5rWL6K-VIFVSTCBTYWZl";
+    assert_eq base64.urlsafe_encode("hello world"), "aGVsbG8gd29ybGQ";
 }
 
 test "urlsafe_decode" {
-  assert_eq base64.urlsafe_decode("5rWL6K-VIFVSTCBTYWZl"), "测试 URL Safe";
-  assert_eq base64.urlsafe_decode("aGVsbG8gd29ybGQ"), "hello world";
+    assert_eq base64.urlsafe_decode("5rWL6K-VIFVSTCBTYWZl"), "测试 URL Safe";
+    assert_eq base64.urlsafe_decode("aGVsbG8gd29ybGQ"), "hello world";
 
-  assert_eq base64.urlsafe_decode("invalid"), nil;
+    assert_eq base64.urlsafe_decode("invalid"), nil;
 }
+

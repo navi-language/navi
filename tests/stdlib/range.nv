@@ -1,0 +1,10 @@
+test "range" {
+    let a = 1..10;
+    assert_eq a.start, 1;
+    assert_eq a.end, 10;
+
+    a.start = 2;
+    a.end = 11;
+    assert_eq a.start, 2;
+    assert_eq a.end, 11;
+}

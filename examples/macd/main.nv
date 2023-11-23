@@ -15,15 +15,18 @@ struct Candlestick {
 
 impl Candlestick {
     fn to_string(): string {
-        return `{ time: ${self.time}, open: ${self.open}, high: ${self.high}, low: ${self.low}, close: ${self.close}, volume: ${self.volume}, turnover: ${self.turnover} }`;
+        return
+            `{ time: ${self.time}, open: ${self.open}, high: ${self.high}, low: ${self.low}, close: ${self.close}, volume: ${self.volume}, turnover: ${self.turnover} }`
+       ;
     }
 }
 
 fn main() {
-    let data = json.parse(fs.read_string("examples/macd/data.json"));
+    let f = fs.open("examples/macd/data.json");
+    let data = json.parse(f.read_to_string());
 
     let candlesticks = [Candlestick] {};
-    
+
     for (let item in data.array()!) {
         candlesticks.push(Candlestick {
             time: item.get("time")?.int()!,
@@ -32,7 +35,7 @@ fn main() {
             low: item.get("low")?.float()!,
             close: item.get("close")?.float()!,
             volume: item.get("volume")?.int()! as float,
-            turnover: item.get("turnover")?.int()! as float,
+            turnover: item.get("turnover")?.int()! as float
         });
     }
 

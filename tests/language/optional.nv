@@ -1,0 +1,191 @@
+test "assign" {
+    let a: int? = 10;
+    let b: int?? = 10;
+    let c: int??? = a;
+    assert_eq b, a;
+    assert_eq c, b;
+    assert_eq c, 10;
+}
+
+test "== int" {
+    let a: int? = 10;
+    let b: int??? = 10;
+    assert_eq b, a;
+    assert_eq a, b;
+}
+
+test "== object" {
+    let a: string? = "abc";
+    let b: string??? = "abc";
+    assert_eq b, a;
+    assert_eq a, b;
+}
+
+test "switch" {
+    let a: string???? = "abc";
+    let b: string?? = "abc";
+    let k = 0;
+
+    switch (a) {
+    case b:
+        k = 1;
+    default:
+        k = 2;
+    }
+
+    assert_eq k, 1;
+}
+
+struct T {
+    a: int,
+    b: T2,
+    c: T2?,
+}
+
+struct T2 {
+    d: int,
+    e: string?,
+}
+
+impl T2 {
+    fn call0() {
+    }
+
+
+    fn call1(): int {
+        return self.d * 2;
+    }
+
+
+    fn call2(): string? {
+        return self.e;
+    }
+
+
+    fn set_d(n: int) {
+        self.d = n;
+    }
+}
+
+test "nil" {
+    let a: T2? = nil;
+    assert_eq a, nil;
+    assert_eq a?.d, nil;
+
+    let a: [int]? = nil;
+    assert_eq a, nil;
+    assert_eq a?[0], nil;
+}
+
+test "optional chaining get member" {
+    let a: T? = T { a: 10, b: T2 { d: 20 }, c: T2 { d: 30, e: "df" } };
+    assert_eq a?.a, 10;
+    assert_eq a?.b?.d, 20;
+    assert_eq a?.c?.d, 30;
+
+    let tt: T2?? = a?.b;
+    assert_eq tt?.d, 20;
+
+    let e: string? = a?.c?.e;
+    assert_eq e, "df";
+}
+
+test "optional chaining access by index" {
+    let a: [int]? = [int] { 10, 20, 30 };
+    assert_eq a?[0], 10;
+    assert_eq a?[1], 20;
+    assert_eq a?[2], 30;
+
+    let tt: int? = a?[1];
+    assert_eq tt, 20;
+
+    let a: [int?]? = [int?] { 40, 50, 60 };
+    assert_eq a?[0], 40;
+    assert_eq a?[1], 50;
+    assert_eq a?[2], 60;
+
+    let tt: int? = a?[1];
+    assert_eq tt, 50;
+}
+
+test "optional chaining set member" {
+    let a: T? = T { a: 10, b: T2 { d: 20 }, c: T2 { d: 30 } };
+
+    a?.a = 80;
+    assert_eq a?.a, 80;
+
+    a?.b?.d = 70;
+    assert_eq a?.b?.d, 70;
+
+    a?.c?.d = 50;
+    assert_eq a?.c?.d, 50;
+
+    a?.b = T2 { d: 80 };
+    assert_eq a?.b?.d, 80;
+
+    a?.c = T2 { d: 88 };
+    assert_eq a?.c?.d, 88;
+}
+
+test "optional chaining set by index" {
+    let a: [int?]? = [int?] { 10, 20, 30 };
+    a?[0] = 40;
+    a?[1] = 50;
+    a?[2] = 60;
+    assert_eq a?[0], 40;
+    assert_eq a?[1], 50;
+    assert_eq a?[2], 60;
+
+    let a: [int???]? = [int???] { 10, 20, 30 };
+    a?[0] = 40;
+    a?[1] = 50;
+    a?[2] = 60;
+    assert_eq a?[0], 40;
+    assert_eq a?[1], 50;
+    assert_eq a?[2], 60;
+}
+
+test "call method" {
+    let a: T2? = T2 { d: 10 };
+    a?.call0();
+    assert_eq a?.call1(), 20;
+    a?.set_d(33);
+    assert_eq a?.d, 33;
+
+    let a: T2???? = T2 { d: 10 };
+    a?.call0();
+    assert_eq a?.call1(), 20;
+
+    let a: T2? = T2 { d: 10, e: "add" };
+    assert_eq a?.call2()?.len(), 3;
+}
+
+test "unwrap" {
+    let a: int? = 10;
+    assert_eq a!, 10;
+
+    let a: int??? = 10;
+    assert_eq a!!!, 10;
+}
+
+test "or else" {
+    let a: int? = 10;
+    assert_eq a || 20, 10;
+    let a: int? = nil;
+    assert_eq a || 20, 20;
+
+    let a: int???? = 10;
+    assert_eq a || 20, 10;
+    let a: int???? = nil;
+    assert_eq a || 20, 20;
+
+    let a: string? = "abc";
+    assert_eq a || "def", "abc";
+    let a: string? = nil;
+    assert_eq a || "def", "def";
+
+    let a: string???? = "abc";
+    assert_eq a || "def", "abc";
+    let a: string???? = nil;
+    assert_eq a || "def", "def";
+}

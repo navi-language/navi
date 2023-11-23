@@ -1,0 +1,28 @@
+// This test only perform on `TEST_STDIN=true`
+// sh tests/test.sh
+
+use std.io;
+use std.env;
+
+test "read_line" {
+    if (env.get("TEST_STDINE_READ_LINE") == nil) {
+        return;
+    }
+
+    let stdin = io.stdin();
+
+    let s = stdin.read_line();
+    assert_eq s, "hello world from test.sh\n";
+}
+
+test "lines" {
+    // sh tests/test.sh
+    if (env.get("TEST_STDINE_LINES") == nil) {
+        return;
+    }
+
+    let lines = io.stdin().lines();
+    assert_eq lines.len(), 2;
+    assert_eq lines[0], "hello world from test.sh";
+    assert_eq lines[1], "This is second line.";
+}
