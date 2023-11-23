@@ -14,8 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Setup Navi
-        run: curl -sSL https://navi-lang.org/install | sh
+      - uses: navi-language/setup-navi@v1
       - name: Test
         run: |
-          navi test
+          navi test tests/language
+          navi test tests/stdlib
