@@ -4,17 +4,11 @@ Navi (/ˈnævi/) is a high-performance programming and stream computing language
 
 In addition to its capabilities as a statically-typed, compiled language, Navi offers the convenience of script-like execution. It can compile source code into Bytecode (without JIT) or Machine Code (with JIT), providing a flexible development workflow. Theoretically, Navi delivering competitive performance on par with Go, Rust, and C.
 
-> The name "Navi" is inspired by the concepts of the **Navy** and **Navigator**, emphasizing its role in guiding users through the vast expanse of financial data analysis and decision-making. It also pays tribute to the [Na'vi](https://learnnavi.org) tribe from the movie "Avatar," whose harmonious coexistence with nature is reflected in Navi's high performance and efficiency in the utilization of computational resources. The [Na'vi](https://learnnavi.org) unique ability to connect with the living world of Pandora through their braids finds a parallel in Navi's cross-platform capabilities and native Cloud support, ensuring seamless operation across various systems and environments. This symbolizes Navi's commitment to supporting a diversity of application environments and adaptability.
-
 ## Language Design Philosophy
 
 - **Simple and Clean Syntax**
 
   Designed with a straightforward and clean syntax.
-
-- **No Implicit Type Conversion**
-
-  The language enforces explicit type conversion to prevent unexpected behavior and errors, ensuring that data types are managed with intention and clarity.
 
 - **Modern Optional Type and Error Handling**
 
@@ -27,30 +21,6 @@ In addition to its capabilities as a statically-typed, compiled language, Navi o
 - **Scripted or Compilied Execution**
 
   Supports script-like execution, but offering same performance comparable to compiled languages like Go.
-
-## Functionalities
-
-- **Dual-Domain Programming**
-
-  Serves as a dual-purpose language, functioning as both a general-purpose programming language and a domain-specific language optimized for incremental computation.
-
-- **High Performance**
-
-  As a statically-typed, compiled language, which is comparable to Go, Rust, and C.
-
-- **Cross-platform**
-
-  Running on Linux, Windows, macOS, and through WebAssembly (WASM), it extends its reach to iOS, Android, and Web Browsers.
-
-- **Native Cloud Support (WIP)**
-
-  With its standard library, Navi enables seamless manipulation of cloud computing resources as if they were local.
-
-- **Native Financial Support (WIP)**
-
-  Navi is equipped with native support for incremental financial data computation, making it ideal for real-time calculation and analysis of stock market data.
-  It boasts a rich set of scientific computing capabilities, includes built-in functions for technical stock market indicators, and standard library support for
-  LongPort OpenAPI, significantly reducing development costs for programmatic trading.
 
 ## Installation
 
@@ -97,7 +67,9 @@ You can create a file named with `.nv` extension, and write some code in it, for
 // main.nv
 use std.io;
 
-io.println("Hello World.");
+fn main() {
+  io.println("Hello World.");
+}
 
 test "Hello World" {
   assert 1 == 1;
@@ -107,10 +79,10 @@ test "Hello World" {
 Then run it by:
 
 ```bash
-$ navi run main.nv
+$ navi run
 Hello world, this is Navi.
 
-$ navi test .
+$ navi test
 ```
 
 ### Examples
@@ -118,7 +90,7 @@ $ navi test .
 In `examples` directory, we provide some examples, you can run it by:
 
 ```bash
-$ navi run examples/macd/main.nv
+$ navi run
 ```
 
 ## Development Tools
