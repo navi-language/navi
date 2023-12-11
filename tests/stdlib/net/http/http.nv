@@ -1,7 +1,15 @@
-use std.net.http;
+use std.net.http.{self, Headers};
 use std.env;
 use test_harness;
 use std.io;
+
+struct ResponseInfo {
+    url: string,
+    method: string,
+    data: string,
+    args: <string, string>,
+    headers: <string, string>
+}
 
 test "request" {
     let server = test_harness.start_http_server();
@@ -10,32 +18,50 @@ test "request" {
     assert_eq server.addr.contains("127.0.0.1"), true, server.addr;
 
     // GET
-    let headers = http.new_headers();
+    let headers = Headers.new();
     let body = "".bytes();
 
     let query = <string, string> { "foo": "1", "bar": "Foo Bar" };
 
-    let res = http.request("GET", server.url("/get"), headers: headers, query: query, body: body);
-    assert_eq res.status, 200, res.text();
+    let res = try! http.request(
+        "GET",
+        server.url("/get"),
+        headers: headers,
+        query: query,
+        body: body
+    );
+    assert_eq res.status, 200, try! res.text();
     assert_eq res.headers.get("Content-Type"), "application/json; charset=utf-8";
     assert_eq res.body.to_string().contains("headers"), true;
 
     // POST
     let body = "Hello, world!".bytes();
-    let res = http.request("POST", server.url("/post"), headers: headers, body: body, query: query);
+    let res = try! http.request(
+        "POST",
+        server.url("/post"),
+        headers: headers,
+        body: body,
+        query: query
+    );
     assert_eq res.status, 200;
-    assert_eq res.text().contains("Hello, world!"), true, res.text();
-    assert_eq res.body.to_string(), res.text();
+    assert_eq try! res.text().contains("Hello, world!"), true, try! res.text();
+    assert_eq res.body.to_string(), try! res.text();
 
     // PUT
     let body = "Hello, world!".bytes();
-    let res = http.request("PUT", server.url("/put"), headers: headers, query: query, body: body);
+    let res = try! http.request(
+        "PUT",
+        server.url("/put"),
+        headers: headers,
+        query: query,
+        body: body
+    );
     assert_eq res.status, 200;
-    assert_eq res.text().contains("Hello, world!"), true;
+    assert_eq try! res.text().contains("Hello, world!"), true;
 
     // DELETE
     let body = "Hello, world!".bytes();
-    let res = http.request(
+    let res = try! http.request(
         "DELETE",
         server.url("/delete"),
         headers: headers,
@@ -43,11 +69,11 @@ test "request" {
         body: body
     );
     assert_eq res.status, 200;
-    assert_eq res.text().contains("Hello, world!"), true;
+    assert_eq try! res.text().contains("Hello, world!"), true;
 
     /// PATCH
     let body = "Hello, world!".bytes();
-    let res = http.request(
+    let res = try! http.request(
         "PATCH",
         server.url("/patch"),
         headers: headers,
@@ -55,105 +81,111 @@ test "request" {
         body: body
     );
     assert_eq res.status, 200;
-    assert_eq res.text().contains("Hello, world!"), true;
+    assert_eq try! res.text().contains("Hello, world!"), true;
 
     /// HEAD
     let body = "".bytes();
-    let res = http.request("HEAD", server.url("/get"), headers: headers, query: query, body: body);
+    let res = try! http.request(
+        "HEAD",
+        server.url("/get"),
+        headers: headers,
+        query: query,
+        body: body
+    );
     assert_eq res.status, 200;
 }
 
 test "request with kw_args" {
     let server = test_harness.start_http_server();
 
-    let res = http.request("GET", server.url("/get"));
+    let res = try! http.request("GET", server.url("/get"));
     assert_eq res.status, 200;
 
-    let headers = http.new_headers();
+    let headers = Headers.new();
     headers.set("FOO", "test-header");
-    let res = http.request("GET", server.url("/get"), headers: headers);
+    let res = try! http.request("GET", server.url("/get"), headers: headers);
     assert_eq res.status, 200;
-    assert_eq res.text().contains("test-header"), true;
+    assert_eq try! res.text().contains("test-header"), true;
 
     let query = <string, string> { "bar": "1", "foo": "FOO_BAR" };
-    let res = http.request("GET", server.url("/get"), headers: headers, query: query);
+    let res = try! http.request("GET", server.url("/get"), headers: headers, query: query);
     assert_eq res.status, 200;
-    assert_eq res.text().contains(server.url("/get?bar=1&foo=FOO_BAR")), true, res.text();
+    assert_eq try! res.text().contains(server.url("/get?bar=1&foo=FOO_BAR")), true, try! res.text();
 }
 
 test "head" {
     let server = test_harness.start_http_server();
 
-    let headers = http.new_headers();
+    let headers = Headers.new();
     let query = <string, string> { "foo": "1", "bar": "Foo Bar" };
-    let res = http.head(server.url("/get"), headers: headers, query: query);
+    let res = try! http.head(server.url("/get"), headers: headers, query: query);
     assert_eq res.status, 200;
 }
 
 test "get" {
     let server = test_harness.start_http_server();
 
-    let headers = http.new_headers();
+    let headers = Headers.new();
     let query = <string, string> {
         "foo": "1",
         "bar": "Foo Bar",
         // same key twice
         "foo": "a"
     };
-    let res = http.get(server.url("/get"), headers: headers, query: query);
+    let res = try! http.get(server.url("/get"), headers: headers, query: query);
     assert_eq res.status, 200;
     assert_eq res.headers.get("Content-Type"), "application/json; charset=utf-8";
     // Test query key order
-    assert_eq res.text().contains(server.url("/get?bar=Foo+Bar&foo=a")), true, res.text();
-    assert_eq res.json().get("url")?.string(), server.url("/get?bar=Foo+Bar&foo=a"), res.text();
+    assert_eq try! res.text().contains(server.url("/get?bar=Foo+Bar&foo=a")), true, try! res.text();
+    assert_eq try! res.json::<ResponseInfo>().url, server.url("/get?bar=Foo+Bar&foo=a"), try! res.text();
 }
 
 test "post" {
     let server = test_harness.start_http_server();
 
-    let headers = http.new_headers();
+    let headers = Headers.new();
     let body = "Hello, world!".bytes();
-    let res = http.post(server.url("/post"), headers: headers, body: body);
+    let res = try! http.post(server.url("/post"), headers: headers, body: body);
     assert_eq res.status, 200;
-    assert_eq res.text().contains("Hello, world!"), true;
+    assert_eq try! res.text().contains("Hello, world!"), true;
 
-    let res = http.post(
+    let res = try! http.post(
         server.url("/post"),
         headers: headers,
         query: <string, string> { "foo": "1", "bar": "Foo Bar" },
         body: body
     );
     assert_eq res.status, 200;
-    assert_eq res.json().get("data")?.string(), `Hello, world!`, res.text();
-    assert_eq res.json().get("url")?.string(), server.url("/post?bar=Foo+Bar&foo=1"), res.text();
+    assert_eq try! res.json::<ResponseInfo>().data, `Hello, world!`, try! res.text();
+    assert_eq try! res.json::<ResponseInfo>().url, server.url("/post?bar=Foo+Bar&foo=1"), try! res.text();
 }
 
 test "delete" {
     let server = test_harness.start_http_server();
 
-    let headers = http.new_headers();
+    let headers = Headers.new();
     let body = "Hello, world!".bytes();
-    let res = http.delete(server.url("/delete"), headers: headers, body: body);
+    let res = try! http.delete(server.url("/delete"), headers: headers, body: body);
     assert_eq res.status, 200;
-    assert_eq res.text().contains("Hello, world!"), true;
+    assert_eq try! res.text().contains("Hello, world!"), true;
 }
 
 test "put" {
     let server = test_harness.start_http_server();
 
-    let headers = http.new_headers();
+    let headers = Headers.new();
     let body = "Hello, world!".bytes();
-    let res = http.put(server.url("/put"), headers: headers, body: body);
+    let res = try! http.put(server.url("/put"), headers: headers, body: body);
     assert_eq res.status, 200;
-    assert_eq res.text().contains("Hello, world!"), true;
+    assert_eq try! res.text().contains("Hello, world!"), true;
 }
 
 test "patch" {
     let server = test_harness.start_http_server();
 
-    let headers = http.new_headers();
+    let headers = Headers.new();
     let body = "Hello, world!".bytes();
-    let res = http.patch(server.url("/patch"), headers: headers, body: body);
+    let res = try! http.patch(server.url("/patch"), headers: headers, body: body);
     assert_eq res.status, 200;
-    assert_eq res.text().contains("Hello, world!"), true;
+    assert_eq try! res.text().contains("Hello, world!"), true;
 }

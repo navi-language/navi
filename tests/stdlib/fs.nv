@@ -1,156 +1,191 @@
-use std.fs;
-use std.path;
-use std.env;
-use std.io;
-use std.time;
+use std.{path, env};
+use std.io.{Bytes, Buffer};
+use std.fs.{self, File};
+use std.time.DateTime;
 
-tests {
-    fn fixture(name: string): fs.File {
-        let filename = path.join("tests/fixtures", name);
-        return fs.open(filename);
-    }
+fn fixture(name: string): File {
+    let filename = path.join("tests/fixtures", name);
+    return try! File.open(filename);
+}
 
-    fn tmp_filepath(path: string): string {
-        let p = path.join(env.tmpdir(), path.join("navi-tests", path));
-        let dir = path.dir(p);
-        fs.create_dir_all(dir);
-        return p;
-    }
+fn tmp_filepath(path: string): string {
+    let p = path.join(env.tmpdir(), path.join("navi-tests", path));
+    let dir = path.dir(p);
+    try! fs.create_dir_all(dir);
+    return p;
+}
 
-    fn cleanup_tmpdir() {
-        let p = path.join(env.tmpdir(), "navi-tests");
-        fs.remove_dir_all(p);
-    }
+fn cleanup_tmpdir() {
+    let p = path.join(env.tmpdir(), "navi-tests");
+    try! fs.remove_dir_all(p);
+}
 
-    test "fs.read" {
-        let buf = fs.read(path.join("tests/fixtures", "hello.txt"));
-        assert_eq buf.to_string(), "Hello, world!\n";
-    }
+test "fs.read" {
+    let buf = try! fs.read(path.join("tests/fixtures", "hello.txt"));
+    assert_eq buf.to_string(), "Hello, world!\n";
+}
 
-    test "fs.read_to_string" {
-        let s = fs.read_to_string(path.join("tests/fixtures", "hello.txt"));
-        assert_eq s, "Hello, world!\n";
-    }
+test "fs.read_to_string" {
+    let s = try! fs.read_to_string(path.join("tests/fixtures", "hello.txt"));
+    assert_eq s, "Hello, world!\n";
+}
 
-    test "open" {
-        let f = fs.open(path.join("tests/fixtures", "hello.txt"));
-        assert_eq f.read_to_string(), "Hello, world!\n";
-    }
+test "fs.open" {
+    let f = try! fs.open(path.join("tests/fixtures", "hello.txt"));
+    assert_eq try! f.read_to_string(), "Hello, world!\n";
+}
 
-    test "read_to_end" {
-        let f = fixture("hello.txt");
-        let buf = io.new_buffer();
-        let n = f.read_to_end(buf);
-        assert_eq n, 14;
-        assert_eq buf.to_string(), "Hello, world!\n";
-    }
+test "fs.write" {
+    let f = tmp_filepath("test-std-file-write.txt");
+    try! fs.write(f, "Hello, world!\n".bytes());
+    assert_eq try! fs.read_to_string(f), "Hello, world!\n";
+    cleanup_tmpdir();
+}
 
-    test "read" {
-        let f = fixture("hello.txt");
-        let buf = io.new_bytes(5);
-        let n = f.read(buf);
-        assert_eq n, 5;
-        assert_eq buf.to_string(), "Hello";
-    }
+test "fs.write_string" {
+    let f = tmp_filepath("test-std-file-write.txt");
+    try! fs.write_string(f, "Hello, world!\n");
+    assert_eq try! fs.read_to_string(f), "Hello, world!\n";
+    cleanup_tmpdir();
+}
 
-    test "read_to_string" {
-        let f = fixture("hello.txt");
-        let s = f.read_to_string();
-        assert_eq s, "Hello, world!\n";
-    }
+test "File.open" {
+    let f = try! File.open(path.join("tests/fixtures", "hello.txt"));
+    assert_eq try! f.read_to_string(), "Hello, world!\n";
+}
 
-    test "File -> string_interpolation" {
-        let f = fixture("hello.txt");
-        assert_eq `file: ${f}`, "file: <std.fs.File>";
-    }
+test "read_to_end" {
+    let f = fixture("hello.txt");
+    let buf = Buffer.new();
+    let n = try! f.read_to_end(buf);
+    assert_eq n, 14;
+    assert_eq buf.to_string(), "Hello, world!\n";
+}
 
-    test "create & write_string & write & remove_file & flush" {
-        let p = tmp_filepath("test-std-file-write.txt");
-        let f = fs.create(p);
+test "read" {
+    let f = fixture("hello.txt");
+    let buf = Bytes.new(5);
+    let n = try! f.read(buf);
+    assert_eq n, 5;
+    assert_eq buf.to_string(), "Hello";
+}
 
-        // Write a string
-        f.write_string("Hello");
-        // Write a bytes
-        let n = f.write(", world!".bytes());
-        assert_eq n, 8;
-        // Write a byte \n
-        f.write_byte(10);
-        // Build a buf
-        let buf = io.new_buffer();
-        buf.write_string("This is Navi.");
-        f.write_buffer(buf);
+test "read_to_string" {
+    let f = fixture("hello.txt");
+    let s = try! f.read_to_string();
+    assert_eq s, "Hello, world!\n";
+}
 
-        // Flush
-        f.flush();
+test "File -> string_interpolation" {
+    let f = fixture("hello.txt");
+    assert_eq `file: ${f}`, "file: <std.fs.File>";
+}
 
-        let f = fs.open(p);
-        let buf = io.new_buffer();
-        f.read_to_end(buf);
-        assert_eq buf.to_string(), "Hello, world!\nThis is Navi.";
+test "fs.create & write_string & write & remove_file & flush" {
+    let p = tmp_filepath("test-std-file-write.txt");
+    let f = try! fs.create(p);
 
-        fs.remove_file(p);
-        assert !path.exists(p);
+    // Write a string
+    try! f.write_string("Hello");
+    // Write a bytes
+    let n = try! f.write(", world!".bytes());
+    assert_eq n, 8;
+    // Write a byte \n
+    try! f.write_byte(10);
+    // Build a buf
+    let buf = Buffer.new();
+    buf.write_string("This is Navi.");
+    try! f.write_buffer(buf);
 
-        cleanup_tmpdir();
-    }
+    // Flush
+    try! f.flush();
 
-    test "create_dir & create_dir_all" {
-        let p = tmp_filepath("fs/test-std-file-create_dir");
-        fs.create_dir(p);
-        assert path.exists(p);
+    let f = try! File.open(p);
+    let buf = Buffer.new();
+    try! f.read_to_end(buf);
+    assert_eq buf.to_string(), "Hello, world!\nThis is Navi.";
 
-        let p = path.join(tmp_filepath("fs"), "foo/bar/dar");
-        fs.create_dir_all(p);
-        assert path.exists(tmp_filepath("fs/foo"));
-        assert path.exists(tmp_filepath("fs/foo/bar"));
-        assert path.exists(tmp_filepath("fs/foo/bar/dar"));
+    try! fs.remove_file(p);
+    assert !path.exists(p);
 
-        cleanup_tmpdir();
-    }
+    cleanup_tmpdir();
+}
 
-    test "remove_dir & remove_dir_all" {
-        let p = tmp_filepath("fs/test-std-file-remove_dir");
-        fs.create_dir(p);
-        assert path.exists(p);
-        fs.remove_dir(p);
-        assert !path.exists(p);
+test "File.create" {
+    let p = tmp_filepath("test-std-file-create.txt");
+    let f = try! File.create(p);
+    assert path.exists(p);
+    cleanup_tmpdir();
+}
 
-        let p = path.join(tmp_filepath("fs"), "foo/bar/dar");
-        fs.create_dir_all(p);
-        assert path.exists(p);
+test "create_dir & create_dir_all" {
+    let p = tmp_filepath("fs/test-std-file-create_dir");
+    try! fs.create_dir(p);
+    assert path.exists(p);
 
-        fs.remove_dir_all(tmp_filepath("fs/foo"));
-        assert !path.exists(tmp_filepath("fs/foo"));
-    }
+    let p = path.join(tmp_filepath("fs"), "foo/bar/dar");
+    try! fs.create_dir_all(p);
+    assert path.exists(tmp_filepath("fs/foo"));
+    assert path.exists(tmp_filepath("fs/foo/bar"));
+    assert path.exists(tmp_filepath("fs/foo/bar/dar"));
 
-    test "metadata" {
-        let t = time.now();
+    cleanup_tmpdir();
+}
 
-        let p = tmp_filepath("fs/test-std-file-metadata");
-        let f = fs.create(p);
-        f.write_string("hello world!");
+test "remove_dir & remove_dir_all" {
+    let p = tmp_filepath("fs/test-std-file-remove_dir");
+    try! fs.create_dir(p);
+    assert path.exists(p);
+    try! fs.remove_dir(p);
+    assert !path.exists(p);
 
-        let meta = fs.metadata(p);
-        assert meta.created() >= t;
-        assert meta.modified() >= t;
-        assert meta.accessed() >= t;
-        assert_eq meta.len(), 12;
-        assert_eq meta.is_file(), true;
-        assert_eq meta.is_dir(), false;
-        assert_eq meta.is_symlink(), false;
-    }
+    let p = path.join(tmp_filepath("fs"), "foo/bar/dar");
+    try! fs.create_dir_all(p);
+    assert path.exists(p);
 
-    test "glob" {
-        let paths = [string] {};
-        let exts = [string] {};
-        fs.glob("tests/**/*.nv", fn(p: string) {paths.push(p);exts.push(path.extension(p));});
+    try! fs.remove_dir_all(tmp_filepath("fs/foo"));
+    assert !path.exists(tmp_filepath("fs/foo"));
+}
 
-        assert paths.len() > 0;
+test "metadata" {
+    let t = DateTime.now() - 1.seconds();
+
+    let p = tmp_filepath("fs/test-std-file-metadata");
+    let f = try! File.create(p);
+    try f.write_string("hello world!");
+    try f.flush();
+
+    let meta = try! fs.metadata(p);
+    assert meta.created()! >= t;
+    assert meta.modified()! >= t;
+    assert meta.accessed()! >= t;
+    assert_eq meta.len(), 12;
+    assert_eq meta.is_file(), true;
+    assert_eq meta.is_dir(), false;
+    assert_eq meta.is_symlink(), false;
+
+    cleanup_tmpdir();
+}
+
+test "glob" {
+    let paths = [string] {};
+    let exts = [string] {};
+    try! fs.glob("tests/**/*.nv", fn(p: string) {
+        paths.push(p);
+        exts.push(path.extension(p));
+    });
+
+    assert paths.len() > 0;
+
+    if (env.platform() == "windows") {
+        assert paths.contains("tests\\stdlib\\path.nv");
+        assert paths.contains("tests\\stdlib\\fs.nv");
+    } else {
         assert paths.contains("tests/stdlib/path.nv");
         assert paths.contains("tests/stdlib/fs.nv");
-
-        exts.unique();
-        assert exts.len() == 1;
-        assert exts.contains("nv");
     }
+
+    exts.unique();
+    assert exts.len() == 1;
+    assert exts.contains("nv");
 }

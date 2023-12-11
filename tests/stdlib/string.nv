@@ -159,48 +159,47 @@ test "repeat" {
     assert_eq s.repeat(-1), "";
 }
 
-fn assert_parse_int(s: string, expected_val: int, expected_ok: bool) {
-    let n, ok = s.to_int();
-    assert_eq ok, expected_ok;
+fn assert_parse_int(s: string, expected_val: int?) {
+    let n = s.parse_int();
     assert_eq n, expected_val;
 }
 
-test "to_int" {
-    assert_parse_int("123", 123, true);
-    assert_parse_int("-123", -123, true);
-    assert_parse_int("0", 0, true);
-    assert_parse_int("1", 1, true);
-    assert_parse_int("-1", -1, true);
-    assert_parse_int("123456789", 123456789, true);
-    assert_parse_int("-123456789", -123456789, true);
-    assert_parse_int("123456789123456789", 123456789123456789, true);
-    assert_parse_int("-123456789123456789", -123456789123456789, true);
+test "parse_int" {
+    assert_parse_int("123", 123);
+    assert_parse_int("-123", -123);
+    assert_parse_int("0", 0);
+    assert_parse_int("1", 1);
+    assert_parse_int("-1", -1);
+    assert_parse_int("123456789", 123456789);
+    assert_parse_int("-123456789", -123456789);
+    assert_parse_int("123456789123456789", 123456789123456789);
+    assert_parse_int("-123456789123456789", -123456789123456789);
 
-    assert_parse_int("123a", 0, false);
-    assert_parse_int("a123", 0, false);
-    assert_parse_int("123 456", 0, false);
-    assert_parse_int("abc", 0, false);
-    assert_parse_int("3.14", 0, false);
+    assert_parse_int("123a", nil);
+    assert_parse_int("a123", nil);
+    assert_parse_int("123 456", nil);
+    assert_parse_int("abc", nil);
+    assert_parse_int("3.14", nil);
 }
 
-fn assert_parse_float(s: string, expected_val: float, expected_ok: bool) {
-    let n, ok = s.to_float();
-    assert_eq ok, expected_ok;
+fn assert_parse_float(s: string, expected_val: float?) {
+    let n = s.parse_float();
     assert_eq n, expected_val;
 }
 
-test "to_float" {
-    assert_parse_float("123", 123.0, true);
-    assert_parse_float("-123", -123.0, true);
-    assert_parse_float("0", 0.0, true);
-    assert_parse_float("123.456", 123.456, true);
-    assert_parse_float("-123.456", -123.456, true);
-    assert_parse_float("123.01234567890123", 123.01234567890123, true);
-    assert_parse_float("-123.01234567890123", -123.01234567890123, true);
+test "parse_float" {
+    assert_parse_float("123", 123.0);
+    assert_parse_float("-123", -123.0);
+    assert_parse_float("0", 0.0);
+    assert_parse_float("123.456", 123.456);
+    assert_parse_float("-123.456", -123.456);
+    assert_parse_float("123.01234567890123", 123.01234567890123);
+    assert_parse_float("-123.01234567890123", -123.01234567890123);
 
-    assert_parse_float("123abc", 0.0, false);
-    assert_parse_float("123.456.789", 0.0, false);
-    assert_parse_float("abc", 0.0, false);
+    assert_parse_float("123abc", nil);
+    assert_parse_float("123.456.789", nil);
+    assert_parse_float("123abc", nil);
+    assert_parse_float("abc", nil);
 }
 
 test "is_empty" {

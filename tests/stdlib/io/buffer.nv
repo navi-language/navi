@@ -1,13 +1,13 @@
-use std.io;
+use std.io.{Bytes, Buffer};
 
 test "new_buffer" {
-    let buf = io.new_buffer();
+    let buf = Buffer.new();
     buf.write_string("hello world");
     assert_eq buf.to_string(), "hello world";
 }
 
 test "write_string" {
-    let buf = io.new_buffer();
+    let buf = Buffer.new();
     buf.write_string("hello");
     buf.write_string(" ");
     buf.write_string("world");
@@ -15,19 +15,19 @@ test "write_string" {
 }
 
 test "write" {
-    let buf = io.new_buffer();
-    buf.write(io.new_bytes_from_array([int] { 104, 101, 108, 108, 111 }));
-    buf.write(io.new_bytes_from_array([int] { 32 }));
-    buf.write(io.new_bytes_from_array([int] { 119, 111, 114, 108, 100 }));
+    let buf = Buffer.new();
+    buf.write(Bytes.from_array({ 104, 101, 108, 108, 111 }));
+    buf.write(Bytes.from_array({ 32 }));
+    buf.write(Bytes.from_array({ 119, 111, 114, 108, 100 }));
     assert_eq buf.to_string(), "hello world";
 
-    let buf = io.new_buffer();
+    let buf = Buffer.new();
     buf.write("Hello 你好".bytes());
     assert_eq buf.to_string(), "Hello 你好";
 }
 
 test "reset" {
-    let buf = io.new_buffer();
+    let buf = Buffer.new();
     buf.write_string("hello");
     assert_eq buf.len(), 5;
     buf.reset();
@@ -35,17 +35,17 @@ test "reset" {
 }
 
 test "len" {
-    let buf = io.new_buffer();
+    let buf = Buffer.new();
     buf.write_string("hello world");
     assert_eq buf.len(), 11;
 
-    let buf = io.new_buffer();
+    let buf = Buffer.new();
     buf.write_string("hello 你好");
     assert_eq buf.len(), 12;
 }
 
 test "get" {
-    let buf = io.new_buffer();
+    let buf = Buffer.new();
     buf.write_string("hello");
     let b, ok = buf.get(0);
     assert ok;
@@ -61,7 +61,7 @@ test "get" {
 }
 
 test "to_string" {
-    let buf = io.new_buffer();
+    let buf = Buffer.new();
     buf.write_string("hello");
     buf.write_string(" ");
     buf.write_string("world");
@@ -69,9 +69,16 @@ test "to_string" {
 }
 
 test "truncate" {
-    let buf = io.new_buffer();
+    let buf = Buffer.new();
     buf.write_string("hello world");
     buf.truncate(5);
     assert_eq buf.len(), 5;
     assert_eq buf.to_string(), "hello";
+}
+
+test "bytes" {
+    let buf = Buffer.new();
+    buf.write_string("hello world");
+    let bytes = buf.bytes();
+    assert_eq bytes.to_string(), "hello world";
 }

@@ -1,15 +1,27 @@
-use std.net.http;
+use std.net.http.{self, Headers, Request};
 use std.env;
 use test_harness;
 use std.io;
 
+struct ResponseInfo {
+    url: string?,
+    method: string,
+    data: string,
+    args: <string, string>,
+    headers: <string, string>,
+}
+
+struct ResponseAuth {
+    authenticated: bool,
+}
+
 test "new_request" {
     let server = test_harness.start_http_server();
-    let req = http.new_request();
+    let req = Request.new();
     assert_eq req.method, "GET";
     assert_eq req.url, "";
 
-    let headers = http.new_headers();
+    let headers = Headers.new();
     headers.set("Content-Type", "application/json");
     headers.set("Accept-Encoding", "gzip, deflate");
 
@@ -17,7 +29,7 @@ test "new_request" {
 
     let body = "Hello World!".bytes();
 
-    let req = http.new_request(
+    let req = Request.new(
         method: "GET",
         url: server.url("/get"),
         headers: headers,
@@ -32,7 +44,7 @@ test "new_request" {
     assert_eq req.query.get("baz"), "1";
     assert_eq req.body?.to_string(), "Hello World!";
 
-    let req = http.new_request(
+    let req = Request.new(
         method: "GET",
         url: server.url("/get"),
         headers: headers,
@@ -51,34 +63,34 @@ test "new_request" {
 test "send" {
     let server = test_harness.start_http_server();
 
-    let req = http.new_request(method: "GET", url: server.url("/get"));
-    let res = req.send();
+    let req = Request.new(method: "GET", url: server.url("/get"));
+    let res = try! req.send();
     assert_eq res.status, 200;
 
-    let headers = http.new_headers();
+    let headers = Headers.new();
     headers.set("Content-Type", "application/json");
 
-    let req = http.new_request(
+    let req = Request.new(
         method: "POST",
         url: server.url("/post"),
         query: <string, string> { "foo": "1", "bar": "Foo Bar", "foo": "a" },
         headers: headers,
         body: "Hello World!".bytes()
     );
-    let res = req.send();
+    let res = try! req.send();
     assert_eq res.status, 200;
     assert_eq res.headers.get("Content-Type"), "application/json; charset=utf-8";
-    assert_eq res.text().contains("Hello World!"), true;
-    assert_eq res.text().contains(server.url("/post?bar=Foo+Bar&foo=a")), true, res.text();
+    assert_eq try! res.text().contains("Hello World!"), true;
+    assert_eq try! res.text().contains(server.url("/post?bar=Foo+Bar&foo=a")), true, try! res.text();
 
-    let data = res.json();
-    assert_eq data.pointer("/args/bar")?.string(), "Foo Bar";
-    assert_eq data.get("url")?.string(), server.url("/post?bar=Foo+Bar&foo=a");
-    assert_eq data.get("headers")?.get("content-type")?.string(), "application/json";
+    let data = try! res.json::<ResponseInfo>();
+    assert_eq data.args["bar"], "Foo Bar";
+    assert_eq data.url, server.url("/post?bar=Foo+Bar&foo=a");
+    assert_eq data.headers["content-type"], "application/json";
 }
 
 test "method" {
-    let req = http.new_request();
+    let req = Request.new();
     assert_eq req.method, "GET";
 
     req.method = "POST";
@@ -86,7 +98,7 @@ test "method" {
 }
 
 test "url" {
-    let req = http.new_request();
+    let req = Request.new();
     assert_eq req.url, "";
 
     req.url = "http://example.com";
@@ -94,10 +106,10 @@ test "url" {
 }
 
 test "headers" {
-    let req = http.new_request();
+    let req = Request.new();
     assert_eq req.headers.len(), 0;
 
-    let headers = http.new_headers();
+    let headers = Headers.new();
     headers.set("Content-Type", "application/json");
     headers.set("Accept-Encoding", "gzip, deflate");
 
@@ -108,7 +120,7 @@ test "headers" {
 }
 
 test "query" {
-    let req = http.new_request();
+    let req = Request.new();
     assert_eq req.query.len(), 0;
 
     let query = <string, string> { "foo": "bar", "baz": "1" };
@@ -121,27 +133,27 @@ test "query" {
 
 test "basic_auth" {
     let server = test_harness.start_http_server();
-    let req = http.new_request(method: "GET", url: server.url("/basic-auth/test-user/test-passwd")).set_basic_auth(
+    let req = Request.new(method: "GET", url: server.url("/basic-auth/test-user/test-passwd")).set_basic_auth(
         "test-user",
         "test-passwd"
     );
-    let res = req.send();
-    assert_eq res.status, 200, res.text();
+    let res = try! req.send();
+    assert_eq res.status, 200, try! res.text();
 
-    let data = res.json();
-    assert_eq data.get("authenticated")?.bool(), true;
+    let data = try! res.json::<ResponseAuth>();
+    assert_eq data.authenticated, true;
 }
 
 test "timeout" {
     let server = test_harness.start_http_server();
 
-    let req = http.new_request(method: "GET", url: server.url("/get"), timeout: 5.2.seconds());
+    let req = Request.new(method: "GET", url: server.url("/get"), timeout: 5.2.seconds());
     assert_eq req.timeout, 5.2.seconds();
     req.timeout = 3.2.seconds();
     assert_eq req.timeout, 3.2.seconds();
 
-    let res = req.send();
-    assert_eq res.status, 200, res.text();
+    let res = try! req.send();
+    assert_eq res.status, 200, try! res.text();
 }
 
 struct MyRequest {
@@ -149,7 +161,7 @@ struct MyRequest {
 }
 
 test "http.Request" {
-    let req: http.Request = http.new_request();
+    let req: http.Request = Request.new();
     assert_eq req.method, "GET";
 
     let my_req = MyRequest { req: req };
@@ -159,13 +171,13 @@ test "http.Request" {
 test "chunk" {
     let server = test_harness.start_http_server();
 
-    let req = http.new_request(method: "GET", url: server.url("/stream/3"));
-    let res = req.send();
+    let req = Request.new(method: "GET", url: server.url("/stream/3"));
+    let res = try! req.send();
     assert_eq res.status, 200;
 
     let bodies = [string] {};
     while (true) {
-        let chunk = res.chunk();
+        let chunk = try! res.chunk();
         if (chunk == nil) {
             break;
         }

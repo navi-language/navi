@@ -67,7 +67,7 @@ You can create a file named with `.nv` extension, and write some code in it, for
 // main.nv
 use std.io;
 
-fn main() {
+fn main() throws {
   io.println("Hello World.");
 }
 

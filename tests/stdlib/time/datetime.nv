@@ -1,34 +1,39 @@
-use std.time;
+use std.time.{self, DateTime};
 use std.io;
 use std.env;
 
 test "timestramp" {
-    let t = time.now();
+    let t = DateTime.now();
     assert t.timestamp() > 1695296020, "timestamp should be greater than 1695296020";
 }
 
 test "DateTime - string_interpolation" {
-    let t = time.parse("2023-04-13 09:45:26 +08:00");
+    let t = try! DateTime.parse("2023-04-13 09:45:26 +08:00");
     assert_eq t.to_string(), "2023-04-13T09:45:26+08:00";
     assert_eq `${t}`, "2023-04-13T09:45:26+08:00";
 }
 
+test "DateTime.parse" {
+    let t = try! DateTime.parse("2023-04-13 09:45:26 +08:00");
+    assert_eq t.timestamp(), 1681350326;
+}
+
 test "parse" {
-    let t = time.parse("2023-04-13 09:45:26");
+    let t = try! DateTime.parse("2023-04-13 09:45:26");
     assert_eq t.timestamp(), 1681379126;
     assert_eq t.format("%Y-%m-%d"), "2023-04-13";
     assert_eq t.format("%Y/%m/%d %H:%M"), "2023/04/13 09:45";
 
-    let t = time.parse("2023-04-13 09:45:26 +08:00");
+    let t = try! DateTime.parse("2023-04-13 09:45:26 +08:00");
     assert_eq t.timestamp(), 1681350326;
     assert_eq t.timezone(), "+08:00";
 
-    let t = time.parse("2023-04-13 09:45:26.123456789 -02:00");
+    let t = try! DateTime.parse("2023-04-13 09:45:26.123456789 -02:00");
     assert_eq t.timestamp(), 1681386326;
     assert_eq t.nanosecond(), 123456789;
     assert_eq t.timezone(), "-02:00";
 
-    let t = time.parse("2023-04-13 09:45:59.231 +08:00");
+    let t = try! DateTime.parse("2023-04-13 09:45:59.231 +08:00");
     assert_eq t.timestamp(), 1681350359;
     assert_eq t.millisecond(), 231;
     assert_eq t.microsecond(), 231000;
@@ -36,14 +41,14 @@ test "parse" {
 }
 
 test "parse with RFC3339" {
-    let t = time.parse("2023-04-13T14:08:33-11:00");
+    let t = try! DateTime.parse("2023-04-13T14:08:33-11:00");
     assert_eq t.timestamp(), 1681434513;
-    let t = time.parse("2023-04-13T14:08:33+11:00");
+    let t = try! DateTime.parse("2023-04-13T14:08:33+11:00");
     assert_eq t.timestamp(), 1681355313;
 }
 
 test "iso8601 / to_string" {
-    let t = time.parse("2023-04-13 09:45:26 +07:00");
+    let t = try! DateTime.parse("2023-04-13 09:45:26 +07:00");
     // to_string is original timezone
     assert_eq t.to_string(), "2023-04-13T09:45:26+07:00";
     // iso8601 is local timezone
@@ -53,17 +58,17 @@ test "iso8601 / to_string" {
 }
 
 test "from_timestamp" {
-    let t = time.from_timestamp(1681355313);
+    let t = DateTime.from_timestamp(1681355313);
     assert_eq t.to_string(), "2023-04-13T03:08:33Z";
 }
 
 test "inspect" {
-    let t = time.parse("2023-04-13 09:45:26 +07:00");
+    let t = try! DateTime.parse("2023-04-13 09:45:26 +07:00");
     assert_eq `time: ${t}`, "time: 2023-04-13T09:45:26+07:00";
 }
 
 test "year / month / day / hour / minute / second / millisecond / microsecond / nanosecond" {
-    let t = time.parse("2023-04-13 09:45:26.123456789 +08:00");
+    let t = try! DateTime.parse("2023-04-13 09:45:26.123456789 +08:00");
     assert_eq t.year(), 2023;
     assert_eq t.month(), 4;
     assert_eq t.day(), 13;
@@ -76,41 +81,41 @@ test "year / month / day / hour / minute / second / millisecond / microsecond / 
 }
 
 test "weekday" {
-    let t = time.parse("2023-10-29 09:45:26 +08:00");
+    let t = try! DateTime.parse("2023-10-29 09:45:26 +08:00");
     assert_eq t.weekday(), 7;
-    let t = time.parse("2023-10-30 09:45:26 +08:00");
+    let t = try! DateTime.parse("2023-10-30 09:45:26 +08:00");
     assert_eq t.weekday(), 1;
-    let t = time.parse("2023-10-31 09:45:26 +08:00");
+    let t = try! DateTime.parse("2023-10-31 09:45:26 +08:00");
     assert_eq t.weekday(), 2;
-    let t = time.parse("2023-11-04 09:45:26 +08:00");
+    let t = try! DateTime.parse("2023-11-04 09:45:26 +08:00");
     assert_eq t.weekday(), 6;
 }
 
 test "timezone" {
-    let t = time.parse("2023-04-13 09:45:26 +08:00");
+    let t = try! DateTime.parse("2023-04-13 09:45:26 +08:00");
     assert_eq t.timezone(), "+08:00";
 
-    let t = time.parse("2023-04-13 09:45:26 -12:30");
+    let t = try! DateTime.parse("2023-04-13 09:45:26 -12:30");
     assert_eq t.timezone(), "-12:30";
 }
 
 test "sub" {
-    let t1 = time.parse("2023-04-13 09:45:26.129 +08:00");
-    let t2 = time.parse("2023-04-13 09:45:59.231 +08:00");
+    let t1 = try! DateTime.parse("2023-04-13 09:45:26.129 +08:00");
+    let t2 = try! DateTime.parse("2023-04-13 09:45:59.231 +08:00");
 
     assert_eq t2.sub(t1), 33102.milliseconds();
     assert_eq t1.sub(t2), (-33102).milliseconds();
 
-    let t1 = time.parse("2023-04-13 09:45:26 +08:00");
-    let t2 = time.parse("2023-04-13 09:45:59 +08:00");
+    let t1 = try! DateTime.parse("2023-04-13 09:45:26 +08:00");
+    let t2 = try! DateTime.parse("2023-04-13 09:45:59 +08:00");
     assert_eq t2.sub(t1), 33.seconds();
     assert_eq t1.sub(t2), (-33).seconds();
 }
 
 test "calculation" {
-    let t1 = time.parse("2023-04-13 09:45:26.129 +08:00");
-    let t2 = time.parse("2023-04-13 09:45:59.231 +08:00");
-    let t3 = time.parse("2023-04-13 09:45:26.129 +08:00");
+    let t1 = try! DateTime.parse("2023-04-13 09:45:26.129 +08:00");
+    let t2 = try! DateTime.parse("2023-04-13 09:45:59.231 +08:00");
+    let t3 = try! DateTime.parse("2023-04-13 09:45:26.129 +08:00");
 
     // ==
     assert_eq t1 == t2, false;
@@ -141,21 +146,21 @@ test "calculation" {
     assert_eq t3 <= t1, true;
 
     // + i64 seconds
-    assert_eq t1 + 33.seconds(), time.parse("2023-04-13 09:45:59.129 +08:00");
+    assert_eq t1 + 33.seconds(), try! DateTime.parse("2023-04-13 09:45:59.129 +08:00");
 
     // - i64 seconds
-    assert_eq t2 - 35.seconds(), time.parse("2023-04-13 09:45:24.231 +08:00");
+    assert_eq t2 - 35.seconds(), try! DateTime.parse("2023-04-13 09:45:24.231 +08:00");
 }
 
 test "utc" {
-    let t = time.parse("2023-04-13 09:45:26.123456789 +08:00");
+    let t = try! DateTime.parse("2023-04-13 09:45:26.123456789 +08:00");
     let utc_t = t.utc();
     assert_eq utc_t.hour(), 1;
     assert_eq utc_t.to_string(), "2023-04-13T01:45:26.123456789Z";
 }
 
 test "to_offset" {
-    let t = time.parse("2023-04-13 09:45:26.123456789 +08:00");
+    let t = try! DateTime.parse("2023-04-13 09:45:26.123456789 +08:00");
     let utc_t = t.to_offset("+00:00");
     assert_eq utc_t.hour(), 1;
     assert_eq utc_t.minute(), 45;
@@ -173,4 +178,3 @@ test "to_offset" {
     assert_eq t2.minute(), 15;
     assert_eq t2.to_string(), "2023-04-13T07:15:26.123456789+05:30";
 }
-

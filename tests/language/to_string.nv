@@ -3,7 +3,7 @@ struct A {
 }
 
 impl A {
-    fn to_string(): string {
+    fn to_string(self): string {
         return `A { value: ${self.value} }`;
     }
 }

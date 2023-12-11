@@ -1,7 +1,8 @@
+use std.env;
 use std.path;
 
 test "absolute" {
-    let full_path = path.absolute("tests/fixtures/hello.txt");
+    let full_path = try! path.absolute("tests/fixtures/hello.txt");
     assert full_path.len() > 0;
 }
 
@@ -50,12 +51,23 @@ test "is_symlink" {
 }
 
 test "is_absolute" {
-    assert path.is_absolute("/foo/bar");
-    assert !path.is_absolute("foo/bar");
+    if (env.platform() == "windows") {
+        assert path.is_absolute("c:\\foo\\bar");
+        assert !path.is_absolute("foo\\bar");
+    } else {
+        assert path.is_absolute("/foo/bar");
+        assert !path.is_absolute("foo/bar");
+    }
 }
 
 test "join" {
-    assert_eq path.join("src", "doesnt_exist.rs"), "src/doesnt_exist.rs";
-    assert_eq path.join("/foo/bar", "dar"), "/foo/bar/dar";
-    assert_eq path.join("/foo/bar/", path.join("dar", "test.zip")), "/foo/bar/dar/test.zip";
+    if (env.platform() == "windows") {
+        assert_eq path.join("src", "doesnt_exist.rs"), "src\\doesnt_exist.rs";
+        assert_eq path.join("c:\\foo\\bar", "dar"), "c:\\foo\\bar\\dar";
+        assert_eq path.join("c:\\foo\\bar\\", path.join("dar", "test.zip")), "c:\\foo\\bar\\dar\\test.zip";
+    } else {
+        assert_eq path.join("src", "doesnt_exist.rs"), "src/doesnt_exist.rs";
+        assert_eq path.join("/foo/bar", "dar"), "/foo/bar/dar";
+        assert_eq path.join("/foo/bar/", path.join("dar", "test.zip")), "/foo/bar/dar/test.zip";
+    }
 }

@@ -1,0 +1,22 @@
+use test_harness;
+
+test "call method" {
+    let a = test_harness.new_testobj(123);
+    assert_eq a.get_value2(), 246;
+}
+
+test "call static method" {
+    let a = test_harness.TestObj.new(123);
+    assert_eq a.value, 123;
+}
+
+test "getter" {
+    let a = test_harness.TestObj.new(123);
+    assert_eq a.value, 123;
+}
+
+test "setter" {
+    let a = test_harness.TestObj.new(123);
+    a.value = 456;
+    assert_eq a.value, 456;
+}

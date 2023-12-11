@@ -1,20 +1,55 @@
 use std.yaml;
+use std.json;
+
+struct FooBar {
+    foo: string,
+    baz: Baz
+}
+
+struct Baz {
+    dar: [string]
+}
+
+struct User {
+    name: string,
+    id: int,
+    profile: Profile
+}
+
+struct Profile {
+    city: string
+}
 
 test "parse" {
-    let obj = yaml.parse(`foo: bar\nbaz:\n  dar:\n    - qux\n    - quux\n`);
+    let val = try! yaml.parse::<FooBar>(`foo: bar\nbaz:\n  dar:\n    - qux\n    - quux\n`);
 
-    assert_eq obj.get("foo")?.string(), "bar";
-    assert_eq obj.to_json(), `{"baz":{"dar":["qux","quux"]},"foo":"bar"}`;
+    assert_eq val.foo, "bar";
+    assert_eq val.baz.dar[0], "qux";
+    assert_eq val.baz.dar[1], "quux";
+    assert_eq try! json.to_string(val), `{"foo":"bar","baz":{"dar":["qux","quux"]}}`;
+
+    do {
+        try yaml.parse::<FooBar>("foo");
+    } catch(e) {
+        assert_eq e.error(), `invalid type: string "foo", expected a struct`;
+    }
+
+    let user = try! yaml.parse::<User>(`
+    name: Sunli
+    id: 123456
+    profile:
+      city: Wuhan
+    `);
+    assert_eq user.name, "Sunli";
+    assert_eq user.id, 123456;
+    assert_eq user.profile.city, "Wuhan";
 }
 
 test "to_string" {
-    let obj = yaml.parse(`foo: bar\nbaz:\n  dar:\n    - qux\n    - quux\n`);
-    assert_eq yaml.to_string(obj), "baz:\n  dar:\n  - qux\n  - quux\nfoo: bar\n";
-}
+    let foo_bar = FooBar {
+        foo: "bar",
+        baz: { dar: { "qux", "quux" } }
+    };
 
-test "to_yaml" {
-    let obj = yaml.parse(`foo: bar\nbaz:\n  dar:\n    - qux\n    - quux\n`);
-    assert_eq obj.to_yaml(), `baz:\n  dar:\n  - qux\n  - quux\nfoo: bar\n`;
-    let value = yaml.parse("foo: bar");
-    assert_eq value.to_yaml(), "foo: bar\n";
+    assert_eq try! yaml.to_string(foo_bar), "foo: bar\nbaz:\n  dar:\n  - qux\n  - quux\n";
 }

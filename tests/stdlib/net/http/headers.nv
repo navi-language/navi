@@ -1,7 +1,7 @@
-use std.net.http;
+use std.net.http.{self, Headers};
 
 test "new_headers" {
-    let headers = http.new_headers();
+    let headers = Headers.new();
     headers.set("User-Agent", "navi-http/0.1.0");
     headers.set("Content-Type", "application/json");
 
@@ -10,7 +10,7 @@ test "new_headers" {
 }
 
 test "to_string" {
-    let headers = http.new_headers();
+    let headers = Headers.new();
     headers.set("Content-Type", "application/json");
     headers.set("User-Agent", "navi-http/0.1.0");
 
@@ -19,19 +19,25 @@ test "to_string" {
 }
 
 test "apppend" {
-    let headers = http.new_headers();
+    let headers = Headers.new();
     headers.append("Accept-Encoding", "gzip");
     headers.append("Accept-Encoding", "deflate");
     headers.append("Accept-Encoding", "br");
+
+    // invalid value, do nothing
+    headers.append("Accept-Encoding", "\n");
 
     assert_eq headers.get("Accept-Encoding"), "gzip";
     assert_eq headers.get_all("Accept-Encoding").join(", "), "gzip, deflate, br";
 }
 
 test "set & set & remove" {
-    let headers = http.new_headers();
+    let headers = Headers.new();
     headers.set("User-Agent", "navi-http/0.1.0");
     headers.set("Content-Type", "application/json");
+
+    // invalid value, do nothing
+    headers.set("Content-Type", "application/json\n");
 
     assert_eq headers.get("User-Agent"), "navi-http/0.1.0";
     assert_eq headers.get("Content-Type"), "application/json";
@@ -57,7 +63,7 @@ test "set & set & remove" {
 }
 
 test "keys" {
-    let headers = http.new_headers();
+    let headers = Headers.new();
     headers.set("User-Agent", "navi-http/0.1.0");
     headers.set("Content-Type", "application/json");
 
@@ -69,7 +75,7 @@ test "keys" {
 }
 
 test "len" {
-    let headers = http.new_headers();
+    let headers = Headers.new();
     assert_eq headers.len(), 0;
 
     headers.set("User-Agent", "navi-http/0.1.0");
@@ -78,7 +84,7 @@ test "len" {
 }
 
 test "is_empty" {
-    let headers = http.new_headers();
+    let headers = Headers.new();
     assert_eq headers.is_empty(), true;
 
     headers.set("User-Agent", "navi-http/0.1.0");
@@ -86,7 +92,7 @@ test "is_empty" {
 }
 
 test "contains_key" {
-    let headers = http.new_headers();
+    let headers = Headers.new();
     assert_eq headers.contains_key("User-Agent"), false;
 
     headers.set("User-Agent", "navi-http/0.1.0");

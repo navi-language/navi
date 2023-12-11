@@ -9,7 +9,7 @@ test "shadow global var" {
     let a = 10;
     assert_eq a, 10;
 
-    {
+    if (true) {
         let a = "abc";
         assert_eq a, "abc";
     }

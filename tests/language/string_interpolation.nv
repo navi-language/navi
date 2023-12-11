@@ -61,12 +61,13 @@ test "bool" {
     assert_eq `a = ${a}`, "a = nil";
 }
 
-struct TestStringInterpolation {}
+struct TestStringInterpolation {
+}
 
 test "struct" {
     let a = TestStringInterpolation {};
-    assert_eq `${a}`, "<string_interpolation.TestStringInterpolation>";
+    assert_eq `${a}`, "string_interpolation.TestStringInterpolation {}";
 
     let a: TestStringInterpolation? = nil;
-    assert_eq `struct = ${a}`, "struct = nil"; 
+    assert_eq `struct = ${a}`, "struct = nil";
 }

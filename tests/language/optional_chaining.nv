@@ -1,79 +1,77 @@
-tests {
-    struct User {
-        email: string,
-        admin: bool,
-        profile: Profile?
-    }
-
-    struct Profile {
-        bio: string
-    }
-
-    test "unwrap" {
-        let user: User? = User {
-            email: "huacnlee@gmail.com",
-            admin: true,
-            profile: nil
-        };
-
-        assert_eq user?.email, "huacnlee@gmail.com";
-        assert_eq user?.admin, true;
-
-        let user1 = user!;
-        assert_eq user1.email, "huacnlee@gmail.com";
-        assert_eq user1.admin, true;
-    }
-
-    test "struct" {
-        let user: User? = nil;
-        assert user?.email == nil;
-        assert_eq user?.email, nil;
-
-        user = User { email: "huacnlee@gmail.com", admin: true, profile: nil };
-        // assert user?.email == "huacnlee@gmail.com";
-        // assert_eq user?.email, "huacnlee@gmail.com";
-        let rr: Profile?? = user?.profile;
-        assert_eq user?.profile?.bio, nil;
-
-        // let user: User? = User {
-        //     email: "huacnlee@gmail.com",
-        //     admin: true,
-        //     profile: Profile {
-        //         bio: "Hello, world!"
-        //     }
-        // };
-        // assert_ne user, nil;
-        // assert_ne user?.profile, nil;
-
-        // assert_eq user?.email, "huacnlee@gmail.com";
-        // assert_eq user?.profile?.bio, "Hello, world!";
-    }
-
-    // test "string" {
-    //     let s: string = "hello";
-    //     assert s == "hello";
-
-    //     let s: string? = "hello";
-    //     assert s! == "hello";
-    //     assert_ne s, nil;
-    //     assert_eq s?.len(), 5;
-
-    //     let s: string? = nil;
-    //     assert s == nil;
-    //     assert_eq s?.len(), nil;
-    // }
-
-    // test "int" {
-    //     let i: int = 1;
-    //     assert i == 1;
-
-    //     let i: int? = 1;
-    //     assert i! == 1;
-    //     assert_ne i, nil;
-    //     assert_eq i?.to_string(), "1";
-
-    //     let i: int? = nil;
-    //     assert i == nil;
-    //     assert_eq i?.to_string(), nil;
-    // }
+struct User {
+    email: string,
+    admin: bool,
+    profile: Profile?
 }
+
+struct Profile {
+    bio: string
+}
+
+test "unwrap" {
+    let user: User? = User {
+        email: "huacnlee@gmail.com",
+        admin: true,
+        profile: nil
+    };
+
+    assert_eq user?.email, "huacnlee@gmail.com";
+    assert_eq user?.admin, true;
+
+    let user1 = user!;
+    assert_eq user1.email, "huacnlee@gmail.com";
+    assert_eq user1.admin, true;
+}
+
+test "struct" {
+    let user: User? = nil;
+    assert user?.email == nil;
+    assert_eq user?.email, nil;
+
+    user = User { email: "huacnlee@gmail.com", admin: true, profile: nil };
+    // assert user?.email == "huacnlee@gmail.com";
+    // assert_eq user?.email, "huacnlee@gmail.com";
+    let rr: Profile?? = user?.profile;
+    assert_eq user?.profile?.bio, nil;
+
+    // let user: User? = User {
+    //     email: "huacnlee@gmail.com",
+    //     admin: true,
+    //     profile: Profile {
+    //         bio: "Hello, world!"
+    //     }
+    // };
+    // assert_ne user, nil;
+    // assert_ne user?.profile, nil;
+
+    // assert_eq user?.email, "huacnlee@gmail.com";
+    // assert_eq user?.profile?.bio, "Hello, world!";
+}
+
+// test "string" {
+//     let s: string = "hello";
+//     assert s == "hello";
+
+//     let s: string? = "hello";
+//     assert s! == "hello";
+//     assert_ne s, nil;
+//     assert_eq s?.len(), 5;
+
+//     let s: string? = nil;
+//     assert s == nil;
+//     assert_eq s?.len(), nil;
+// }
+
+// test "int" {
+//     let i: int = 1;
+//     assert i == 1;
+
+//     let i: int? = 1;
+//     assert i! == 1;
+//     assert_ne i, nil;
+//     assert_eq i?.to_string(), "1";
+
+//     let i: int? = nil;
+//     assert i == nil;
+//     assert_eq i?.to_string(), nil;
+// }
