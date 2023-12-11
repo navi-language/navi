@@ -1,27 +1,27 @@
-use std.io;
+use std.io.Bytes;
 
 test "new_bytes" {
-    let buf = io.new_bytes(0);
+    let buf = Bytes.new(0);
     assert_eq buf.len(), 0;
 
-    let buf = io.new_bytes(2);
+    let buf = Bytes.new(2);
     assert_eq buf.get(0), 0;
     assert_eq buf.get(1), 0;
 }
 
 test "from_bytes" {
-    let buf = io.new_bytes_from_array([int] { 104, 101, 108, 108, 111 });
+    let buf = Bytes.from_array({ 104, 101, 108, 108, 111 });
     assert_eq buf.len(), 5;
     assert_eq buf.to_string(), "hello";
 }
 
 test "len" {
-    let buf = io.new_bytes(2);
+    let buf = Bytes.new(2);
     assert_eq buf.len(), 2;
 }
 
 test "set & get" {
-    let buf = io.new_bytes(5);
+    let buf = Bytes.new(5);
     buf.set(0, 104);
     buf.set(1, 101);
     buf.set(2, 108);
@@ -37,12 +37,4 @@ test "set & get" {
     assert_eq buf.get(0), 72;
     assert_eq buf.get(1), 101;
     assert_eq buf.to_string(), "Hello";
-}
-
-test "encode" {
-    let buf = "hello world".bytes();
-
-    assert_eq buf.encode("hex"), "68656c6c6f20776f726c64";
-    assert_eq buf.encode("base64"), "aGVsbG8gd29ybGQ=";
-    assert_eq buf.encode("base64url"), "aGVsbG8gd29ybGQ";
 }

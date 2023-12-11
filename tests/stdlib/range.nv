@@ -8,3 +8,12 @@ test "range" {
     assert_eq a.start, 2;
     assert_eq a.end, 11;
 }
+
+test "step" {
+    let items = [int] {};
+    for (let i in (0..10).step(2)) {
+        items.push(i);
+    }
+
+    assert_eq items, [int] { 0, 2, 4, 6, 8 };
+}

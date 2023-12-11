@@ -5,17 +5,31 @@ struct A {
 }
 
 impl A {
-    fn operator==(b: A): bool {
+    fn operator==(self, b: A): bool {
         return self.value == b.value;
     }
 
-    fn operator!=(b: A): bool {
+    fn operator!=(self, b: A): bool {
         return self.value != b.value;
     }
 
-    fn to_string(): string {
+    fn to_string(self): string {
         return `Value { value: ${self.value} }`;
     }
+}
+
+test "nil" {
+    let a: A??? = nil;
+    assert a == nil;
+    assert !(a != nil);
+
+    let b: A? = nil;
+    assert a == b;
+    assert !(a != b);
+
+    let c: A? = A { value: 10 };
+    assert a != c;
+    assert !(a == c);
 }
 
 test "optional equal" {
@@ -50,32 +64,113 @@ test "array" {
     let a: [int] = [int] {1, 2, 3};
     let b: [int] = [int] {1, 2};
     assert !(a == b);
+    assert a != b;
 
     let a: [int] = [int] {1, 2, 3};
     let b: [int] = [int] {1, 2};
     assert a != b;
+    assert !(a == b);
 
     let a: [int] = [int] {1, 2, 3};
     let b: [int] = [int] {1, 2, 3};
     assert a == b;
+    assert !(a != b);
 
     let a: [[int]] = [[int]] { [int] { 1, 2, 3}, [int] { 10, 20, 30} };
     let b: [[int]] = [[int]] { [int] { 1, 2, 3}, [int] { 10, 20, 30} };
     assert a == b;
+    assert !(a != b);
 
     let a: [[int]] = [[int]] { [int] { 1, 2, 3}, [int] { 10, 20, 30} };
     let b: [[int]] = [[int]] { [int] { 1, 2, 3}, [int] { 10, 201, 30} };
     assert a != b;
+    assert !(a == b);
 
     let a: [int]???? = [int] {1, 2, 3};
     let b: [int]?? = [int] {1, 20, 3};
     assert a != b;
+    assert !(a == b);
 
     let a = [A] { A { value: 10}, A { value: 20}, A { value: 30} };
     let b = [A] { A { value: 10}, A { value: 20}, A { value: 30} };
     assert a == b;
+    assert !(a != b);
 
     let a = [A] { A { value: 10}, A { value: 20}, A { value: 30} };
     let b = [A] { A { value: 10}, A { value: 201}, A { value: 30} };
     assert a != b;
+    assert !(a == b);
 }
+
+test "map" {
+    let a: <string, int> = <string, int> { "a": 10, "b": 20 };
+    let b: <string, int> = <string, int> { "a": 10 };
+    assert a != b;
+    assert !(a == b);
+
+    let a: <string, int> = <string, int> { "a": 10, "b": 20 };
+    let b: <string, int> = <string, int> { "a": 10, "b": 20 };
+    assert a == b;
+    assert !(a != b);
+
+    let a: <string, int>????? = <string, int> { "a": 10, "b": 20 };
+    let b: <string, int>?? = <string, int> { "a": 10, "b": 20 };
+    assert a == b;
+    assert !(a != b);
+
+    let a: <string, int> = <string, int> { "a": 10, "b": 20 };
+    let b: <string, int> = <string, int> { "a": 10, "b": 201 };
+    assert a != b;
+    assert !(a == b);
+
+    let a: <string, int>????? = <string, int> { "a": 10, "b": 20 };
+    let b: <string, int>?? = <string, int> { "a": 10, "b": 201 };
+    assert a != b;
+    assert !(a == b);
+
+    let a = <string, A> { "a": A { value: 10}, "b": A { value: 20}, "c": A { value: 30} };
+    let b = <string, A> { "a": A { value: 10}, "b": A { value: 20}, "c": A { value: 30} };
+    assert a == b;
+    assert !(a != b);
+
+    let a = <string, A> { "a": A { value: 10}, "b": A { value: 20}, "c": A { value: 30} };
+    let b = <string, A> { "a": A { value: 10}, "b": A { value: 201}, "c": A { value: 30} };
+    assert a != b;
+    assert !(a == b);
+}
+
+struct B {
+    value: int,
+}
+
+impl B {
+    fn operator==(self, c: C): bool {
+        return self.value.to_string() == c.value;
+    }
+
+    fn operator!=(self, c: C): bool {
+        return self.value.to_string() != c.value;
+    }
+}
+
+struct C {
+    value: string,
+}
+
+test "operator== different types" {
+    let a = B { value: 10 };
+    let b = C { value: "10" };
+    assert a == b;
+    assert !(a != b);
+
+    let a = [B] { B { value: 10 }, B { value: 20 } };
+    let b = [C] { C { value: "10" }, C { value: "20" } };
+    assert a == b;
+    assert !(a != b);
+
+    let a = <string, B> { "a": B { value: 10 }, "b": B { value: 20 } };
+    let b = <string, C> { "a": C { value: "10" }, "b": C { value: "20" } };
+    assert a == b;
+    assert !(a != b);
+}
+

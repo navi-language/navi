@@ -21,7 +21,7 @@ impl Candlestick {
     }
 }
 
-fn main() {
+fn main() throws {
     let f = fs.open("examples/macd/data.json");
     let data = json.parse(f.read_to_string());
 

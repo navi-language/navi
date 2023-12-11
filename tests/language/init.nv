@@ -20,7 +20,6 @@ test "init array with rest" {
     assert_eq a[4], 50;
     assert_eq a.len(), 5;
 }
- 
 
 test "init map" {
     let map = <string, int> { "a": 10, "b": 20, "c": 30 };
@@ -30,12 +29,12 @@ test "init map" {
     assert_eq map.len(), 3;
 }
 
-test "init struct" {
-    struct Point {
-        x: int,
-        y: int,
-    }
+struct Point {
+    x: int,
+    y: int,
+}
 
+test "init struct" {
     let point = Point { x: 10, y: 20 };
     assert_eq point.x, 10;
     assert_eq point.y, 20;
@@ -45,7 +44,7 @@ test "init struct array" {
     let points = [Point] {
         Point { x: 10, y: 20 },
         Point { x: 30, y: 40 },
-        Point { x: 50, y: 60 },
+        Point { x: 50, y: 60 }
     };
 
     assert_eq points[0].x, 10;
@@ -57,8 +56,33 @@ test "init struct array" {
     assert_eq points.len(), 3;
 }
 
+struct TTT {
+    x: int = 10,
+    y: int? = 20,
+    z: ToString? = "abc",
+}
+
+test "init struct with default value" {
+    let ttt = TTT {};
+    assert_eq ttt.x, 10;
+    assert_eq ttt.y, 20;
+    assert_eq ttt.z!.to_string(), "abc";
+}
+
 test "init foreign struct" {
     let t = foo.T1 { a: 10, b: "def" };
     assert_eq t.a, 10;
     assert_eq t.b, "def";
+}
+
+struct A {
+    value: int,
+}
+
+test "omit type" {
+    let a: [int] = { 1, 2, 3 };
+    let b: [A] = { { value: 1 }, { value: 2 }, { value: 3 } };
+    let b = [A] { { value: 1 }, { value: 2 }, { value: 3 } };
+    let c: <string, A> = { "a": { value: 1 }, "b": { value: 2 }, "c": { value: 3 } };
+    let c = <string, A> { "a": { value: 1 }, "b": { value: 2 }, "c": { value: 3 } };
 }

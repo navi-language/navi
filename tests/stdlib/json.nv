@@ -1,50 +1,82 @@
 use std.json;
-use std.value;
+
+struct User {
+    name: string,
+    id: int,
+    enabled: bool,
+    float: float,
+    profile: Profile,
+    tags: [string]?,
+    null: string?,
+}
+
+struct Profile {
+    city: string,
+}
 
 test "parse" {
     // null
-    let obj = json.parse(`null`);
-    assert_eq obj.is_null(), true;
+    let val = try! json.parse::<string?>(`null`);
+    assert_eq val, nil;
 
     // string
-    let obj = json.parse(`"foo"`);
-    assert_eq obj.string()!, "foo";
-
-    // int
-    let obj = json.parse(`123`);
-    assert_eq obj.int()!, 123;
-
-    // float
-    let obj = json.parse(`123.0`);
-    assert_eq obj.float()!, 123.0;
+    let val = try! json.parse::<string>(`"foo"`);
+    assert_eq val, "foo";
 
     // bool
-    let obj = json.parse(`true`);
-    assert_eq obj.bool()!, true;
-    let obj = json.parse(`false`);
-    assert_eq obj.bool()!, false;
+    let val = try! json.parse::<bool>(`true`);
+    assert_eq val, true;
+    let val = try! json.parse::<bool>(`false`);
+    assert_eq val, false;
 
-    // object
-    let obj = json.parse(`{
+    // int
+    let val = try! json.parse::<int>(`123`);
+    assert_eq val, 123;
+
+    // float
+    let val = try! json.parse::<float>(`123.0`);
+    assert_eq val, 123.0;
+
+    // struct
+    let user = try! json.parse::<User>(`{
         "name": "Jason Lee",
         "id": 123456,
         "enabled": true,
         "float": 1.23,
         "profile": {
             "city": "Chengdu"
-        }
+        },
+        "tags": null,
+        "null": null
     }`);
-    assert_eq obj.get("name")?.string()!, "Jason Lee";
-    assert_eq obj.get("name")?.string()!, "Jason Lee";
+    assert_eq user.name, "Jason Lee";
+    assert_eq user.id, 123456;
+    assert_eq user.enabled, true;
+    assert_eq user.float, 1.23;
+    assert_eq user.profile.city, "Chengdu";
 
     // array
-    let obj = json.parse(`["Navi", "Rust"]`);
-    assert_eq obj.array()?.get(0)?.string()!, "Navi";
-    assert_eq obj.array()?.get(1)?.string()!, "Rust";
+    let val = try! json.parse::<[string]>(`["Navi", "Rust"]`);
+    assert_eq val.len(), 2;
+    assert_eq val[0], "Navi";
+    assert_eq val[1], "Rust";
+
+    // map
+    let val = try! json.parse::<<string, string>>(`{"name": "Jason Lee"}`);
+    assert_eq val["name"], "Jason Lee";
+}
+
+test "parse_struct" {
+    let profile = try json.parse::<Profile>(`{
+        "foo": "Foo Bar",
+        "city": "Chengdu"
+    }`);
+
+    assert_eq profile.city, "Chengdu";
 }
 
 test "to_string" {
-    let obj = json.parse(`{
+    let user = try! json.parse::<User>(`{
         "name": "Jason Lee",
         "id": 123456,
         "enabled": true,
@@ -55,30 +87,6 @@ test "to_string" {
         "tags": ["Navi", "Rust"],
         "null": null
     }`);
-    assert_eq json.to_string(obj), `{"name":"Jason Lee","null":null,"id":123456,"enabled":true,"profile":{"city":"Chengdu"},"float":1.23,"tags":["Navi","Rust"]}`;
-    assert_eq json.to_string(obj, pretty: true), `{\n  "name": "Jason Lee",\n  "null": null,\n  "id": 123456,\n  "enabled": true,\n  "profile": {\n    "city": "Chengdu"\n  },\n  "float": 1.23,\n  "tags": [\n    "Navi",\n    "Rust"\n  ]\n}`;
-}
-
-test "to_json" {
-    let obj = json.parse(`{
-        "name": "Jason Lee",
-        "id": 123456,
-        "enabled": true,
-        "float": 1.23,
-        "profile": {
-            "city": "Chengdu"
-        },
-        "tags": ["Navi", "Rust"],
-        "null": null
-    }`);
-
-    assert_eq obj.to_json(), `{"name":"Jason Lee","null":null,"id":123456,"enabled":true,"profile":{"city":"Chengdu"},"float":1.23,"tags":["Navi","Rust"]}`;
-    assert_eq obj.to_json(pretty: true), `{\n  "name": "Jason Lee",\n  "null": null,\n  "id": 123456,\n  "enabled": true,\n  "profile": {\n    "city": "Chengdu"\n  },\n  "float": 1.23,\n  "tags": [\n    "Navi",\n    "Rust"\n  ]\n}`;
-    assert_eq obj.get("profile")?.to_json(), `{"city":"Chengdu"}`;
-    assert_eq obj.get("name")?.to_json(), `"Jason Lee"`;
-    assert_eq obj.get("id")?.to_json(), `123456`;
-    assert_eq obj.get("enabled")?.to_json(), `true`;
-    assert_eq obj.get("float")?.to_json(), `1.23`;
-    assert_eq obj.get("tags")?.to_json(), `["Navi","Rust"]`;
-    assert_eq obj.get("tags")?.to_json(pretty: true), `[\n  "Navi",\n  "Rust"\n]`;
+    assert_eq try! json.to_string(user), `{"name":"Jason Lee","id":123456,"enabled":true,"float":1.23,"profile":{"city":"Chengdu"},"tags":["Navi","Rust"],"null":null}`;
+    assert_eq try! json.to_string(user, pretty: true), `{\n  "name": "Jason Lee",\n  "id": 123456,\n  "enabled": true,\n  "float": 1.23,\n  "profile": {\n    "city": "Chengdu"\n  },\n  "tags": [\n    "Navi",\n    "Rust"\n  ],\n  "null": null\n}`;
 }

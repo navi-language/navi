@@ -1,0 +1,60 @@
+test "cast" {
+    let n = 100 as float;
+    assert_eq n, 100.0;
+
+    let n = 3.1415 as int;
+    assert_eq n, 3;
+
+    let n = true as int;
+    assert_eq n, 1;
+    let n = false as int;
+    assert_eq n, 0;
+}
+
+test "parse_int" {
+    let n = "100".parse_int();
+    assert_eq n, 100;
+
+    let n = "abc100".parse_int();
+    assert_eq n, nil;
+
+    let n = "100abc".parse_int();
+    assert_eq n, nil;
+
+    let n = 3.1415 as int;
+    assert_eq n, 3;
+
+    let n = true as int;
+    assert_eq n, 1;
+
+    let n = false as int;
+    assert_eq n, 0;
+}
+
+test "parse_float" {
+    let n = "100".parse_float();
+    assert_eq n, 100.0;
+
+    let n = "3.1415".parse_float();
+    assert_eq n, 3.1415;
+
+    let n = "3.9abc".parse_float();
+    assert_eq n, nil;
+
+    let n = 3 as float;
+    assert_eq n, 3.0;
+}
+
+test "to_string" {
+    let n = 100.to_string();
+    assert_eq n, "100";
+
+    let n = 3.1415.to_string();
+    assert_eq n, "3.1415";
+
+    let n = true.to_string();
+    assert_eq n, "true";
+
+    let n = false.to_string();
+    assert_eq n, "false";
+}

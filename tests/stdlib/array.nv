@@ -13,6 +13,12 @@ test "[int]" {
     assert_eq items[2], 3;
     // FIXME: expect this return nil
     // assert_eq items[4], 0;
+
+    let items: [int] = { 1, 2, 3 };
+    assert_eq items.len(), 3;
+    assert_eq items[0], 1;
+    assert_eq items[1], 2;
+    assert_eq items[2], 3;
 }
 
 test "[string]" {
@@ -206,7 +212,7 @@ test "sort_by" {
     items.sort_by(fn(a: Item, b: Item): bool {
         return a.name < b.name;
     });
-    assert_eq `${items}`, "[<array.Item>, <array.Item>, <array.Item>]";
+    assert_eq `${items}`, "[array.Item { name: bar }, array.Item { name: baz }, array.Item { name: foo }]";
 }
 
 test "reverse" {
@@ -430,7 +436,7 @@ test "clone" {
     let items = [int] { 1, 2, 3 };
     let items2 = items.clone();
 
-    assert_ne items, items2;
+    assert_eq items, items2;
     items[2] = 4;
     items2[1] = 5;
 

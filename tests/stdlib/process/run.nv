@@ -11,7 +11,7 @@ test "run" {
     let args = [string] { "-c", "printenv" };
     let envs = <string, string> { "ENV1": "hello", "ENV2": "Foo Bar" };
 
-    let output = process.run("sh", args: args, envs: envs, stdout: "piped");
+    let output = try! process.run("sh", args: args, envs: envs, stdout: "piped");
     assert_eq output.status, 0, output;
     assert_eq output.stderr.to_string().trim(), "";
 
@@ -32,7 +32,7 @@ test "run stderr" {
         return;
     }
 
-    let output = process.run(
+    let output = try! process.run(
         "sh",
         args: [string] { "-c", "echo This message goes to stderr >&2" },
         stderr: "piped"
@@ -47,12 +47,12 @@ test "run with args" {
     }
 
     let args = [string] { "arg1", "arg2", "arg3" };
-    let output = process.run("echo", args: args, stdout: "piped", stderr: "piped");
+    let output = try! process.run("echo", args: args, stdout: "piped", stderr: "piped");
     assert_eq output.status, 0;
     assert_eq output.stderr.to_string(), "";
     assert_eq output.stdout.to_string().trim(), "arg1 arg2 arg3";
 
-    let output = process.run(
+    let output = try! process.run(
         "sh",
         args: [string] { "-c", `echo "hello world\nnext line." | wc -l` },
         stdout: "piped",
@@ -62,7 +62,7 @@ test "run with args" {
     assert_eq output.stderr.to_string(), "";
     assert_eq output.stdout.to_string().trim(), "2";
 
-    let output = process.run(
+    let output = try! process.run(
         "sh",
         args: [string] { "-c", `echo "hello world" && echo foo bar dar` },
         stdout: "piped",
@@ -72,7 +72,7 @@ test "run with args" {
     assert_eq output.stderr.to_string(), "";
     assert_eq output.stdout.to_string().trim(), "hello world\nfoo bar dar";
 
-    let output = process.run(
+    let output = try! process.run(
         "sh",
         args: [string] { "-c", "echo", `"hello world"`, "&&", "echo foo bar dar" },
         stdout: "piped",
@@ -88,7 +88,7 @@ test "run with env" {
     }
 
     let envs = <string, string> { "ENV1": "hello", "ENV2": "Foo Bar" };
-    let output = process.run("printenv", envs: envs, stdout: "piped", stderr: "piped");
+    let output = try! process.run("printenv", envs: envs, stdout: "piped", stderr: "piped");
     assert_eq output.status, 0;
     assert_eq output.stderr.to_string(), "";
 
@@ -104,27 +104,27 @@ test "run stdin" {
 
     let filename = path.join(env.tmpdir(), "test-run-in");
     if (fs.exists(filename)) {
-        fs.remove_file(filename);
+        try! fs.remove_file(filename);
     }
-    let f = fs.create(filename);
-    f.write_string("Hello, world!");
-    f.flush();
+    let f = try! fs.create(filename);
+    try! f.write_string("Hello, world!");
+    try! f.flush();
 
-    let output = process.run("cat", stdin: "null");
+    let output = try! process.run("cat", stdin: "null");
     assert_eq output.status, 0;
     assert_eq output.stderr.to_string(), "";
     assert_eq output.stdout.to_string(), "";
 
-    let output = process.run("cat", stdin: "piped");
+    let output = try! process.run("cat", stdin: "piped");
     assert_eq output.status, 0;
     assert_eq output.stderr.to_string(), "";
     assert_eq output.stdout.to_string(), "";
 
-    let output = process.run("cat", stdin: filename, stdout: "piped");
+    let output = try! process.run("cat", stdin: filename, stdout: "piped");
     assert_eq output.status, 0;
     assert_eq output.stderr.to_string(), "";
     assert_eq output.stdout.to_string(), "Hello, world!";
-    fs.remove_file(filename);
+    try! fs.remove_file(filename);
 }
 
 test "run stdout" {
@@ -132,33 +132,33 @@ test "run stdout" {
         return;
     }
 
-    let output = process.run("echo", args: [string] { "Hello, world!" }, stdout: "null");
+    let output = try! process.run("echo", args: [string] { "Hello, world!" }, stdout: "null");
     assert_eq output.status, 0;
     assert_eq output.stderr.to_string(), "";
     assert_eq output.stdout.to_string().trim(), "";
 
-    let output = process.run("echo", args: [string] { "Hello, world!" }, stdout: "piped");
+    let output = try! process.run("echo", args: [string] { "Hello, world!" }, stdout: "piped");
     assert_eq output.status, 0;
     assert_eq output.stderr.to_string(), "";
     assert_eq output.stdout.to_string().trim(), "Hello, world!";
 
     let f = path.join(env.tmpdir(), "test-run-stdout");
     if (fs.exists(f)) {
-        fs.remove_file(f);
+        try! fs.remove_file(f);
     }
-    let output = process.run("echo", args: [string] { "Hello, world!" }, stdout: f);
+    let output = try! process.run("echo", args: [string] { "Hello, world!" }, stdout: f);
     assert_eq output.status, 0, `run failed, ${output.stderr} file: ${f}`;
     assert_eq output.stderr.to_string(), "";
     assert_eq output.stdout.to_string(), "";
-    let out = fs.read_to_string(f);
+    let out = try! fs.read_to_string(f);
     assert_eq out, "Hello, world!\n", f;
 
     // test when file exist
-    let output = process.run("echo", args: [string] { "Hello, world!" }, stdout: f);
+    let output = try! process.run("echo", args: [string] { "Hello, world!" }, stdout: f);
     assert_eq output.status, 0, `run failed, ${output.stderr} file: ${f}`;
-    let out = fs.read_to_string(f);
+    let out = try! fs.read_to_string(f);
     assert_eq out, "Hello, world!\nHello, world!\n", f;
-    fs.remove_file(f);
+    try! fs.remove_file(f);
 }
 
 test "run stderr" {
@@ -166,7 +166,7 @@ test "run stderr" {
         return;
     }
 
-    let output = process.run(
+    let output = try! process.run(
         "sh",
         args: [string] { "-c", "echo Hello, world! >&2" },
         stderr: "null"
@@ -175,7 +175,7 @@ test "run stderr" {
     assert_eq output.stderr.to_string(), "";
     assert_eq output.stdout.to_string(), "";
 
-    let output = process.run(
+    let output = try! process.run(
         "sh",
         args: [string] { "-c", "echo Hello, world! >&2" },
         stderr: "piped"
@@ -186,15 +186,19 @@ test "run stderr" {
 
     let f = path.join(env.tmpdir(), "test-run-stderr");
     if (fs.exists(f)) {
-        fs.remove_file(f);
+        try! fs.remove_file(f);
     }
-    let output = process.run("sh", args: [string] { "-c", "echo Hello, world! >&2" }, stderr: f);
+    let output = try! process.run(
+        "sh",
+        args: [string] { "-c", "echo Hello, world! >&2" },
+        stderr: f
+    );
     assert_eq output.status, 0, `run failed, ${output.stderr} file: ${f}`;
     assert_eq output.stderr.to_string(), "";
     assert_eq output.stdout.to_string(), "";
-    let out = fs.read_to_string(f);
+    let out = try! fs.read_to_string(f);
     assert_eq out, "Hello, world!\n", f;
-    fs.remove_file(f);
+    try! fs.remove_file(f);
 }
 
 test "run with cwd" {
@@ -203,8 +207,8 @@ test "run with cwd" {
     }
 
     let cwd = env.tmpdir();
-    let full_path = path.absolute(cwd);
-    let output = process.run("pwd", args: [string] { "-L" }, cwd: cwd, stdout: "piped");
+    let full_path = try! path.absolute(cwd);
+    let output = try! process.run("pwd", args: [string] { "-L" }, cwd: cwd, stdout: "piped");
     assert_eq output.status, 0;
     assert_eq output.stdout.to_string().trim(), full_path;
 }

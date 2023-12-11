@@ -1,7 +1,7 @@
 use std.collections.map;
 
 struct Item {
-  name: string
+    name: string
 }
 
 test "map.new::<int, string>" {
@@ -120,10 +120,7 @@ test "struct value" {
 }
 
 test "clear" {
-    let items = <string, string> {
-        "name": "Jason",
-        "city": "Chengdu",
-    };
+    let items = <string, string> { "name": "Jason", "city": "Chengdu" };
 
     assert_eq items.len(), 2;
     items.clear();
@@ -131,10 +128,7 @@ test "clear" {
 }
 
 test "clone" {
-    let items = <string, string> {
-        "name": "Jason",
-        "city": "Chengdu",
-    };
+    let items = <string, string> { "name": "Jason", "city": "Chengdu" };
     let items2 = items.clone();
     items["name"] = "Sunli";
     items2["city"] = "Wuhan";
@@ -144,4 +138,14 @@ test "clone" {
 
     assert_eq items2["name"], "Jason";
     assert_eq items2["city"], "Wuhan";
+}
+
+test "iter k, v in map" {
+    let items = <string, string> { "title": "Navi", "url": "https://navi-lang.org" };
+
+    let result = [string] {};
+    for (let k, v in items) {
+        result.push(`${k}: ${v}`);
+    }
+    assert_eq result.join(", "), "title: Navi, url: https://navi-lang.org";
 }

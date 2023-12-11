@@ -48,21 +48,21 @@ struct T2 {
 }
 
 impl T2 {
-    fn call0() {
+    fn call0(self) {
     }
 
 
-    fn call1(): int {
+    fn call1(self): int {
         return self.d * 2;
     }
 
 
-    fn call2(): string? {
+    fn call2(self): string? {
         return self.e;
     }
 
 
-    fn set_d(n: int) {
+    fn set_d(self, n: int) {
         self.d = n;
     }
 }
@@ -78,7 +78,7 @@ test "nil" {
 }
 
 test "optional chaining get member" {
-    let a: T? = T { a: 10, b: T2 { d: 20 }, c: T2 { d: 30, e: "df" } };
+    let a: T? = T { a: 10, b: T2 { d: 20, e: nil }, c: T2 { d: 30, e: "df" } };
     assert_eq a?.a, 10;
     assert_eq a?.b?.d, 20;
     assert_eq a?.c?.d, 30;
@@ -109,7 +109,7 @@ test "optional chaining access by index" {
 }
 
 test "optional chaining set member" {
-    let a: T? = T { a: 10, b: T2 { d: 20 }, c: T2 { d: 30 } };
+    let a: T? = T { a: 10, b: T2 { d: 20, e: nil }, c: T2 { d: 30, e: nil } };
 
     a?.a = 80;
     assert_eq a?.a, 80;
@@ -120,10 +120,10 @@ test "optional chaining set member" {
     a?.c?.d = 50;
     assert_eq a?.c?.d, 50;
 
-    a?.b = T2 { d: 80 };
+    a?.b = T2 { d: 80, e: nil };
     assert_eq a?.b?.d, 80;
 
-    a?.c = T2 { d: 88 };
+    a?.c = T2 { d: 88, e: nil };
     assert_eq a?.c?.d, 88;
 }
 
@@ -146,13 +146,13 @@ test "optional chaining set by index" {
 }
 
 test "call method" {
-    let a: T2? = T2 { d: 10 };
+    let a: T2? = T2 { d: 10, e: nil };
     a?.call0();
     assert_eq a?.call1(), 20;
     a?.set_d(33);
     assert_eq a?.d, 33;
 
-    let a: T2???? = T2 { d: 10 };
+    let a: T2???? = T2 { d: 10, e: nil };
     a?.call0();
     assert_eq a?.call1(), 20;
 

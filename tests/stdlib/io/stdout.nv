@@ -7,7 +7,7 @@ test "write" {
     }
 
     let stdout = io.stdout();
-    let n = stdout.write("Hello, world!\n".bytes());   
+    let n = try! stdout.write("Hello, world!\n".bytes());
     assert_eq n, 14;
 }
 
@@ -17,5 +17,5 @@ test "write_string" {
     }
 
     let stdout = io.stdout();
-    stdout.write_string("Hello, world!\n");   
+    try! stdout.write_string("Hello, world!\n");
 }

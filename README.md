@@ -97,7 +97,9 @@ You can create a file named with `.nv` extension, and write some code in it, for
 // main.nv
 use std.io;
 
-io.println("Hello World.");
+fn main() throws {
+  io.println("Hello World.");
+}
 
 test "Hello World" {
   assert 1 == 1;

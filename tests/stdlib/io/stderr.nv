@@ -7,7 +7,7 @@ test "write" {
     }
 
     let stderr = io.stderr();
-    let n = stderr.write("Hello, world!\n".bytes());   
+    let n = try! stderr.write("Hello, world!\n".bytes());
     assert_eq n, 14;
 }
 
@@ -17,5 +17,5 @@ test "write_string" {
     }
 
     let stderr = io.stderr();
-    stderr.write_string("Hello, world!\n");   
+    try! stderr.write_string("Hello, world!\n");
 }

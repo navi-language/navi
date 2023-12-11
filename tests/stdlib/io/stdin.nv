@@ -11,7 +11,7 @@ test "read_line" {
 
     let stdin = io.stdin();
 
-    let s = stdin.read_line();
+    let s = try! stdin.read_line();
     assert_eq s, "hello world from test.sh\n";
 }
 
@@ -21,7 +21,7 @@ test "lines" {
         return;
     }
 
-    let lines = io.stdin().lines();
+    let lines = try! io.stdin().lines();
     assert_eq lines.len(), 2;
     assert_eq lines[0], "hello world from test.sh";
     assert_eq lines[1], "This is second line.";
