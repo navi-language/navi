@@ -16,6 +16,9 @@ test "DateTime - string_interpolation" {
 test "DateTime.parse" {
     let t = try! DateTime.parse("2023-04-13 09:45:26 +08:00");
     assert_eq t.timestamp(), 1681350326;
+
+    let t = try! DateTime.parse("2023.04.13 Time: 14:08", format: "%Y.%m.%d Time: %H:%M");
+    assert_eq t.to_string(), "2023-04-13T14:08:00Z";
 }
 
 test "parse" {
@@ -177,4 +180,37 @@ test "to_offset" {
     assert_eq t2.hour(), 7;
     assert_eq t2.minute(), 15;
     assert_eq t2.to_string(), "2023-04-13T07:15:26.123456789+05:30";
+}
+
+test "sort_by date" {
+    let dates = try [time.DateTime] {
+        DateTime.parse("2023-04-08 09:45:26 +08:00"),
+        DateTime.parse("2023-04-13 09:45:26 +08:00"),
+        DateTime.parse("2023-04-01 09:45:26 +08:00"),
+        DateTime.parse("2023-04-01 09:45:30 +08:00")
+    };
+
+    dates.sort_by(|a, b| {
+        return a > b;
+    });
+    assert_eq dates[0].to_string(), "2023-04-13T09:45:26+08:00";
+    assert_eq dates[1].to_string(), "2023-04-08T09:45:26+08:00";
+    assert_eq dates[2].to_string(), "2023-04-01T09:45:30+08:00";
+    assert_eq dates[3].to_string(), "2023-04-01T09:45:26+08:00";
+
+    let dates = try [time.DateTime] {
+        DateTime.parse("2023-04-08 09:45:26 +08:00"),
+        DateTime.parse("2023-04-13 09:45:26 +08:00"),
+        DateTime.parse("2023-04-01 09:45:26 +08:00"),
+        DateTime.parse("2023-04-01 09:45:30 +08:00")
+    };
+    dates.sort_by(|a, b| {
+        return a < b;
+    });
+
+    assert_eq dates[0].to_string(), "2023-04-01T09:45:26+08:00";
+    assert_eq dates[1].to_string(), "2023-04-01T09:45:30+08:00";
+    assert_eq dates[2].to_string(), "2023-04-08T09:45:26+08:00";
+    assert_eq dates[3].to_string(), "2023-04-13T09:45:26+08:00";
+
 }

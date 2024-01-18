@@ -13,9 +13,16 @@ test "String - string_interpolation" {
 
 test "len" {
     assert_eq "hello world.".len(), 12;
-    assert_eq "👋🏻 你好".len(), 5;
-    assert_eq "Hello 世界".len(), 8;
+    assert_eq "👋🏻 你好".len(), 15;
+    assert_eq "Hello 世界".len(), 12;
     assert_eq "".len(), 0;
+}
+
+test "count" {
+    assert_eq "hello world.".count(), 12;
+    assert_eq "👋🏻 你好".count(), 5;
+    assert_eq "Hello 世界".count(), 8;
+    assert_eq "".count(), 0;
 }
 
 test "bytes" {
@@ -57,6 +64,20 @@ test "to_lowercase" {
 test "to_uppercase" {
     let s = "Hello World";
     assert_eq s.to_uppercase(), "HELLO WORLD";
+}
+
+test "slice" {
+    let s = "hello world.";
+    assert_eq s.slice(0, 5), "hello";
+    assert_eq s.slice(6, 11), "world";
+
+    assert_eq s.slice(0, 0), "";
+    assert_eq s.slice(-1, 2), "he";
+    assert_eq s.slice(-1, -2), "";
+
+    let s = "hello 你好";
+    assert_eq s.slice(0, 5).len(), "hello".len();
+    assert_eq s.slice(6, 12), "你好";
 }
 
 test "substring" {
@@ -101,19 +122,16 @@ test "ends_with" {
 
 test "split" {
     let s = "hello world.";
+    let parts = s.split("");
+    assert_eq parts.len(), 12;
+    assert_eq parts, { "h", "e", "l", "l", "o", " ", "w", "o", "r", "l", "d", "." };
+    assert_eq parts.join(""), s;
+
     let parts = s.split(" ");
     assert_eq parts.len(), 2;
     assert_eq parts[0], "hello";
     assert_eq parts[1], "world.";
     assert_eq parts.join(" "), s;
-
-    let parts = s.split("");
-    assert_eq parts.len(), 12;
-    assert_eq parts[0], "h";
-    assert_eq parts[5], " ";
-    assert_eq parts[10], "d";
-    assert_eq parts[11], ".";
-    assert_eq parts.join(""), s;
 
     let parts = "ab  cd ".split(" ");
     assert_eq parts.len(), 4;
@@ -241,4 +259,8 @@ test "operator" {
     assert a < b;
     assert b > a;
     assert a + b == "ab";
+}
+
+test "error" {
+    assert_eq "foo".error(), "foo";
 }

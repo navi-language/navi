@@ -4,7 +4,7 @@ use test_harness;
 use std.json;
 use std.path;
 use std.fs;
-use std.io;
+use std.io.{self, Cursor, Bytes};
 
 struct ResponseInfo {
     url: string,
@@ -25,7 +25,7 @@ test "request set_multipart" {
     req.set_multipart(form);
 
     let res = try! req.send();
-    assert_eq res.status, 200;
+    assert_eq res.status(), 200;
 
     let body = try! res.json::<ResponseInfo>();
     assert_eq body.method, "POST";
@@ -45,7 +45,7 @@ test "new_request with multipart optional" {
     let req = Request.new(method: "POST", url: server.url("/post"), multipart: form);
     let res = try! req.send();
 
-    assert_eq res.status, 200;
+    assert_eq res.status(), 200;
     let body = try! res.json::<ResponseInfo>();
     assert_eq body.headers["content-type"].contains("multipart/form-data; boundary="), true, body;
     assert_eq body.data.contains(`Content-Disposition: form-data; name="name"`), true, body.data;
@@ -64,7 +64,7 @@ test "upload file" {
 
     let req = Request.new(method: "POST", url: server.url("/post"), multipart: form);
     let res = try! req.send();
-    assert_eq res.status, 200;
+    assert_eq res.status(), 200;
     let body = try! res.json::<ResponseInfo>();
 
     assert_eq body.headers["content-type"].contains("multipart/form-data; boundary="), true, body;
@@ -72,6 +72,31 @@ test "upload file" {
 
     let file_payload0 = `Content-Disposition: form-data; name="my_file0"; filename="测试hello0.txt"\r\nContent-Type: text/navi\r\n\r\nHello, world!`;
     let file_payload1 = `Content-Disposition: form-data; name="my_file1"; filename="测试hello1.txt"\r\nContent-Type: text/plain\r\n\r\nHello, world!`;
+    assert_eq data.contains(file_payload0), true, data;
+    assert_eq data.contains(file_payload1), true, data;
+}
+
+test "set" {
+    let filename = try! path.absolute("tests/fixtures/hello.txt");
+    let file = try! fs.open(filename);
+
+    let cursor = Cursor.new("Hello, world!".bytes());
+
+    let server = test_harness.start_http_server();
+    let form = Form.new();
+    form.set("file", file, filename: "测试hello0.txt", mime: "text/navi");
+    form.set("file1", cursor, filename: "测试hello1.txt", mime: "text/plain");
+
+    let req = Request.new(method: "POST", url: server.url("/post"), multipart: form);
+    let res = try! req.send();
+    assert_eq res.status(), 200;
+    let body = try! res.json::<ResponseInfo>();
+
+    assert_eq body.headers["content-type"].contains("multipart/form-data; boundary="), true, body;
+    let data = body.data;
+
+    let file_payload0 = `Content-Disposition: form-data; name="file"; filename="测试hello0.txt"\r\nContent-Type: text/navi\r\n\r\nHello, world!`;
+    let file_payload1 = `Content-Disposition: form-data; name="file1"; filename="测试hello1.txt"\r\nContent-Type: text/plain\r\n\r\nHello, world!`;
     assert_eq data.contains(file_payload0), true, data;
     assert_eq data.contains(file_payload1), true, data;
 }

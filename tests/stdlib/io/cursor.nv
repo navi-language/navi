@@ -1,0 +1,42 @@
+use std.io.{self, Cursor, Bytes};
+
+fn assert_read_cursor(reader: io.Read, len: int, expect_len: int): string {
+    let buf = Bytes.new(len);
+    do {
+        let nread = try! reader.read(buf);
+        assert_eq nread, expect_len;
+    } catch(e) {
+    }
+
+    return buf.to_string();
+}
+
+test "new" {
+    let bytes = "hello world".bytes();
+    let cursor = Cursor.new(bytes);
+
+    assert_eq assert_read_cursor(cursor, 0, 0), "";
+    assert_eq assert_read_cursor(cursor, 5, 5), "hello";
+    assert_eq assert_read_cursor(cursor, 1, 1), " ";
+    assert_eq assert_read_cursor(cursor, 5, 5), "world";
+    assert_eq assert_read_cursor(cursor, 3, 0), Bytes.new(3).to_string();
+}
+
+test "from_string" {
+    let cursor = Cursor.from_string("hello world");
+    assert_eq assert_read_cursor(cursor, 0, 0), "";
+    assert_eq assert_read_cursor(cursor, 5, 5), "hello";
+    assert_eq assert_read_cursor(cursor, 1, 1), " ";
+    assert_eq assert_read_cursor(cursor, 5, 5), "world";
+    assert_eq assert_read_cursor(cursor, 3, 0), Bytes.new(3).to_string();
+}
+
+test "read missmatched buff size" {
+    let bytes = "hello world".bytes();
+    let cursor = Cursor.new(bytes);
+    let buf = Bytes.new(1024);
+    try cursor.read(buf);
+    let str = buf.to_string();
+    assert_eq str.slice(0, 11), "hello world";
+    assert_eq str.len(), 1024;
+}

@@ -1,0 +1,17 @@
+use std.testing.{assert_throws};
+
+enum MyError {
+    TestError,
+}
+
+impl MyError {
+    pub fn error(self): string {
+        return "test error";
+    }
+}
+
+test "assert_throws" {
+    assert_throws(|| {
+        throw MyError.TestError;
+    }, MyError.TestError);
+}

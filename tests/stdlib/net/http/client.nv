@@ -1,0 +1,39 @@
+use std.net.http.{Client, Request};
+use test_harness;
+
+struct ResponseInfo {
+    url: string?,
+    method: string,
+    data: string,
+    args: <string, string>,
+    headers: <string, string>,
+}
+
+test "Client.new" {
+    let server = test_harness.start_http_server();
+    let client = Client.new(
+        timeout: 60.seconds(),
+        connection_timeout: 30.seconds(),
+        tcp_keepalive: 30.seconds(),
+        redirect: 10,
+        referer: true,
+        user_agent: "test-user-agent",
+        tcp_nodelay: false,
+        no_proxy: true,
+        http1_only: true
+    );
+    let req = Request.new(method: "GET", url: server.url("/get"));
+    let res = try client.execute(req);
+    assert_eq res.status(), 200;
+    let data = try! res.json::<ResponseInfo>();
+    assert_eq data.headers["user-agent"], "test-user-agent";
+}
+
+test "execute" {
+    let server = test_harness.start_http_server();
+
+    let client = Client.new(timeout: 60.seconds());
+    let req = Request.new(method: "GET", url: server.url("/get"));
+    let res = try client.execute(req);
+    assert_eq res.status(), 200;
+}

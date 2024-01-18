@@ -1,0 +1,92 @@
+use std.io.{self, StringBuffer};
+
+test "StringBuffer.new" {
+    let buf = StringBuffer.new();
+    buf.push("hello world");
+    assert_eq buf.to_string(), "hello world";
+}
+
+fn assert_write(writer: io.Write) {
+    let n = try! writer.write("<write".bytes());
+    assert_eq n, 6;
+
+    let n = try! writer.write(" 测试>".bytes());
+    assert_eq n, 8;
+}
+
+fn assert_write_string(writer: io.WriteString) {
+    let n = try! writer.write_string("<write_string");
+    assert_eq n, 13;
+    let n = try! writer.write_string(" 测试>");
+    assert_eq n, 8;
+}
+
+test "io.Write" {
+    let buf = StringBuffer.new();
+    assert_write(buf);
+    assert_eq buf.to_string(), "<write 测试>";
+}
+
+test "io.WriteString" {
+    let buf = StringBuffer.new();
+    assert_write_string(buf);
+    assert_eq buf.to_string(), "<write_string 测试>";
+}
+
+test "write & write_string" {
+    let buf = StringBuffer.new();
+    let n = try buf.write("hello".bytes());
+    assert_eq n, 5;
+    let n = try buf.write_string(" 世界");
+    assert_eq n, 7;
+    assert_eq buf.to_string(), "hello 世界";
+}
+
+test "push" {
+    let buf = StringBuffer.new();
+    buf.push("hello");
+    buf.push(" ");
+    buf.push("world");
+    assert_eq buf.to_string(), "hello world";
+}
+
+test "reset" {
+    let buf = StringBuffer.new();
+    buf.push("hello");
+    assert_eq buf.len(), 5;
+    buf.reset();
+    assert_eq buf.len(), 0;
+}
+
+test "len" {
+    let buf = StringBuffer.new();
+    buf.push("hello world");
+    assert_eq buf.len(), 11;
+
+    let buf = StringBuffer.new();
+    buf.push("hello 你好");
+    assert_eq buf.len(), 12;
+}
+
+test "to_string" {
+    let buf = StringBuffer.new();
+    buf.push("hello");
+    buf.push(" ");
+    buf.push("world");
+    assert_eq buf.to_string(), "hello world";
+}
+
+test "truncate" {
+    let buf = StringBuffer.new();
+    buf.push("hello world");
+    buf.truncate(5);
+    assert_eq buf.len(), 5;
+    assert_eq buf.to_string(), "hello";
+}
+
+test "bytes" {
+    let buf = StringBuffer.new();
+    buf.push("hello world");
+    let bytes = buf.bytes();
+    assert_eq bytes.to_string(), "hello world";
+}

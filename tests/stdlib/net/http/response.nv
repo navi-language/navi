@@ -1,40 +1,47 @@
-use std.net.http.{Response, Headers};
+use std.net.http.{Response, Request, Headers};
+use std.io.{Bytes, StringBuffer};
+use std.testing.assert_throws;
+use test_harness;
 
 test "new_response" {
     let headers = Headers.new();
     headers.set("Content-Type", "application/json");
     let body = "Hello, world!".bytes();
     let res = Response.new(status: 200, headers: headers, body: body);
-    assert_eq res.status, 200;
-    assert_eq res.headers.get("Content-Type"), "application/json";
+    assert_eq res.status(), 200;
+    assert_eq res.headers().get("Content-Type"), "application/json";
     assert_eq try! res.text().contains("Hello, world!"), true;
 
     let res = Response.new();
-    assert_eq res.status, 0;
-    assert_eq res.headers.len(), 0;
+    assert_eq res.status(), 200;
+    assert_eq res.headers().len(), 0;
     assert_eq try! res.text(), "";
 
     let res = Response.new(headers: headers, status: 200, body: body);
-    assert_eq res.status, 200;
-    assert_eq res.headers.get("Content-Type"), "application/json";
+    assert_eq res.status(), 200;
+    assert_eq res.headers().get("Content-Type"), "application/json";
     assert_eq try! res.text().contains("Hello, world!"), true;
 }
 
 test "status & status_text" {
+    let res = Response.new();
+    assert_eq res.status(), 200;
+    assert_eq res.status_text(), "200 OK";
+
     let res = Response.new(status: 200);
-    assert_eq res.status, 200;
+    assert_eq res.status(), 200;
     assert_eq res.status_text(), "200 OK";
 
     let res = Response.new(status: 201);
-    assert_eq res.status, 201;
+    assert_eq res.status(), 201;
     assert_eq res.status_text(), "201 Created";
 
     let res = Response.new(status: 404);
-    assert_eq res.status, 404;
+    assert_eq res.status(), 404;
     assert_eq res.status_text(), "404 Not Found";
 
     let res = Response.new(status: 500);
-    assert_eq res.status, 500;
+    assert_eq res.status(), 500;
     assert_eq res.status_text(), "500 Internal Server Error";
 }
 
@@ -44,15 +51,29 @@ test "headers" {
     headers.set("Content-Length", "123");
 
     let res = Response.new(headers: headers);
-    assert_eq res.headers.get("Content-Type"), "application/json";
-    assert_eq res.headers.get("Content-Length"), "123";
+    assert_eq res.headers().get("Content-Type"), "application/json";
+    assert_eq res.headers().get("Content-Length"), "123";
 }
 
 test "body & text" {
-    let body = "Hello, world!".bytes();
-    let res = Response.new(body: body);
-    assert_eq res.body, body;
-    assert_eq try! res.text(), "Hello, world!";
+    let res = Response.new(body: "Hello, world!".bytes());
+    let body = res.body();
+
+    let bytes = Bytes.new(5);
+    try res.body().read(bytes);
+    assert_eq bytes.to_string(), "Hello";
+    let bytes = Bytes.new(8);
+    try res.body().read(bytes);
+    assert_eq bytes.to_string(), ", world!";
+
+    let body = "Hello, world!";
+    let res = Response.new(body: body.bytes());
+    assert_eq try! res.text(), body;
+
+    assert_throws(|| {
+        try res.text();
+    }, "body already consumed");
+
 }
 
 struct User {

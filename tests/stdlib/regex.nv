@@ -54,45 +54,40 @@ test "replace_all" {
 
 test "replace_with" {
     let re = try! Regex.new("([a-z]+)");
-    let s = re.replace_with(
-        "abc123def456",
-        fn(caps: Captures?): string {
-            let s = caps!.get(1)!.text;
-            return s.to_uppercase();
-        }
-    );
+    let s = re.replace_with("abc123def456", |caps| {
+        let s = caps!.get(1)!.text;
+        return s.to_uppercase();
+    });
     assert_eq s, "ABC123def456";
 
     // test no expand
-    let s = re.replace_with("abc123def456", fn(caps: Captures?): string {return "$1 $2";});
+    let s = re.replace_with("abc123def456", |caps| {
+        return "$1 $2";
+    });
     assert_eq s, "$1 $2123def456";
 }
 
 test "replace_all_with" {
     let re = try! Regex.new("([a-z]+)([\\d]+)");
-    let s = re.replace_all_with(
-        "abc123, def456",
-        fn(caps: Captures?): string {
-            let s = caps!.get(1)!.text;
-            let n = caps!.get(2)!.text;
+    let s = re.replace_all_with("abc123, def456", |caps| {
+        let s = caps!.get(1)!.text;
+        let n = caps!.get(2)!.text;
 
-            return `${s.to_uppercase()}-${n}`;
-        }
-    );
+        return `${s.to_uppercase()}-${n}`;
+    });
     assert_eq s, "ABC-123, DEF-456";
 
     // test no expand
-    let s = re.replace_all_with("abc123, def456", fn(caps: Captures?): string {return "$1 $2";});
+    let s = re.replace_all_with("abc123, def456", |caps| {
+        return "$1 $2";
+    });
     assert_eq s, "$1 $2, $1 $2";
 
     let re = try! Regex.new("(?m)^\\s*([#]+)\\s*");
-    let s = re.replace_all_with(
-        "# hello\n## world\n## world1\n### world2",
-        fn(caps: Captures?): string {
-            let s = caps!.get(1)!.text;
-            return `[${s}] `;
-        }
-    );
+    let s = re.replace_all_with("# hello\n## world\n## world1\n### world2", |caps| {
+        let s = caps!.get(1)!.text;
+        return `[${s}] `;
+    });
     assert_eq s, "[#] hello\n[##] world\n[##] world1\n[###] world2";
 }
 
@@ -122,8 +117,8 @@ test "find_all" {
 
     let matches = re.find_all("hello123world");
     assert_eq matches.len(), 2;
-    assert_eq matches[0].text(), "hello";
-    assert_eq matches[1].text(), "world";
+    assert_eq matches[0].text, "hello";
+    assert_eq matches[1].text, "world";
 
     let m = matches[0];
     assert_eq m.start, 0;

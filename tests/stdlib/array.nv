@@ -128,6 +128,31 @@ test "join" {
     assert_eq items.join(" "), "foo bar baz";
 }
 
+test "index" {
+    let items = [string] { "foo", "bar", "baz" };
+    assert_eq items.index("foo"), 0;
+    assert_eq items.index("bar"), 1;
+    assert_eq items.index("baz"), 2;
+    assert_eq items.index("qux"), nil;
+
+    let items = [int] { 8, 6, 13 };
+    assert_eq items.index(8), 0;
+    assert_eq items.index(6), 1;
+    assert_eq items.index(13), 2;
+    assert_eq items.index(1), nil;
+
+    let items = [float] { 8.31, 6.211, 13.0 };
+    assert_eq items.index(8.31), 0;
+    assert_eq items.index(6.211), 1;
+    assert_eq items.index(13.0), 2;
+    assert_eq items.index(1.0), nil;
+
+    let items = [bool] { true, false, true };
+    assert_eq items.index(true), 0;
+    assert_eq items.index(false), 1;
+    assert_eq items.index(true), 0;
+}
+
 test "contains" {
     // string
     let items = [string] { "a", "b", "c" };
@@ -187,19 +212,19 @@ test "sort" {
 
 test "sort_by" {
     let items = [int] { 2, 4, 0, 10 };
-    items.sort_by(fn(a: int, b: int): bool {
+    items.sort_by(|a, b| {
         return a < b;
     });
     assert_eq `${items}`, "[0, 2, 4, 10]";
 
     let items = [float] { 2.1, 4.2, 0.2, 10.3 };
-    items.sort_by(fn(a: float, b: float): bool {
+    items.sort_by(|a, b| {
         return a > b;
     });
     assert_eq `${items}`, "[10.3, 4.2, 2.1, 0.2]";
 
     let items = [string] { "foo", "bar", "baz" };
-    items.sort_by(fn(a: string, b: string): bool {
+    items.sort_by(|a, b| {
         return a < b;
     });
     assert_eq `${items}`, "[bar, baz, foo]";
@@ -209,7 +234,7 @@ test "sort_by" {
         Item { name: "bar" },
         Item { name: "baz" }
     };
-    items.sort_by(fn(a: Item, b: Item): bool {
+    items.sort_by(|a, b| {
         return a.name < b.name;
     });
     assert_eq `${items}`, "[array.Item { name: bar }, array.Item { name: baz }, array.Item { name: foo }]";

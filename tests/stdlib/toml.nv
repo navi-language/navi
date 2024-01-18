@@ -1,0 +1,56 @@
+use std.toml;
+use std.json;
+
+struct FooBar {
+    foo: string,
+    baz: Baz
+}
+
+struct Baz {
+    dar: [string]
+}
+
+struct User {
+    name: string,
+    id: int,
+    profile: Profile
+}
+
+struct Profile {
+    city: string
+}
+
+test "parse" {
+    let val = try! toml.parse::<FooBar>(`foo = "bar"\n[baz]\ndar = ["qux", "quux"]`);
+
+    assert_eq val.foo, "bar";
+    assert_eq val.baz.dar[0], "qux";
+    assert_eq val.baz.dar[1], "quux";
+    assert_eq try! json.to_string(val), `{"foo":"bar","baz":{"dar":["qux","quux"]}}`;
+
+    do {
+        try toml.parse::<FooBar>("foo");
+    } catch(e) {
+        assert_eq e.error().contains("TOML parse error at line 1, column 4"), true, e.error();
+    }
+
+    let user = try! toml.parse::<User>(`
+        name = "Sunli"
+        id = 123456
+    
+        [profile]
+        city = "Wuhan"
+        `);
+    assert_eq user.name, "Sunli";
+    assert_eq user.id, 123456;
+    assert_eq user.profile.city, "Wuhan";
+}
+
+test "to_string" {
+    let foo_bar = FooBar {
+        foo: "bar",
+        baz: { dar: { "qux", "quux" } }
+    };
+
+    assert_eq try! toml.to_string(foo_bar), `foo = "bar"\n\n[baz]\ndar = ["qux", "quux"]\n`;
+}

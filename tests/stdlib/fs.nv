@@ -1,5 +1,5 @@
 use std.{path, env};
-use std.io.{Bytes, Buffer};
+use std.io.{self, Bytes, Buffer};
 use std.fs.{self, File};
 use std.time.DateTime;
 
@@ -8,8 +8,8 @@ fn fixture(name: string): File {
     return try! File.open(filename);
 }
 
-fn tmp_filepath(path: string): string {
-    let p = path.join(env.tmpdir(), path.join("navi-tests", path));
+fn tmp_filepath(p: string): string {
+    let p = path.join(env.tmpdir(), path.join("navi-tests", p));
     let dir = path.dir(p);
     try! fs.create_dir_all(dir);
     return p;
@@ -33,6 +33,7 @@ test "fs.read_to_string" {
 test "fs.open" {
     let f = try! fs.open(path.join("tests/fixtures", "hello.txt"));
     assert_eq try! f.read_to_string(), "Hello, world!\n";
+    try f.close();
 }
 
 test "fs.write" {
@@ -52,6 +53,7 @@ test "fs.write_string" {
 test "File.open" {
     let f = try! File.open(path.join("tests/fixtures", "hello.txt"));
     assert_eq try! f.read_to_string(), "Hello, world!\n";
+    try f.close();
 }
 
 test "read_to_end" {
@@ -60,6 +62,7 @@ test "read_to_end" {
     let n = try! f.read_to_end(buf);
     assert_eq n, 14;
     assert_eq buf.to_string(), "Hello, world!\n";
+    try f.close();
 }
 
 test "read" {
@@ -68,12 +71,14 @@ test "read" {
     let n = try! f.read(buf);
     assert_eq n, 5;
     assert_eq buf.to_string(), "Hello";
+    try f.close();
 }
 
 test "read_to_string" {
     let f = fixture("hello.txt");
     let s = try! f.read_to_string();
     assert_eq s, "Hello, world!\n";
+    try f.close();
 }
 
 test "File -> string_interpolation" {
@@ -94,15 +99,16 @@ test "fs.create & write_string & write & remove_file & flush" {
     try! f.write_byte(10);
     // Build a buf
     let buf = Buffer.new();
-    buf.write_string("This is Navi.");
+    try! buf.write_string("This is Navi.");
     try! f.write_buffer(buf);
 
-    // Flush
-    try! f.flush();
+    // Close
+    try f.close();
 
     let f = try! File.open(p);
     let buf = Buffer.new();
     try! f.read_to_end(buf);
+    try f.close();
     assert_eq buf.to_string(), "Hello, world!\nThis is Navi.";
 
     try! fs.remove_file(p);
@@ -170,7 +176,7 @@ test "metadata" {
 test "glob" {
     let paths = [string] {};
     let exts = [string] {};
-    try! fs.glob("tests/**/*.nv", fn(p: string) {
+    try! fs.glob("tests/**/*.nv", |p| {
         paths.push(p);
         exts.push(path.extension(p));
     });
@@ -178,14 +184,41 @@ test "glob" {
     assert paths.len() > 0;
 
     if (env.platform() == "windows") {
-        assert paths.contains("tests\\stdlib\\path.nv");
+        assert paths.contains("tests\\stdlib\\json.nv");
         assert paths.contains("tests\\stdlib\\fs.nv");
     } else {
-        assert paths.contains("tests/stdlib/path.nv");
+        assert paths.contains("tests/stdlib/json.nv");
         assert paths.contains("tests/stdlib/fs.nv");
     }
 
     exts.unique();
     assert exts.len() == 1;
     assert exts.contains("nv");
+}
+
+fn assert_read(reader: io.Read, expect: string) {
+    let buf = Buffer.new();
+    let n = try! reader.read_to_end(buf);
+    assert_eq n, 14;
+    assert_eq buf.to_string(), expect;
+
+}
+
+fn assert_write(writer: io.Write, expect: string) {
+    let n = try! writer.write(expect.bytes());
+    assert_eq n, expect.len();
+}
+
+test "std.io.Read" {
+    let f = fixture("hello.txt");
+    assert_read(f, "Hello, world!\n");
+}
+
+test "std.io.Write" {
+    let p = tmp_filepath("test-std-io-write.txt");
+    let f = try! File.create(p);
+    assert_write(f, "Hello, world!\n");
+    try f.close();
+    assert_eq try! fs.read_to_string(p), "Hello, world!\n";
+    cleanup_tmpdir();
 }

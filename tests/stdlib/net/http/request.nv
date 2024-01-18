@@ -1,7 +1,7 @@
-use std.net.http.{self, Headers, Request};
+use std.net.http.{self, Headers, Request, Body};
 use std.env;
 use test_harness;
-use std.io;
+use std.io.{self, Cursor};
 
 struct ResponseInfo {
     url: string?,
@@ -27,37 +27,26 @@ test "new_request" {
 
     let query = <string, string> { "foo": "bar", "baz": "1" };
 
-    let body = "Hello World!".bytes();
+    let body = Cursor.from_string("Hello World!");
 
-    let req = Request.new(
-        method: "GET",
-        url: server.url("/get"),
-        headers: headers,
-        query: query,
-        body: body
-    );
+    let req = Request.new(method: "GET", url: server.url("/get"), headers:, query:, body:);
     assert_eq req.method, "GET";
     assert_eq req.url, server.url("/get");
     assert_eq req.headers.get("Content-Type"), "application/json";
     assert_eq req.headers.get("Accept-Encoding"), "gzip, deflate";
     assert_eq req.query.get("foo"), "bar";
     assert_eq req.query.get("baz"), "1";
-    assert_eq req.body?.to_string(), "Hello World!";
+    assert_eq try req.body?.read_to_string(), "Hello World!";
 
-    let req = Request.new(
-        method: "GET",
-        url: server.url("/get"),
-        headers: headers,
-        query: query,
-        body: body
-    );
+    let body = Body.from_string("Hello World!");
+    let req = Request.new(method: "GET", url: server.url("/get"), headers:, query:, body:);
     assert_eq req.method, "GET";
     assert_eq req.url, server.url("/get");
     assert_eq req.headers.get("Content-Type"), "application/json";
     assert_eq req.headers.get("Accept-Encoding"), "gzip, deflate";
     assert_eq req.query.get("foo"), "bar";
     assert_eq req.query.get("baz"), "1";
-    assert_eq req.body?.to_string(), "Hello World!";
+    assert_eq try req.body?.read_to_string(), "Hello World!";
 }
 
 test "send" {
@@ -65,7 +54,7 @@ test "send" {
 
     let req = Request.new(method: "GET", url: server.url("/get"));
     let res = try! req.send();
-    assert_eq res.status, 200;
+    assert_eq res.status(), 200;
 
     let headers = Headers.new();
     headers.set("Content-Type", "application/json");
@@ -74,15 +63,12 @@ test "send" {
         method: "POST",
         url: server.url("/post"),
         query: <string, string> { "foo": "1", "bar": "Foo Bar", "foo": "a" },
-        headers: headers,
-        body: "Hello World!".bytes()
+        headers:,
+        body: Cursor.from_string("Hello World!")
     );
     let res = try! req.send();
-    assert_eq res.status, 200;
-    assert_eq res.headers.get("Content-Type"), "application/json; charset=utf-8";
-    assert_eq try! res.text().contains("Hello World!"), true;
-    assert_eq try! res.text().contains(server.url("/post?bar=Foo+Bar&foo=a")), true, try! res.text();
-
+    assert_eq res.status(), 200;
+    assert_eq res.headers().get("Content-Type"), "application/json; charset=utf-8";
     let data = try! res.json::<ResponseInfo>();
     assert_eq data.args["bar"], "Foo Bar";
     assert_eq data.url, server.url("/post?bar=Foo+Bar&foo=a");
@@ -138,10 +124,21 @@ test "basic_auth" {
         "test-passwd"
     );
     let res = try! req.send();
-    assert_eq res.status, 200, try! res.text();
+    assert_eq res.status(), 200;
 
     let data = try! res.json::<ResponseAuth>();
     assert_eq data.authenticated, true;
+}
+
+test "body" {
+    let req = Request.new();
+    assert_eq req.body, nil;
+
+    req.body = Cursor.from_string("Hello World!");
+    assert_eq try req.body?.read_to_string(), "Hello World!";
+
+    req.body = Body.from_string("Foo bar");
+    assert_eq try req.body?.read_to_string(), "Foo bar";
 }
 
 test "timeout" {
@@ -153,7 +150,7 @@ test "timeout" {
     assert_eq req.timeout, 3.2.seconds();
 
     let res = try! req.send();
-    assert_eq res.status, 200, try! res.text();
+    assert_eq res.status(), 200, try! res.text();
 }
 
 struct MyRequest {
@@ -166,27 +163,4 @@ test "http.Request" {
 
     let my_req = MyRequest { req: req };
     assert_eq my_req.req.method, "GET";
-}
-
-test "chunk" {
-    let server = test_harness.start_http_server();
-
-    let req = Request.new(method: "GET", url: server.url("/stream/3"));
-    let res = try! req.send();
-    assert_eq res.status, 200;
-
-    let bodies = [string] {};
-    while (true) {
-        let chunk = try! res.chunk();
-        if (chunk == nil) {
-            break;
-        }
-
-        bodies.push(chunk!.to_string());
-    }
-
-    assert_eq bodies.len(), 3;
-    assert_eq bodies[0].trim(), `{"args":{},"data":"","headers":{"accept":"*/*","host":"${server.addr}"},"id":0,"method":"GET","url":"http://${server.addr}/stream/3"}`;
-    assert_eq bodies[1].trim(), `{"args":{},"data":"","headers":{"accept":"*/*","host":"${server.addr}"},"id":1,"method":"GET","url":"http://${server.addr}/stream/3"}`;
-    assert_eq bodies[2].trim(), `{"args":{},"data":"","headers":{"accept":"*/*","host":"${server.addr}"},"id":2,"method":"GET","url":"http://${server.addr}/stream/3"}`;
 }

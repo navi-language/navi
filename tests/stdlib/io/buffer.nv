@@ -1,34 +1,71 @@
-use std.io.{Bytes, Buffer};
+use std.io.{self, Bytes, Buffer};
 
 test "new_buffer" {
     let buf = Buffer.new();
-    buf.write_string("hello world");
+    try! buf.write_string("hello world");
     assert_eq buf.to_string(), "hello world";
+}
+
+fn assert_write(writer: io.Write) {
+    let n = try! writer.write("<write".bytes());
+    assert_eq n, 6;
+
+    let n = try! writer.write(" 测试>".bytes());
+    assert_eq n, 8;
+}
+
+fn assert_write_string(writer: io.WriteString) {
+    let n = try! writer.write_string("<write_string");
+    assert_eq n, 13;
+    let n = try! writer.write_string(" 测试>");
+    assert_eq n, 8;
 }
 
 test "write_string" {
     let buf = Buffer.new();
-    buf.write_string("hello");
-    buf.write_string(" ");
-    buf.write_string("world");
-    assert_eq buf.to_string(), "hello world";
+    let n = try! buf.write_string("hello");
+    assert_eq n, 5;
+    let n = try! buf.write_string(" ");
+    assert_eq n, 1;
+    let n = try! buf.write_string("世界");
+    assert_eq n, 6;
+    assert_eq buf.to_string(), "hello 世界";
+}
+
+test "io.WriteString" {
+    let buf = Buffer.new();
+    assert_write_string(buf);
+    assert_eq buf.to_string(), "<write_string 测试>";
 }
 
 test "write" {
     let buf = Buffer.new();
-    buf.write(Bytes.from_array({ 104, 101, 108, 108, 111 }));
-    buf.write(Bytes.from_array({ 32 }));
-    buf.write(Bytes.from_array({ 119, 111, 114, 108, 100 }));
+    let n = try! buf.write(Bytes.from_array({ 104, 101, 108, 108, 111 }));
+    assert_eq n, 5;
+    let n = try! buf.write(Bytes.from_array({ 32 }));
+    assert_eq n, 1;
+    let n = try! buf.write(Bytes.from_array({ 119, 111, 114, 108, 100 }));
+    assert_eq n, 5;
     assert_eq buf.to_string(), "hello world";
 
     let buf = Buffer.new();
-    buf.write("Hello 你好".bytes());
+    try! buf.write("Hello 你好".bytes());
     assert_eq buf.to_string(), "Hello 你好";
+
+    let buf = Buffer.new();
+    try! buf.write_len("Hello 你好".bytes(), 5);
+    assert_eq buf.to_string(), "Hello";
+}
+
+test "io.Write" {
+    let buf = Buffer.new();
+    assert_write(buf);
+    assert_eq buf.to_string(), "<write 测试>";
 }
 
 test "reset" {
     let buf = Buffer.new();
-    buf.write_string("hello");
+    try! buf.write_string("hello");
     assert_eq buf.len(), 5;
     buf.reset();
     assert_eq buf.len(), 0;
@@ -36,17 +73,17 @@ test "reset" {
 
 test "len" {
     let buf = Buffer.new();
-    buf.write_string("hello world");
+    try! buf.write_string("hello world");
     assert_eq buf.len(), 11;
 
     let buf = Buffer.new();
-    buf.write_string("hello 你好");
+    try! buf.write_string("hello 你好");
     assert_eq buf.len(), 12;
 }
 
 test "get" {
     let buf = Buffer.new();
-    buf.write_string("hello");
+    try! buf.write_string("hello");
     let b, ok = buf.get(0);
     assert ok;
     assert_eq b, 104;
@@ -62,15 +99,15 @@ test "get" {
 
 test "to_string" {
     let buf = Buffer.new();
-    buf.write_string("hello");
-    buf.write_string(" ");
-    buf.write_string("world");
+    try! buf.write_string("hello");
+    try! buf.write_string(" ");
+    try! buf.write_string("world");
     assert_eq buf.to_string(), "hello world";
 }
 
 test "truncate" {
     let buf = Buffer.new();
-    buf.write_string("hello world");
+    try! buf.write_string("hello world");
     buf.truncate(5);
     assert_eq buf.len(), 5;
     assert_eq buf.to_string(), "hello";
@@ -78,7 +115,7 @@ test "truncate" {
 
 test "bytes" {
     let buf = Buffer.new();
-    buf.write_string("hello world");
+    try! buf.write_string("hello world");
     let bytes = buf.bytes();
     assert_eq bytes.to_string(), "hello world";
 }

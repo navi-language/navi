@@ -1,6 +1,4 @@
-use std.channel;
-
-let ch = channel.new::<int>();
+let ch = channel::<int>();
 
 spawn {
     let i = 1;

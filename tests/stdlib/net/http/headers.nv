@@ -29,6 +29,10 @@ test "apppend" {
 
     assert_eq headers.get("Accept-Encoding"), "gzip";
     assert_eq headers.get_all("Accept-Encoding").join(", "), "gzip, deflate, br";
+
+    // append a nil
+    headers.append("Accept-Encoding", nil);
+    assert_eq headers.get_all("Accept-Encoding").join(", "), "gzip, deflate, br";
 }
 
 test "set & set & remove" {
@@ -60,6 +64,15 @@ test "set & set & remove" {
     headers.remove("User-Agent");
     assert_eq headers.get("User-Agent"), nil;
     assert_eq headers.get("foo-nil"), nil;
+}
+
+test "set nil" {
+    let headers = Headers.new();
+    headers.set("User-Agent", "navi-http/0.1.0");
+    headers.set("Content-Type", "application/json");
+
+    headers.set("User-Agent", nil);
+    assert_eq headers.get("User-Agent"), nil;
 }
 
 test "keys" {

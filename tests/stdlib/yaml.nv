@@ -1,5 +1,6 @@
 use std.yaml;
 use std.json;
+use std.io.Cursor;
 
 struct FooBar {
     foo: string,
@@ -52,4 +53,12 @@ test "to_string" {
     };
 
     assert_eq try! yaml.to_string(foo_bar), "foo: bar\nbaz:\n  dar:\n  - qux\n  - quux\n";
+}
+
+test "from_reader" {
+    let reader = Cursor.new("foo: bar\nbaz:\n  dar:\n    - qux\n    - quux\n".bytes());
+    let item = try! yaml.from_reader::<FooBar>(reader);
+    assert_eq item.foo, "bar";
+    assert_eq item.baz.dar[0], "qux";
+    assert_eq item.baz.dar[1], "quux";
 }

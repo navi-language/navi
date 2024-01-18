@@ -28,13 +28,13 @@ test "bytes" {
 }
 
 bench "int" {
-    bench.run(fn() {
+    bench.run(|| {
         rand.int(0, 99);
     });
 }
 
 bench "float" {
-    bench.run(fn() {
+    bench.run(|| {
         rand.float(0.0, 0.99);
     });
 }

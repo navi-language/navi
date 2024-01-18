@@ -3,9 +3,9 @@ use std.url.{self, URL};
 test "URL.parse" {
     let my_url = try? URL.parse("http://navi-lang.org");
     assert_ne my_url, nil;
-    assert_eq my_url!.host, "navi-lang.org";
-    assert_eq my_url!.scheme, "http";
-    assert_eq my_url!.port, 80;
+    assert_eq my_url!.host(), "navi-lang.org";
+    assert_eq my_url!.scheme(), "http";
+    assert_eq my_url!.port(), 80;
 }
 
 test "to_string" {
@@ -26,135 +26,167 @@ test "URL - string_interpolation" {
 
 test "scheme / set_scheme" {
     let my_url = try! URL.parse("http://navi-lang.org");
-    assert_eq my_url.scheme, "http";
+    assert_eq my_url.scheme(), "http";
 
     let my_url = try! URL.parse("https://navi-lang.org");
-    assert_eq my_url.scheme, "https";
+    assert_eq my_url.scheme(), "https";
 
-    my_url.scheme = "ftp";
-    assert_eq my_url.scheme, "ftp";
+    my_url.set_scheme("ftp");
+    assert_eq my_url.scheme(), "ftp";
     assert_eq my_url.to_string(), "ftp://navi-lang.org";
 
-    my_url.scheme = "navi";
-    assert_eq my_url.scheme, "ftp";
+    my_url.set_scheme("navi");
+    assert_eq my_url.scheme(), "ftp";
 
     // custom scheme
     let my_url = try! URL.parse("navi://navi-lang.org");
-    assert_eq my_url.scheme, "navi";
+    assert_eq my_url.scheme(), "navi";
     assert_eq my_url.to_string(), "navi://navi-lang.org";
 
-    my_url.scheme = "vscode";
-    assert_eq my_url.scheme, "vscode";
+    my_url.set_scheme("vscode");
+    assert_eq my_url.scheme(), "vscode";
     assert_eq my_url.to_string(), "vscode://navi-lang.org";
 
-    my_url.scheme = "http";
-    assert_eq my_url.scheme, "vscode";
+    my_url.set_scheme("http");
+    assert_eq my_url.scheme(), "vscode";
 }
 
 test "host / set_host" {
     let my_url = try! URL.parse("http://navi-lang.org");
-    assert_eq my_url.host, "navi-lang.org";
+    assert_eq my_url.host(), "navi-lang.org";
 
     let my_url = try! URL.parse("http://navi-lang.org/foo/bar?id=1&name=foo");
-    assert_eq my_url.host, "navi-lang.org";
+    assert_eq my_url.host(), "navi-lang.org";
 
-    my_url.host = "navi-lang.org";
-    assert_eq my_url.host, "navi-lang.org";
+    my_url.set_host("navi-lang.org");
+    assert_eq my_url.host(), "navi-lang.org";
     assert_eq my_url.to_string(), "http://navi-lang.org/foo/bar?id=1&name=foo";
 }
 
 test "port / set_port" {
     let my_url = try! URL.parse("http://navi-lang.org");
-    assert_eq my_url.port, 80;
+    assert_eq my_url.port(), 80;
 
     let my_url = try! URL.parse("https://navi-lang.org");
-    assert_eq my_url.port, 443;
+    assert_eq my_url.port(), 443;
 
     let my_url = try! URL.parse("ws://navi-lang.org");
-    assert_eq my_url.port, 80;
+    assert_eq my_url.port(), 80;
 
     let my_url = try! URL.parse("wss://navi-lang.org");
-    assert_eq my_url.port, 443;
+    assert_eq my_url.port(), 443;
 
     let my_url = try! URL.parse("ftp://navi-lang.org");
-    assert_eq my_url.port, 21;
+    assert_eq my_url.port(), 21;
 
     let my_url = try! URL.parse("vscode://navi-lang.org");
-    assert_eq my_url.port, 0;
+    assert_eq my_url.port(), 0;
 
     let my_url = try! URL.parse("http://navi-lang.org:8080");
-    assert_eq my_url.port, 8080;
+    assert_eq my_url.port(), 8080;
 
-    my_url.port = 8081;
-    assert_eq my_url.port, 8081;
+    my_url.set_port(8081);
+    assert_eq my_url.port(), 8081;
     assert_eq my_url.to_string(), "http://navi-lang.org:8081";
 }
 
 test "path / set_path" {
     let my_url = try! URL.parse("http://navi-lang.org");
-    assert_eq my_url.path, "/";
+    assert_eq my_url.path(), "/";
 
     let my_url = try! URL.parse("http://navi-lang.org/foo/bar?id=1&name=foo");
-    assert_eq my_url.path, "/foo/bar";
+    assert_eq my_url.path(), "/foo/bar";
 
-    my_url.path = "/foo/bar/baz";
-    assert_eq my_url.path, "/foo/bar/baz";
+    my_url.set_path("/foo/bar/baz");
+    assert_eq my_url.path(), "/foo/bar/baz";
     assert_eq my_url.to_string(), "http://navi-lang.org/foo/bar/baz?id=1&name=foo";
 }
 
 test "query / set_query" {
     let my_url = try! URL.parse("http://navi-lang.org");
-    assert_eq my_url.query, "";
+    assert_eq my_url.query(), "";
 
     let my_url = try! URL.parse("http://navi-lang.org/foo/bar?id=1&name=foo");
-    assert_eq my_url.query, "id=1&name=foo";
+    assert_eq my_url.query(), "id=1&name=foo";
 
-    my_url.query = "id=2&name=bar";
-    assert_eq my_url.query, "id=2&name=bar";
-    assert_eq my_url.to_string(), "http://navi-lang.org/foo/bar?id=2&name=bar";
+    my_url.set_query("id=2&name=bar");
+    assert_eq my_url.query(), "id=2&name=bar";
 }
 
 test "fragment / set_fragment" {
     let my_url = try! URL.parse("http://navi-lang.org");
-    assert_eq my_url.fragment, "";
+    assert_eq my_url.fragment(), "";
 
     let my_url = try! URL.parse("http://navi-lang.org/foo/bar?id=1&name=foo#this-is-hash");
-    assert_eq my_url.fragment, "this-is-hash";
+    assert_eq my_url.fragment(), "this-is-hash";
 
-    my_url.fragment = "this-is-new-hash";
-    assert_eq my_url.fragment, "this-is-new-hash";
+    my_url.set_fragment("this-is-new-hash");
+    assert_eq my_url.fragment(), "this-is-new-hash";
     assert_eq my_url.to_string(), "http://navi-lang.org/foo/bar?id=1&name=foo#this-is-new-hash";
 }
 
 test "username && password" {
     let my_url = try! URL.parse("redis://localhost:6379");
-    assert_eq my_url.username, "";
-    assert_eq my_url.password, "";
+    assert_eq my_url.username(), "";
+    assert_eq my_url.password(), "";
 
     let my_url = try! URL.parse("redis://user:pass@localhost:6379");
-    assert_eq my_url.username, "user";
-    assert_eq my_url.password, "pass";
+    assert_eq my_url.username(), "user";
+    assert_eq my_url.password(), "pass";
 
-    my_url.username = "new-user";
-    my_url.password = "new-pass";
-    assert_eq my_url.username, "new-user";
-    assert_eq my_url.password, "new-pass";
+    my_url.set_username("new-user");
+    my_url.set_password("new-pass");
+    assert_eq my_url.username(), "new-user";
+    assert_eq my_url.password(), "new-pass";
     assert_eq my_url.to_string(), "redis://new-user:new-pass@localhost:6379";
 }
 
 test "set all" {
     let my_url = try! URL.parse("http://navi-lang.org");
 
-    my_url.scheme = "https";
-    my_url.host = "github.com";
-    my_url.port = 8080;
-    my_url.path = "/navi-lang/navi";
-    my_url.query = "id=1&name=foo";
-    my_url.fragment = "this-is-hash";
-    my_url.username = "user";
-    my_url.password = "pass";
+    my_url.set_scheme("https").set_host("github.com").set_port(8080).set_path("/navi-lang/navi").set_query("id=1&name=foo").set_fragment("this-is-hash").set_username("user").set_password("pass");
 
     assert_eq my_url.to_string(), "https://user:pass@github.com:8080/navi-lang/navi?id=1&name=foo#this-is-hash";
+}
+
+test "origin" {
+    let my_url = try! URL.parse("http://navi-lang.org");
+    assert_eq my_url.origin(), "http://navi-lang.org";
+
+    let my_url = try! URL.parse("http://navi-lang.org/foo/bar?id=1&name=foo");
+    assert_eq my_url.origin(), "http://navi-lang.org";
+
+    let my_url = try! URL.parse("https://navi-lang.org:8080/foo/bar?id=1&name=foo#this-is-hash");
+    assert_eq my_url.origin(), "https://navi-lang.org:8080";
+
+    let my_url = try! URL.parse("navi://navi-lang.org:8080/foo/bar");
+    assert_eq my_url.origin(), "";
+
+    let my_url = try! URL.parse("blob:https://navi-lang.org:8080/foo/bar");
+    assert_eq my_url.origin(), "https://navi-lang.org:8080";
+
+    let my_url = try! URL.parse("file:///foo/bar");
+    assert_eq my_url.origin(), "";
+}
+
+test "authority" {
+    let my_url = try! URL.parse("http://navi-lang.org");
+    assert_eq my_url.authority(), "navi-lang.org";
+
+    let my_url = try! URL.parse("http://navi-lang.org/foo/bar?id=1&name=foo");
+    assert_eq my_url.authority(), "navi-lang.org";
+
+    let my_url = try! URL.parse("https://navi-lang.org:8080/foo/bar?id=1&name=foo#this-is-hash");
+    assert_eq my_url.authority(), "navi-lang.org:8080";
+
+    let my_url = try! URL.parse("navi://navi-lang.org:8080/foo/bar");
+    assert_eq my_url.authority(), "navi-lang.org:8080";
+
+    let my_url = try! URL.parse("blob:https://navi-lang.org:8080/foo/bar");
+    assert_eq my_url.authority(), "";
+
+    let my_url = try! URL.parse("file:///foo/bar");
+    assert_eq my_url.authority(), "";
 }
 
 test "join" {

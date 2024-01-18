@@ -17,5 +17,4 @@ jobs:
       - uses: navi-language/setup-navi@v1
       - name: Test
         run: |
-          navi test tests/language
-          navi test tests/stdlib
+          navi test tests/ --all-dirs

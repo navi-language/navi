@@ -1,4 +1,7 @@
 use std.json;
+use std.io.{Cursor, StringBuffer};
+use std.fs;
+use std.path;
 
 struct User {
     name: string,
@@ -89,4 +92,39 @@ test "to_string" {
     }`);
     assert_eq try! json.to_string(user), `{"name":"Jason Lee","id":123456,"enabled":true,"float":1.23,"profile":{"city":"Chengdu"},"tags":["Navi","Rust"],"null":null}`;
     assert_eq try! json.to_string(user, pretty: true), `{\n  "name": "Jason Lee",\n  "id": 123456,\n  "enabled": true,\n  "float": 1.23,\n  "profile": {\n    "city": "Chengdu"\n  },\n  "tags": [\n    "Navi",\n    "Rust"\n  ],\n  "null": null\n}`;
+}
+
+test "from_reader" {
+    let reader = Cursor.new(`{
+        "city": "Chengdu"
+    }`.bytes());
+    let profile = try! json.from_reader::<Profile>(reader);
+    assert_eq profile.city, "Chengdu";
+
+    let user = try! json.from_reader::<User>(fs.open(path.join("tests/fixtures", "user.json")));
+    assert_eq user.name, "Jason Lee";
+}
+
+test "from_bytes" {
+    let bytes = `{
+        "city": "Chengdu"
+    }`.bytes();
+    let profile = try! json.from_bytes::<Profile>(bytes);
+    assert_eq profile.city, "Chengdu";
+}
+
+test "to_writer" {
+    let user = User {
+        name: "Jason Lee",
+        id: 123456,
+        enabled: true,
+        float: 1.23,
+        profile: Profile { city: "Chengdu" },
+        tags: { "Navi", "Rust" },
+        null: nil
+    };
+
+    let buf = StringBuffer.new();
+    try! json.to_writer(buf, user);
+    assert_eq buf.to_string(), `{"name":"Jason Lee","id":123456,"enabled":true,"float":1.23,"profile":{"city":"Chengdu"},"tags":["Navi","Rust"],"null":null}`;
 }

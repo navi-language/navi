@@ -1,0 +1,68 @@
+use std.xml;
+use std.json;
+use std.io.Cursor;
+
+#[serde(rename_all = "lowercase")]
+struct FooBar {
+    foo: string,
+    baz: Baz
+}
+
+#[serde(rename_all = "lowercase")]
+struct Baz {
+    dar: [string]
+}
+
+#[serde(rename_all = "lowercase")]
+struct User {
+    name: string,
+    id: int,
+    profile: Profile
+}
+
+#[serde(rename_all = "lowercase")]
+struct Profile {
+    city: string
+}
+
+test "parse" {
+    let val = try! xml.parse::<FooBar>(`<?xml version="1.0" encoding="utf-8"?><user><foo>bar</foo><baz><dar>qux</dar><dar>quux</dar></baz></user>`);
+
+    assert_eq val.foo, "bar";
+    assert_eq val.baz.dar[0], "qux";
+    assert_eq val.baz.dar[1], "quux";
+    assert_eq try! json.to_string(val), `{"foo":"bar","baz":{"dar":["qux","quux"]}}`;
+
+    do {
+        try xml.parse::<FooBar>("foo");
+    } catch(e) {
+        assert_eq e.error().contains(`Syntax: 1:1 Unexpected characters outside the root element`), true, e.error();
+    }
+
+    let user = try! xml.parse::<User>(`
+    <user>
+        <name>Sunli</name>
+        <id>123456</id>
+        <profile city="Wuhan" />
+    </user>
+    `);
+    assert_eq user.name, "Sunli";
+    assert_eq user.id, 123456;
+    assert_eq user.profile.city, "Wuhan";
+}
+
+test "to_string" {
+    let foo_bar = FooBar {
+        foo: "bar",
+        baz: { dar: { "qux", "quux" } }
+    };
+
+    assert_eq try! xml.to_string(foo_bar), `<?xml version="1.0" encoding="utf-8"?><foo>bar</foo><baz><dar>qux</dar><dar>quux</dar></baz>`;
+}
+
+test "from_reader" {
+    let reader = Cursor.new(`<?xml version="1.0" encoding="utf-8"?><user><foo>bar</foo><baz><dar>qux</dar><dar>quux</dar></baz></user>`.bytes());
+    let user = try! xml.from_reader::<FooBar>(reader);
+    assert_eq user.foo, "bar";
+    assert_eq user.baz.dar[0], "qux";
+}

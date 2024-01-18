@@ -1,0 +1,14 @@
+{
+  "name": "Jason Lee",
+  "id": 123456,
+  "enabled": true,
+  "float": 1.23,
+  "profile": {
+    "city": "Chengdu"
+  },
+  "tags": [
+    "Navi",
+    "Rust"
+  ],
+  "null": null
+}

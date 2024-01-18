@@ -1,27 +1,80 @@
-use std.base64;
+use std.base64.{self, Mode, InvalidError};
+use std.io.{Buffer, StringBuffer, Bytes};
+use std.testing.{assert_throws};
 
 test "encode" {
     assert_eq base64.encode("hello world".bytes()), "aGVsbG8gd29ybGQ=";
-    assert_eq base64.encode("测试 URL Safe".bytes()), "5rWL6K+VIFVSTCBTYWZl";
+    assert_eq base64.encode("hello world".bytes(), mode: Mode.Standard), "aGVsbG8gd29ybGQ=";
+    assert_eq base64.encode("hello world".bytes(), mode: Mode.URLSafe), "aGVsbG8gd29ybGQ=";
+    assert_eq base64.encode("hello world".bytes(), mode: Mode.StandardNoPadding), "aGVsbG8gd29ybGQ";
+    assert_eq base64.encode("hello world".bytes(), mode: Mode.URLSafeNoPadding), "aGVsbG8gd29ybGQ";
     assert_eq base64.encode("https://navi-lang.org".bytes()), "aHR0cHM6Ly9uYXZpLWxhbmcub3Jn";
 }
 
-test "decode" {
+test "encode_string" {
+    assert_eq base64.encode_string("测试 URL Safe"), "5rWL6K+VIFVSTCBTYWZl";
+    assert_eq base64.encode_string("测试 URL Safe"), "5rWL6K+VIFVSTCBTYWZl";
+}
+
+test "decode & decode_to_string" {
     assert_eq try! base64.decode("aGVsbG8gd29ybGQ=").to_string(), "hello world";
+    assert_eq try! base64.decode_to_string("aGVsbG8gd29ybGQ="), "hello world";
     assert_eq try! base64.decode("5rWL6K+VIFVSTCBTYWZl").to_string(), "测试 URL Safe";
+    assert_eq try! base64.decode_to_string("5rWL6K+VIFVSTCBTYWZl"), "测试 URL Safe";
     assert_eq try! base64.decode("aHR0cHM6Ly9uYXZpLWxhbmcub3Jn").to_string(), "https://navi-lang.org";
+    assert_eq try! base64.decode_to_string("aHR0cHM6Ly9uYXZpLWxhbmcub3Jn"), "https://navi-lang.org";
 
-    assert_eq try? base64.decode("invalid"), nil;
+    assert_throws(|| {
+        try base64.decode("invalid");
+    }, InvalidError.Padding);
+
+    assert_eq try? base64.decode("invalid", mode: Mode.Standard), nil;
+    assert_eq try? base64.decode("invalid", mode: Mode.URLSafe), nil;
+    assert_eq try? base64.decode("invalid", mode: Mode.StandardNoPadding), nil;
+    assert_eq try? base64.decode("invalid", mode: Mode.URLSafeNoPadding), nil;
+
+    assert_eq try! base64.decode("aGVsbG8gd29ybGQ=", mode: Mode.Standard).to_string(), "hello world";
+    assert_eq try! base64.decode("5rWL6K-VIFVSTCBTYWZl", mode: Mode.URLSafe).to_string(), "测试 URL Safe";
+    assert_eq try! base64.decode("aGVsbG8gd29ybGQ=", mode: Mode.URLSafe).to_string(), "hello world";
+    assert_eq try! base64.decode_to_string("aGVsbG8gd29ybGQ", mode: Mode.StandardNoPadding), "hello world";
+    assert_eq try! base64.decode_to_string("aGVsbG8gd29ybGQ=", mode: Mode.URLSafe), "hello world";
 }
 
-test "urlsafe_encode" {
-    assert_eq base64.urlsafe_encode("测试 URL Safe".bytes()), "5rWL6K-VIFVSTCBTYWZl";
-    assert_eq base64.urlsafe_encode("hello world".bytes()), "aGVsbG8gd29ybGQ";
+test "InvalidError" {
+    assert_eq InvalidError.Byte.error(), "Invalid Byte";
+    assert_eq InvalidError.Length.error(), "Invalid Length";
+    assert_eq InvalidError.LastSymbol.error(), "Invalid LastSymbol";
+    assert_eq InvalidError.Padding.error(), "Invalid Padding";
 }
 
-test "urlsafe_decode" {
-    assert_eq try! base64.urlsafe_decode("5rWL6K-VIFVSTCBTYWZl").to_string(), "测试 URL Safe";
-    assert_eq try! base64.urlsafe_decode("aGVsbG8gd29ybGQ").to_string(), "hello world";
+// 127 ns/op
+bench "base64.encode" {
+    let text = "hello world";
+    bench.run(|| {
+        base64.encode(text);
+    });
+}
 
-    assert_eq try? base64.urlsafe_decode("invalid"), nil;
+// 48 ns/op
+bench "base64.decode" {
+    let text = "aGVsbG8gd29ybGQ=";
+    bench.run(|| {
+        try! base64.decode(text);
+    });
+}
+
+// 136 ns/op
+bench "base64.urlsafe_encode" {
+    let text = "hello world";
+    bench.run(|| {
+        base64.urlsafe_encode(text);
+    });
+}
+
+// 47 ns/op
+bench "base64.urlsafe_decode" {
+    let text = "aGVsbG8gd29ybGQ";
+    bench.run(|| {
+        try! base64.urlsafe_decode(text);
+    });
 }

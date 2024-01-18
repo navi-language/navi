@@ -1,11 +1,9 @@
-use std.collections.map;
-
 struct Item {
     name: string
 }
 
-test "map.new::<int, string>" {
-    let a = map.new::<int, string>();
+test "init map" {
+    let a = <int, string> {};
     a.set(1, "a");
     a.set(2, "B");
     a.set(3, "c");
