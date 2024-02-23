@@ -1,6 +1,6 @@
-use std.time.{self, DateTime};
-use std.io;
 use std.env;
+use std.io;
+use std.time.{self, DateTime};
 
 test "timestramp" {
     let t = DateTime.now();

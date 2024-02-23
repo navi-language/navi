@@ -1,8 +1,9 @@
+use std.env;
+
 // This test only perform on `TEST_STDIN=true`
 // sh tests/test.sh
 
 use std.io;
-use std.env;
 
 test "read_line" {
     if (env.get("TEST_STDINE_READ_LINE") == nil) {

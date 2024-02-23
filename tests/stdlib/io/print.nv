@@ -1,0 +1,16 @@
+use std.io;
+
+test "print" {
+    io.print("hello");
+    io.print("hello", "world", 123, 3.14, true, false);
+    let a = 123;
+    io.print("a = ", a);
+    // let a: int? = 123;
+    // io.print("a = ", a);
+}
+
+test "println" {
+    io.println("hello", "world", 123, 3.14, true, false);
+    let a = 123;
+    io.println("a = ", a);
+}

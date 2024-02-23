@@ -1,5 +1,5 @@
-use std.io;
 use std.env;
+use std.io;
 
 test "write" {
     if (env.get("TEST_STDOUT") == nil) {

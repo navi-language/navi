@@ -13,3 +13,9 @@ test "from_timestamp" {
     let t = time.from_timestamp(1681350326);
     assert_eq t.format("%Y-%m-%d %H:%M:%S %z"), "2023-04-13 01:45:26 +0000";
 }
+
+test "sleep" {
+    time.sleep(0);
+    time.sleep(0.01);
+    time.sleep(0.01.seconds());
+}

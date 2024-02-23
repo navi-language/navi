@@ -1,4 +1,4 @@
-use std.regex.{Regex, Captures};
+use std.regex.{Captures, Regex};
 
 test "parse" {
     let re = try! Regex.new("[a-z0-9]+");
@@ -16,7 +16,7 @@ test "Regex - string_interpolation" {
 
 test "Match - string_interpolation" {
     let m = try! Regex.new("[a-z0-9]+").find("hello123");
-    assert_eq `${m}`, "hello123";
+    assert_eq `${m!}`, "hello123";
 }
 
 test "is_match" {

@@ -1,4 +1,4 @@
-use std.io.{self, Bytes, Buffer};
+use std.io.{self, Buffer, Bytes};
 
 test "new_buffer" {
     let buf = Buffer.new();

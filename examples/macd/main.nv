@@ -15,9 +15,15 @@ struct Candlestick {
 
 impl Candlestick {
     pub fn to_string(self): string {
-        return
-            `{ time: ${self.time}, open: ${self.open}, high: ${self.high}, low: ${self.low}, close: ${self.close}, volume: ${self.volume}, turnover: ${self.turnover} }`
-       ;
+        return `{
+            time: ${self.time},
+            open: ${self.open},
+            high: ${self.high},
+            low: ${self.low},
+            close: ${self.close},
+            volume: ${self.volume},
+            turnover: ${self.turnover}
+        }`;
     }
 }
 

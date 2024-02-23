@@ -20,13 +20,6 @@ test "float" {
     }
 }
 
-test "bytes" {
-    let buf = rand.bytes(10);
-    assert_eq buf.len(), 10;
-
-    assert_ne rand.bytes(20).to_string(), "";
-}
-
 bench "int" {
     bench.run(|| {
         rand.int(0, 99);

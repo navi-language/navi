@@ -1,5 +1,5 @@
-use std.process;
 use std.io;
+use std.process;
 
 test "pid" {
     let pid = process.pid();

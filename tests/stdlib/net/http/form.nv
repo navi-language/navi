@@ -1,6 +1,7 @@
-use std.net.http.{Request, multipart};
-use test_harness;
 use std.json;
+use std.net.http.{multipart, Request};
+
+use test_harness;
 
 struct ResponseInfo {
     url: string,

@@ -1,4 +1,4 @@
-use std.net.http.{self, Headers};
+use std.net.http.{self, HeaderMap, Headers};
 
 test "new_headers" {
     let headers = Headers.new();
@@ -7,6 +7,37 @@ test "new_headers" {
 
     assert_eq headers.get("User-Agent"), "navi-http/0.1.0";
     assert_eq headers.get("Content-Type"), "application/json";
+
+    // Other types
+    headers.set("Int", 1234);
+    assert_eq headers.get("Int"), "1234";
+    headers.set("Float", 123.456);
+    assert_eq headers.get("Float"), "123.456";
+    headers.set("Bool", true);
+    assert_eq headers.get("Bool"), "true";
+    headers.set("Bool", false);
+    assert_eq headers.get("Bool"), "false";
+}
+
+test "from" {
+    let headers = Headers.new();
+    headers.set("Foo", "foo bar");
+    let new_headers = Headers.from(headers);
+    assert_eq new_headers.len(), 1;
+    assert_eq new_headers.get("Foo"), "foo bar";
+
+    let header_map: HeaderMap = {
+        "StringKey": "string val",
+        "IntKey": 123,
+        "FloatKey": 123.45,
+        "BoolKey": true
+    };
+    let new_headers = Headers.from(header_map);
+    assert_eq new_headers.len(), 4;
+    assert_eq new_headers.get("StringKey"), "string val";
+    assert_eq new_headers.get("IntKey"), "123";
+    assert_eq new_headers.get("FloatKey"), "123.45";
+    assert_eq new_headers.get("BoolKey"), "true";
 }
 
 test "to_string" {
@@ -30,9 +61,15 @@ test "apppend" {
     assert_eq headers.get("Accept-Encoding"), "gzip";
     assert_eq headers.get_all("Accept-Encoding").join(", "), "gzip, deflate, br";
 
-    // append a nil
-    headers.append("Accept-Encoding", nil);
-    assert_eq headers.get_all("Accept-Encoding").join(", "), "gzip, deflate, br";
+    // Other types
+    headers.append("Int", 1234);
+    assert_eq headers.get("Int"), "1234";
+    headers.append("Float", 123.456);
+    assert_eq headers.get("Float"), "123.456";
+    headers.append("Bool", true);
+    assert_eq headers.get("Bool"), "true";
+    headers.append("Bool1", false);
+    assert_eq headers.get("Bool1"), "false";
 }
 
 test "set & set & remove" {
@@ -64,15 +101,6 @@ test "set & set & remove" {
     headers.remove("User-Agent");
     assert_eq headers.get("User-Agent"), nil;
     assert_eq headers.get("foo-nil"), nil;
-}
-
-test "set nil" {
-    let headers = Headers.new();
-    headers.set("User-Agent", "navi-http/0.1.0");
-    headers.set("Content-Type", "application/json");
-
-    headers.set("User-Agent", nil);
-    assert_eq headers.get("User-Agent"), nil;
 }
 
 test "keys" {

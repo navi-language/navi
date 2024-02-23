@@ -1,6 +1,7 @@
-use std.net.http.{Response, Request, Headers};
 use std.io.{Bytes, StringBuffer};
+use std.net.http.{Headers, Request, Response};
 use std.testing.assert_throws;
+
 use test_harness;
 
 test "new_response" {

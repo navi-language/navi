@@ -1,7 +1,9 @@
-use std.net.http.{self, Headers, Request, Body};
 use std.env;
+use std.io.{self, Bytes, Cursor};
+use std.json;
+use std.net.http.{self, Body, Headers, Request};
+
 use test_harness;
-use std.io.{self, Cursor};
 
 struct ResponseInfo {
     url: string?,
@@ -26,8 +28,7 @@ test "new_request" {
     headers.set("Accept-Encoding", "gzip, deflate");
 
     let query = <string, string> { "foo": "bar", "baz": "1" };
-
-    let body = Cursor.from_string("Hello World!");
+    let body = "Hello World!";
 
     let req = Request.new(method: "GET", url: server.url("/get"), headers:, query:, body:);
     assert_eq req.method, "GET";
@@ -36,9 +37,9 @@ test "new_request" {
     assert_eq req.headers.get("Accept-Encoding"), "gzip, deflate";
     assert_eq req.query.get("foo"), "bar";
     assert_eq req.query.get("baz"), "1";
-    assert_eq try req.body?.read_to_string(), "Hello World!";
+    assert_eq req.body!.(string), "Hello World!";
 
-    let body = Body.from_string("Hello World!");
+    let body = "Hello World!";
     let req = Request.new(method: "GET", url: server.url("/get"), headers:, query:, body:);
     assert_eq req.method, "GET";
     assert_eq req.url, server.url("/get");
@@ -46,7 +47,7 @@ test "new_request" {
     assert_eq req.headers.get("Accept-Encoding"), "gzip, deflate";
     assert_eq req.query.get("foo"), "bar";
     assert_eq req.query.get("baz"), "1";
-    assert_eq try req.body?.read_to_string(), "Hello World!";
+    assert_eq req.body!.(string), "Hello World!";
 }
 
 test "send" {
@@ -64,7 +65,7 @@ test "send" {
         url: server.url("/post"),
         query: <string, string> { "foo": "1", "bar": "Foo Bar", "foo": "a" },
         headers:,
-        body: Cursor.from_string("Hello World!")
+        body: "Hello World!"
     );
     let res = try! req.send();
     assert_eq res.status(), 200;
@@ -73,6 +74,43 @@ test "send" {
     assert_eq data.args["bar"], "Foo Bar";
     assert_eq data.url, server.url("/post?bar=Foo+Bar&foo=a");
     assert_eq data.headers["content-type"], "application/json";
+    assert_eq data.headers["content-length"], "12";
+}
+
+test "body" {
+    let server = test_harness.start_http_server();
+    let req = Request.new(method: "POST", url: server.url("/post"));
+
+    // Test with chunked
+    req.body = Cursor.new("hello");
+    let res = try! req.send();
+    assert_eq res.status(), 200;
+    let data = try! res.json::<ResponseInfo>();
+    assert_eq data.headers.get("transfer-encoding"), "chunked";
+    assert_eq data.headers.get("content-length"), nil;
+    assert_eq data.data, "hello";
+
+    // Test with not chunked
+    let req = Request.new(method: "POST", url: server.url("/post"));
+    req.body = "Hello";
+    assert_eq req.body!.(string), "Hello";
+    let res = try! req.send();
+    assert_eq res.status(), 200;
+    let data = try! res.json::<ResponseInfo>();
+    assert_eq data.data, "Hello";
+    assert_eq data.headers.get("transfer-encoding"), nil;
+    assert_eq data.headers.get("content-length"), "5";
+
+    let req = Request.new(method: "POST", url: server.url("/post"));
+    req.body = "Hello".bytes();
+    assert_eq req.body!.(Bytes), "Hello".bytes();
+
+    let res = try! req.send();
+    assert_eq res.status(), 200;
+    let data = try! res.json::<ResponseInfo>();
+    assert_eq data.data, "Hello";
+    assert_eq data.headers.get("transfer-encoding"), nil;
+    assert_eq data.headers.get("content-length"), "5";
 }
 
 test "method" {
@@ -128,17 +166,6 @@ test "basic_auth" {
 
     let data = try! res.json::<ResponseAuth>();
     assert_eq data.authenticated, true;
-}
-
-test "body" {
-    let req = Request.new();
-    assert_eq req.body, nil;
-
-    req.body = Cursor.from_string("Hello World!");
-    assert_eq try req.body?.read_to_string(), "Hello World!";
-
-    req.body = Body.from_string("Foo bar");
-    assert_eq try req.body?.read_to_string(), "Foo bar";
 }
 
 test "timeout" {

@@ -215,19 +215,19 @@ test "sort_by" {
     items.sort_by(|a, b| {
         return a < b;
     });
-    assert_eq `${items}`, "[0, 2, 4, 10]";
+    assert_eq `${items:?}`, "[0, 2, 4, 10]";
 
     let items = [float] { 2.1, 4.2, 0.2, 10.3 };
     items.sort_by(|a, b| {
         return a > b;
     });
-    assert_eq `${items}`, "[10.3, 4.2, 2.1, 0.2]";
+    assert_eq `${items:?}`, "[10.3, 4.2, 2.1, 0.2]";
 
     let items = [string] { "foo", "bar", "baz" };
     items.sort_by(|a, b| {
         return a < b;
     });
-    assert_eq `${items}`, "[bar, baz, foo]";
+    assert_eq `${items:?}`, `["bar", "baz", "foo"]`;
 
     let items = [Item] {
         Item { name: "foo" },
@@ -237,7 +237,7 @@ test "sort_by" {
     items.sort_by(|a, b| {
         return a.name < b.name;
     });
-    assert_eq `${items}`, "[array.Item { name: bar }, array.Item { name: baz }, array.Item { name: foo }]";
+    assert_eq `${items:?}`, `[array.Item { name: "bar" }, array.Item { name: "baz" }, array.Item { name: "foo" }]`;
 }
 
 test "reverse" {
@@ -465,6 +465,6 @@ test "clone" {
     items[2] = 4;
     items2[1] = 5;
 
-    assert_eq `${items}`, "[1, 2, 4]";
-    assert_eq `${items2}`, "[1, 5, 3]";
+    assert_eq `${items:?}`, "[1, 2, 4]";
+    assert_eq `${items2:?}`, "[1, 5, 3]";
 }

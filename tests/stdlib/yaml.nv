@@ -1,6 +1,6 @@
-use std.yaml;
-use std.json;
 use std.io.Cursor;
+use std.json;
+use std.yaml;
 
 struct FooBar {
     foo: string,
@@ -55,9 +55,43 @@ test "to_string" {
     assert_eq try! yaml.to_string(foo_bar), "foo: bar\nbaz:\n  dar:\n  - qux\n  - quux\n";
 }
 
+test "from_string" {
+    let str = "foo: bar\nbaz:\n  dar:\n    - qux\n    - quux\n";
+    let item = try! yaml.from_string::<FooBar>(str);
+    assert_eq item.foo, "bar";
+    assert_eq item.baz.dar[0], "qux";
+    assert_eq item.baz.dar[1], "quux";
+
+    let str = "foo: bar\nbaz:\n  dar:\n    - qux\n    - quux\n";
+    let item = try! yaml.parse::<FooBar>(str);
+    assert_eq item.foo, "bar";
+    assert_eq item.baz.dar[0], "qux";
+    assert_eq item.baz.dar[1], "quux";
+}
+
+test "from_bytes" {
+    let bytes = "foo: bar\nbaz:\n  dar:\n    - qux\n    - quux\n".bytes();
+    let item = try! yaml.from_bytes::<FooBar>(bytes);
+    assert_eq item.foo, "bar";
+    assert_eq item.baz.dar[0], "qux";
+    assert_eq item.baz.dar[1], "quux";
+
+    let bytes = "foo: bar\nbaz:\n  dar:\n    - qux\n    - quux\n".bytes();
+    let item = try! yaml.parse::<FooBar>(bytes);
+    assert_eq item.foo, "bar";
+    assert_eq item.baz.dar[0], "qux";
+    assert_eq item.baz.dar[1], "quux";
+}
+
 test "from_reader" {
-    let reader = Cursor.new("foo: bar\nbaz:\n  dar:\n    - qux\n    - quux\n".bytes());
+    let reader = Cursor.new("foo: bar\nbaz:\n  dar:\n    - qux\n    - quux\n");
     let item = try! yaml.from_reader::<FooBar>(reader);
+    assert_eq item.foo, "bar";
+    assert_eq item.baz.dar[0], "qux";
+    assert_eq item.baz.dar[1], "quux";
+
+    let reader = Cursor.new("foo: bar\nbaz:\n  dar:\n    - qux\n    - quux\n");
+    let item = try! yaml.parse::<FooBar>(reader);
     assert_eq item.foo, "bar";
     assert_eq item.baz.dar[0], "qux";
     assert_eq item.baz.dar[1], "quux";

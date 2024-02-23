@@ -1,6 +1,6 @@
-use std.xml;
-use std.json;
 use std.io.Cursor;
+use std.json;
+use std.xml;
 
 #[serde(rename_all = "lowercase")]
 struct FooBar {
@@ -60,9 +60,36 @@ test "to_string" {
     assert_eq try! xml.to_string(foo_bar), `<?xml version="1.0" encoding="utf-8"?><foo>bar</foo><baz><dar>qux</dar><dar>quux</dar></baz>`;
 }
 
+test "from_string" {
+    let input = `<?xml version="1.0" encoding="utf-8"?><user><foo>bar</foo><baz><dar>qux</dar><dar>quux</dar></baz></user>`;
+    let user = try! xml.from_string::<FooBar>(input);
+    assert_eq user.foo, "bar";
+    assert_eq user.baz.dar[0], "qux";
+
+    let user = try! xml.parse::<FooBar>(input);
+    assert_eq user.foo, "bar";
+    assert_eq user.baz.dar[0], "qux";
+}
+
+test "from_bytes" {
+    let input = `<?xml version="1.0" encoding="utf-8"?><user><foo>bar</foo><baz><dar>qux</dar><dar>quux</dar></baz></user>`.bytes();
+    let user = try! xml.from_bytes::<FooBar>(input);
+    assert_eq user.foo, "bar";
+    assert_eq user.baz.dar[0], "qux";
+
+    let user = try! xml.parse::<FooBar>(input);
+    assert_eq user.foo, "bar";
+    assert_eq user.baz.dar[0], "qux";
+}
+
 test "from_reader" {
-    let reader = Cursor.new(`<?xml version="1.0" encoding="utf-8"?><user><foo>bar</foo><baz><dar>qux</dar><dar>quux</dar></baz></user>`.bytes());
+    let reader = Cursor.new(`<?xml version="1.0" encoding="utf-8"?><user><foo>bar</foo><baz><dar>qux</dar><dar>quux</dar></baz></user>`);
     let user = try! xml.from_reader::<FooBar>(reader);
+    assert_eq user.foo, "bar";
+    assert_eq user.baz.dar[0], "qux";
+
+    let reader = Cursor.new(`<?xml version="1.0" encoding="utf-8"?><user><foo>bar</foo><baz><dar>qux</dar><dar>quux</dar></baz></user>`);
+    let user = try! xml.parse::<FooBar>(reader);
     assert_eq user.foo, "bar";
     assert_eq user.baz.dar[0], "qux";
 }

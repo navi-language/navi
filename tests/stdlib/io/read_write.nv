@@ -1,4 +1,4 @@
-use std.io.{self, Bytes, Buffer, StringBuffer};
+use std.io.{self, Buffer, Bytes, StringBuffer};
 
 struct MyReadwriter {
     data: StringBuffer,

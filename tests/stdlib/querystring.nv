@@ -1,5 +1,5 @@
-use std.querystring;
 use std.json;
+use std.querystring;
 
 struct User {
     name: string,

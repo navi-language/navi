@@ -1,5 +1,5 @@
-use std.toml;
 use std.json;
+use std.toml;
 
 struct FooBar {
     foo: string,

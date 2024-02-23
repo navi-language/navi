@@ -1,7 +1,8 @@
-use std.net.http.{self, Headers, Body};
 use std.env;
-use test_harness;
 use std.io;
+use std.net.http.{self, Body, Headers};
+
+use test_harness;
 
 struct ResponseInfo {
     url: string,
@@ -13,14 +14,12 @@ struct ResponseInfo {
 
 test "request" {
     let server = test_harness.start_http_server();
-    test_harness.sleep(1.0);
-
     assert_eq server.addr.contains("127.0.0.1"), true, server.addr;
 
     // GET
     let headers = Headers.new();
     let query = <string, string> { "foo": "1", "bar": "Foo Bar" };
-    let body = Body.from_string("");
+    let body = "";
 
     let res = try http.request("GET", server.url("/get"), headers:, query:, body:);
 
@@ -30,32 +29,32 @@ test "request" {
     assert_eq text.contains("headers"), true;
 
     // POST
-    let body = Body.from_string("Hello, world!");
+    let body = "Hello, world!";
     let res = try http.request("POST", server.url("/post"), headers:, body:, query:);
     assert_eq res.status(), 200;
     let text = try res.text();
     assert_eq text.contains("Hello, world!"), true, text;
 
     // PUT
-    let body = Body.from_string("Hello, world!");
+    let body = "Hello, world!";
     let res = try http.request("PUT", server.url("/put"), headers:, query:, body:);
     assert_eq res.status(), 200;
     assert_eq try res.text().contains("Hello, world!"), true;
 
     // DELETE
-    let body = Body.from_string("Hello, world!");
+    let body = "Hello, world!";
     let res = try http.request("DELETE", server.url("/delete"), headers:, query:, body:);
     assert_eq res.status(), 200;
     assert_eq try res.text().contains("Hello, world!"), true;
 
     // PATCH
-    let body = Body.from_string("Hello, world!");
+    let body = "Hello, world!";
     let res = try http.request("PATCH", server.url("/patch"), headers:, query:, body:);
     assert_eq res.status(), 200;
     assert_eq try res.text().contains("Hello, world!"), true;
 
     // HEAD
-    let body = Body.from_string("");
+    let body = "";
     let res = try http.request("HEAD", server.url("/get"), headers:, query:, body:);
     assert_eq res.status(), 200;
 }
@@ -111,12 +110,12 @@ test "post" {
 
     let headers = Headers.new();
     let query = <string, string> { "foo": "1", "bar": "Foo Bar" };
-    let body = Body.from_string("Hello, world!");
+    let body = "Hello, world!";
     let res = try http.post(server.url("/post"), headers: headers, body:);
     assert_eq res.status(), 200;
     assert_eq try res.text().contains("Hello, world!"), true;
 
-    let body = Body.from_string("Hello, world!");
+    let body = "Hello, world!";
     let res = try http.post(server.url("/post"), headers:, query:, body:);
     assert_eq res.status(), 200;
     let info = try res.json::<ResponseInfo>();
@@ -128,7 +127,7 @@ test "delete" {
     let server = test_harness.start_http_server();
 
     let headers = Headers.new();
-    let body = Body.from_string("Hello, world!");
+    let body = "Hello, world!";
     let res = try http.delete(server.url("/delete"), headers: headers, body: body);
     assert_eq res.status(), 200;
     let text = try res.text();
@@ -139,7 +138,7 @@ test "put" {
     let server = test_harness.start_http_server();
 
     let headers = Headers.new();
-    let body = Body.from_string("Hello, world!");
+    let body = "Hello, world!";
     let res = try http.put(server.url("/put"), headers: headers, body: body);
     assert_eq res.status(), 200;
     let text = try res.text();
@@ -150,8 +149,25 @@ test "patch" {
     let server = test_harness.start_http_server();
 
     let headers = Headers.new();
-    let body = Body.from_string("Hello, world!");
+    let body = "Hello, world!";
     let res = try http.patch(server.url("/patch"), headers: headers, body: body);
     assert_eq res.status(), 200;
     assert_eq try res.text().contains("Hello, world!"), true;
+}
+
+test "response status" {
+    let server = test_harness.start_http_server();
+
+    let res = try http.get(server.url("/status/200"));
+    assert_eq res.status(), 200;
+
+    let res = try http.get(server.url("/status/302"));
+    assert_eq res.status(), 302;
+
+    let res = try http.get(server.url("/status/404"));
+    assert_eq res.status(), 404;
+    assert_eq res.status(), 404;
+
+    let res = try http.get(server.url("/status/403"));
+    assert_eq res.status(), 403;
 }

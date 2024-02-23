@@ -1,7 +1,7 @@
-use std.process;
 use std.env;
-use std.path;
 use std.fs;
+use std.path;
+use std.process;
 
 test "run" {
     if (env.platform() == "windows") {
@@ -12,7 +12,7 @@ test "run" {
     let envs = <string, string> { "ENV1": "hello", "ENV2": "Foo Bar" };
 
     let output = try! process.run("sh", args: args, envs: envs, stdout: "piped");
-    assert_eq output.status, 0, output;
+    assert_eq output.status, 0, `${output:?}`;
     assert_eq output.stderr.to_string().trim(), "";
 
     let stdout = output.stdout.to_string();

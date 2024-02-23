@@ -80,21 +80,6 @@ test "slice" {
     assert_eq s.slice(6, 12), "你好";
 }
 
-test "substring" {
-    let s = "hello world.";
-    assert_eq s.substring(0, 5), "hello";
-    assert_eq s.substring(6, 11), "world";
-    assert_eq s.substring(0, 11), "hello world";
-
-    assert_eq s.substring(0, 0), "";
-    assert_eq s.substring(-1, 2), "he";
-    assert_eq s.substring(-1, -2), "";
-
-    let s = "👋🏻 你好";
-    assert_eq s.substring(0, 2), "👋🏻";
-    assert_eq s.substring(3, 5), "你好";
-}
-
 test "replace" {
     let s = "hello world.";
     assert_eq s.replace("hello", "hi"), "hi world.";

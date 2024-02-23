@@ -1,9 +1,14 @@
-use std.base64.{self, Mode, InvalidError};
-use std.io.{Buffer, StringBuffer, Bytes};
+use std.base64.{self, InvalidDataError, Mode};
+use std.io.{Buffer, Bytes, StringBuffer};
 use std.testing.{assert_throws};
 
 test "encode" {
+    assert_eq base64.encode("测试 URL Safe"), "5rWL6K+VIFVSTCBTYWZl";
+}
+
+test "encode_bytes" {
     assert_eq base64.encode("hello world".bytes()), "aGVsbG8gd29ybGQ=";
+    assert_eq base64.encode_bytes("hello world".bytes()), "aGVsbG8gd29ybGQ=";
     assert_eq base64.encode("hello world".bytes(), mode: Mode.Standard), "aGVsbG8gd29ybGQ=";
     assert_eq base64.encode("hello world".bytes(), mode: Mode.URLSafe), "aGVsbG8gd29ybGQ=";
     assert_eq base64.encode("hello world".bytes(), mode: Mode.StandardNoPadding), "aGVsbG8gd29ybGQ";
@@ -12,6 +17,7 @@ test "encode" {
 }
 
 test "encode_string" {
+    assert_eq base64.encode("测试 URL Safe"), "5rWL6K+VIFVSTCBTYWZl";
     assert_eq base64.encode_string("测试 URL Safe"), "5rWL6K+VIFVSTCBTYWZl";
     assert_eq base64.encode_string("测试 URL Safe"), "5rWL6K+VIFVSTCBTYWZl";
 }
@@ -26,7 +32,7 @@ test "decode & decode_to_string" {
 
     assert_throws(|| {
         try base64.decode("invalid");
-    }, InvalidError.Padding);
+    }, InvalidDataError {});
 
     assert_eq try? base64.decode("invalid", mode: Mode.Standard), nil;
     assert_eq try? base64.decode("invalid", mode: Mode.URLSafe), nil;
@@ -38,13 +44,6 @@ test "decode & decode_to_string" {
     assert_eq try! base64.decode("aGVsbG8gd29ybGQ=", mode: Mode.URLSafe).to_string(), "hello world";
     assert_eq try! base64.decode_to_string("aGVsbG8gd29ybGQ", mode: Mode.StandardNoPadding), "hello world";
     assert_eq try! base64.decode_to_string("aGVsbG8gd29ybGQ=", mode: Mode.URLSafe), "hello world";
-}
-
-test "InvalidError" {
-    assert_eq InvalidError.Byte.error(), "Invalid Byte";
-    assert_eq InvalidError.Length.error(), "Invalid Length";
-    assert_eq InvalidError.LastSymbol.error(), "Invalid LastSymbol";
-    assert_eq InvalidError.Padding.error(), "Invalid Padding";
 }
 
 // 127 ns/op

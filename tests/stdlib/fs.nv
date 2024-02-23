@@ -1,7 +1,7 @@
-use std.{path, env};
-use std.io.{self, Bytes, Buffer};
 use std.fs.{self, File};
+use std.io.{self, Buffer, Bytes};
 use std.time.DateTime;
+use std.{env, path};
 
 fn fixture(name: string): File {
     let filename = path.join("tests/fixtures", name);
@@ -38,6 +38,18 @@ test "fs.open" {
 
 test "fs.write" {
     let f = tmp_filepath("test-std-file-write.txt");
+    try! fs.write(f, "Hello, world!\n");
+    assert_eq try! fs.read_to_string(f), "Hello, world!\n";
+    cleanup_tmpdir();
+}
+
+test "fs.write_bytes" {
+    let f = tmp_filepath("test-std-file-write.txt");
+    try! fs.write_bytes(f, "Hello, world!\n".bytes());
+    assert_eq try! fs.read_to_string(f), "Hello, world!\n";
+    cleanup_tmpdir();
+
+    let f = tmp_filepath("test-std-file-write.txt");
     try! fs.write(f, "Hello, world!\n".bytes());
     assert_eq try! fs.read_to_string(f), "Hello, world!\n";
     cleanup_tmpdir();
@@ -46,6 +58,11 @@ test "fs.write" {
 test "fs.write_string" {
     let f = tmp_filepath("test-std-file-write.txt");
     try! fs.write_string(f, "Hello, world!\n");
+    assert_eq try! fs.read_to_string(f), "Hello, world!\n";
+    cleanup_tmpdir();
+
+    let f = tmp_filepath("test-std-file-write.txt");
+    try! fs.write(f, "Hello, world!\n");
     assert_eq try! fs.read_to_string(f), "Hello, world!\n";
     cleanup_tmpdir();
 }

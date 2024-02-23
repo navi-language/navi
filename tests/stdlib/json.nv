@@ -1,6 +1,6 @@
-use std.json;
-use std.io.{Cursor, StringBuffer};
 use std.fs;
+use std.io.{Cursor, StringBuffer};
+use std.json;
 use std.path;
 
 struct User {
@@ -94,11 +94,27 @@ test "to_string" {
     assert_eq try! json.to_string(user, pretty: true), `{\n  "name": "Jason Lee",\n  "id": 123456,\n  "enabled": true,\n  "float": 1.23,\n  "profile": {\n    "city": "Chengdu"\n  },\n  "tags": [\n    "Navi",\n    "Rust"\n  ],\n  "null": null\n}`;
 }
 
+test "from_string" {
+    let s = `{ "city": "Chengdu" }`;
+    let profile = try! json.from_string::<Profile>(s);
+    assert_eq profile.city, "Chengdu";
+
+    let s = `{ "city": "Chengdu" }`;
+    let profile = try! json.parse::<Profile>(s);
+    assert_eq profile.city, "Chengdu";
+}
+
 test "from_reader" {
     let reader = Cursor.new(`{
         "city": "Chengdu"
-    }`.bytes());
+    }`);
     let profile = try! json.from_reader::<Profile>(reader);
+    assert_eq profile.city, "Chengdu";
+
+    let reader = Cursor.new(`{
+        "city": "Chengdu"
+    }`);
+    let profile = try! json.parse::<Profile>(reader);
     assert_eq profile.city, "Chengdu";
 
     let user = try! json.from_reader::<User>(fs.open(path.join("tests/fixtures", "user.json")));
@@ -109,7 +125,11 @@ test "from_bytes" {
     let bytes = `{
         "city": "Chengdu"
     }`.bytes();
+
     let profile = try! json.from_bytes::<Profile>(bytes);
+    assert_eq profile.city, "Chengdu";
+
+    let profile = try! json.parse::<Profile>(bytes);
     assert_eq profile.city, "Chengdu";
 }
 

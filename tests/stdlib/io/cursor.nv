@@ -1,4 +1,4 @@
-use std.io.{self, Cursor, Bytes};
+use std.io.{self, Bytes, Cursor};
 
 fn assert_read_cursor(reader: io.Read, len: int, expect_len: int): string {
     let buf = Bytes.new(len);
@@ -20,15 +20,12 @@ test "new" {
     assert_eq assert_read_cursor(cursor, 1, 1), " ";
     assert_eq assert_read_cursor(cursor, 5, 5), "world";
     assert_eq assert_read_cursor(cursor, 3, 0), Bytes.new(3).to_string();
-}
 
-test "from_string" {
-    let cursor = Cursor.from_string("hello world");
+    let cursor = Cursor.new("hello world");
     assert_eq assert_read_cursor(cursor, 0, 0), "";
     assert_eq assert_read_cursor(cursor, 5, 5), "hello";
     assert_eq assert_read_cursor(cursor, 1, 1), " ";
     assert_eq assert_read_cursor(cursor, 5, 5), "world";
-    assert_eq assert_read_cursor(cursor, 3, 0), Bytes.new(3).to_string();
 }
 
 test "read missmatched buff size" {
