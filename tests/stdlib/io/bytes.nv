@@ -38,3 +38,11 @@ test "set & get" {
     assert_eq buf.get(1), 101;
     assert_eq buf.to_string(), "Hello";
 }
+
+test "encode_to_string" {
+    let bytes = "hello world".bytes();
+    assert_eq try! bytes.encode_to_string("utf8"), "hello world";
+    assert_eq try! bytes.encode_to_string("hex"), "68656c6c6f20776f726c64";
+    assert_eq try! bytes.encode_to_string("base64"), "aGVsbG8gd29ybGQ=";
+    assert_eq try! bytes.encode_to_string("base64url"), "aGVsbG8gd29ybGQ";
+}

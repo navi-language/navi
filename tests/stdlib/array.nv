@@ -135,6 +135,12 @@ test "index" {
     assert_eq items.index("baz"), 2;
     assert_eq items.index("qux"), nil;
 
+    let items = [char] { 'a', 'b', 'c' };
+    assert_eq items.index('a'), 0;
+    assert_eq items.index('b'), 1;
+    assert_eq items.index('c'), 2;
+    assert_eq items.index('d'), nil;
+
     let items = [int] { 8, 6, 13 };
     assert_eq items.index(8), 0;
     assert_eq items.index(6), 1;
@@ -153,13 +159,42 @@ test "index" {
     assert_eq items.index(true), 0;
 }
 
+test "index_by" {
+    let items = [string] { "foo", "bar", "baz" };
+    assert_eq items.index_by(|value| {
+        return value == "foo";
+    }), 0;
+    assert_eq items.index_by(|value| {
+        return value == "bar";
+    }), 1;
+    assert_eq items.index_by(|value| {
+        return value == "baz";
+    }), 2;
+    assert_eq items.index_by(|value| {
+        return value == "qux";
+    }), nil;
+
+    let items = [int] { 8, 6, 13 };
+    assert_eq items.index_by(|value| {
+        return value == 8;
+    }), 0;
+    assert_eq items.index_by(|value| {
+        return value == 13;
+    }), 2;
+}
+
 test "contains" {
     // string
     let items = [string] { "a", "b", "c" };
-
     assert items.contains("a");
     assert items.contains("b");
     assert !items.contains("d");
+
+    // char
+    let items = [char] { 'a', 'b', 'c' };
+    assert items.contains('a');
+    assert items.contains('b');
+    assert !items.contains('d');
 
     // int
     let items = [int] { 1, 2, 3 };
@@ -178,6 +213,38 @@ test "contains" {
     let items = [bool] { true, true };
     assert items.contains(true);
     assert !items.contains(false);
+}
+
+test "contains_by" {
+    let items = [string] { "a", "b", "c" };
+    assert items.contains_by(|value| {
+        return value == "a";
+    });
+    assert items.contains_by(|value| {
+        return value == "b";
+    });
+    assert !items.contains_by(|value| {
+        return value == "d";
+    });
+
+    let items = [int] { 182, 12, 3 };
+    assert items.contains_by(|value| {
+        return value == 182;
+    });
+    assert !items.contains_by(|value| {
+        return value == 20;
+    });
+
+    let items = [Item] { Item { name: "foo" }, Item { name: "bar" } };
+    assert items.contains_by(|value| {
+        return value.name == "foo";
+    });
+    assert !items.contains_by(|value| {
+        return value.name == "baz";
+    });
+    assert !items.contains_by(|value| {
+        return value.name == "qux";
+    });
 }
 
 test "sort" {
@@ -237,7 +304,7 @@ test "sort_by" {
     items.sort_by(|a, b| {
         return a.name < b.name;
     });
-    assert_eq `${items:?}`, `[array.Item { name: "bar" }, array.Item { name: "baz" }, array.Item { name: "foo" }]`;
+    assert_eq `${items:?}`, `[main.Item { name: "bar" }, main.Item { name: "baz" }, main.Item { name: "foo" }]`;
 }
 
 test "reverse" {
@@ -465,6 +532,92 @@ test "clone" {
     items[2] = 4;
     items2[1] = 5;
 
-    assert_eq `${items:?}`, "[1, 2, 4]";
-    assert_eq `${items2:?}`, "[1, 5, 3]";
+    assert_eq items, { 1, 2, 4 };
+    assert_eq items2, { 1, 5, 3 };
+}
+
+test "slice" {
+    let a = [int] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    let b = a.slice(3, 6);
+    assert_eq b, { 4, 5, 6 };
+
+    a[5] = 77;
+    assert_eq b, { 4, 5, 6 };
+    assert_eq a[5], 77;
+}
+
+test "max/min" {
+    let a = [int] { 10, 23, 44, 2, -34, -2 };
+    assert_eq a.max(), 44;
+    assert_eq a.min(), -34;
+
+    assert_eq a.max_by(|a, b| {
+        return a < b;
+    }), 44;
+    assert_eq a.min_by(|a, b| {
+        return a < b;
+    }), -34;
+}
+
+test "position max/min" {
+    let a = [int] { 10, 23, 44, 2, -34, -2 };
+    assert_eq a.position_max(), 2;
+    assert_eq a.position_min(), 4;
+
+    assert_eq a.position_max_by(|a, b| {
+        return a < b;
+    }), 2;
+    assert_eq a.position_min_by(|a, b| {
+        return a < b;
+    }), 4;
+}
+
+test "map" {
+    let a = [int] { 2, 43, 56 };
+    let b = a.map::<int, string>(|x| {
+        return `${x}`;
+    });
+    assert_eq b, { "2", "43", "56" };
+}
+
+test "filter" {
+    let a = [int] { 2, 43, 56, 7, 23, -245 };
+    let b = a.filter(|x| {
+        return x > 10;
+    });
+    assert_eq b, { 43, 56, 23 };
+}
+
+test "filter_map" {
+    let a = [int] { 2, 43, 56, 7, 23, -245 };
+    let b = a.filter_map::<int, string>(|x| {
+        if (x > 10) {
+            return `${x}`;
+        } else {
+            return nil;
+        }
+    });
+    assert_eq b, { "43", "56", "23" };
+}
+
+test "concat" {
+    let a = [int] { 2, 43, 56 };
+    let b = [int] { 55, 22, 6 };
+    assert_eq a.concat(b), { 2, 43, 56, 55, 22, 6 };
+}
+
+test "sum" {
+    let a = [int] { 2, 43, 56 };
+    assert_eq a.sum(), 101;
+
+    let b = [float] { 2.0, 43.0, 56.0 };
+    assert_eq a.sum(), 101;
+}
+
+test "product" {
+    let a = [int] { 2, 43, 56 };
+    assert_eq a.product(), 2 * 43 * 56;
+
+    let b = [float] { 2.0, 43.0, 56.0 };
+    assert_eq a.product(), 2 * 43 * 56;
 }

@@ -199,6 +199,18 @@ test "eq" {
     assert_eq a, 0.32.seconds();
 }
 
+test "lt le, gt ge" {
+    let a = 1.seconds();
+    let b = 2.seconds();
+    let c = 1.seconds();
+    assert a < b;
+    assert a <= b;
+    assert b > a;
+    assert b >= a;
+    assert a <= c;
+    assert a >= c;
+}
+
 test "+ & -" {
     assert_eq 1.seconds() + 1.seconds(), 2.seconds();
     assert_eq 1.seconds() + 2.seconds(), 3.seconds();

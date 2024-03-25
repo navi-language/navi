@@ -1,13 +1,8 @@
-use std.io.{self, Bytes, Cursor};
+use std.io.{self, Bytes, Cursor, IoError};
+use std.testing.assert_throws;
 
-fn assert_read_cursor(reader: io.Read, len: int, expect_len: int): string {
-    let buf = Bytes.new(len);
-    do {
-        let nread = try! reader.read(buf);
-        assert_eq nread, expect_len;
-    } catch(e) {
-    }
-
+fn assert_read_cursor(reader: io.Read, len: int): string throws IoError, Utf8Error {
+    let buf = try reader.read_exact(len);
     return buf.to_string();
 }
 
@@ -15,17 +10,19 @@ test "new" {
     let bytes = "hello world".bytes();
     let cursor = Cursor.new(bytes);
 
-    assert_eq assert_read_cursor(cursor, 0, 0), "";
-    assert_eq assert_read_cursor(cursor, 5, 5), "hello";
-    assert_eq assert_read_cursor(cursor, 1, 1), " ";
-    assert_eq assert_read_cursor(cursor, 5, 5), "world";
-    assert_eq assert_read_cursor(cursor, 3, 0), Bytes.new(3).to_string();
+    assert_eq try! assert_read_cursor(cursor, 0), "";
+    assert_eq try! assert_read_cursor(cursor, 5), "hello";
+    assert_eq try! assert_read_cursor(cursor, 1), " ";
+    assert_eq try! assert_read_cursor(cursor, 5), "world";
+    assert_throws(|| {
+        try assert_read_cursor(cursor, 3);
+    }, "unexpected EOF");
 
     let cursor = Cursor.new("hello world");
-    assert_eq assert_read_cursor(cursor, 0, 0), "";
-    assert_eq assert_read_cursor(cursor, 5, 5), "hello";
-    assert_eq assert_read_cursor(cursor, 1, 1), " ";
-    assert_eq assert_read_cursor(cursor, 5, 5), "world";
+    assert_eq try! assert_read_cursor(cursor, 0), "";
+    assert_eq try! assert_read_cursor(cursor, 5), "hello";
+    assert_eq try! assert_read_cursor(cursor, 1), " ";
+    assert_eq try! assert_read_cursor(cursor, 5), "world";
 }
 
 test "read missmatched buff size" {

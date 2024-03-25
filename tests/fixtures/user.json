@@ -6,9 +6,8 @@
   "profile": {
     "city": "Chengdu"
   },
-  "tags": [
-    "Navi",
-    "Rust"
-  ],
-  "null": null
+  "tags": ["Navi", "Rust"],
+  "decimal": "123.456",
+  "datetime": "2024-02-28T09:50:40Z",
+  "union_type": "union-type"
 }

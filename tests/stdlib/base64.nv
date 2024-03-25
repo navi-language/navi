@@ -1,5 +1,5 @@
-use std.base64.{self, InvalidDataError, Mode};
-use std.io.{Buffer, Bytes, StringBuffer};
+use std.base64.{self, Mode};
+use std.io.{Buffer, Bytes, IoError, StringBuffer};
 use std.testing.{assert_throws};
 
 test "encode" {
@@ -32,7 +32,7 @@ test "decode & decode_to_string" {
 
     assert_throws(|| {
         try base64.decode("invalid");
-    }, InvalidDataError {});
+    }, "Invalid padding");
 
     assert_eq try? base64.decode("invalid", mode: Mode.Standard), nil;
     assert_eq try? base64.decode("invalid", mode: Mode.URLSafe), nil;

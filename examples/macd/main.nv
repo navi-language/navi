@@ -1,8 +1,10 @@
-use macd;
-use std.io;
 use std.fs;
+use std.io;
 use std.json;
 
+use macd;
+
+#[serde()]
 struct Candlestick {
     time: int,
     open: float,
@@ -13,17 +15,9 @@ struct Candlestick {
     turnover: float,
 }
 
-impl Candlestick {
+impl ToString for Candlestick {
     pub fn to_string(self): string {
-        return `{
-            time: ${self.time},
-            open: ${self.open},
-            high: ${self.high},
-            low: ${self.low},
-            close: ${self.close},
-            volume: ${self.volume},
-            turnover: ${self.turnover}
-        }`;
+        return try! json.to_string(self);
     }
 }
 
@@ -36,4 +30,17 @@ fn main() throws {
         t.execute(time: candlestick.time, close: candlestick.close);
         io.println(candlestick.to_string());
     }
+}
+
+test "Candlestick.to_string()" {
+    let c = Candlestick {
+        time: 1,
+        open: 2.0,
+        high: 3.0,
+        low: 4.0,
+        close: 5.0,
+        volume: 6.0,
+        turnover: 7.0
+    };
+    assert_eq c.to_string(), `{"time":1,"open":2.0,"high":3.0,"low":4.0,"close":5.0,"volume":6.0,"turnover":7.0}`;
 }

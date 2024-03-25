@@ -1,7 +1,10 @@
 use std.fs;
-use std.io.{Cursor, StringBuffer};
+use std.io.{Buffer, Cursor};
 use std.json;
 use std.path;
+use std.time.DateTime;
+
+type MyUnionType = string | int | float | bool;
 
 struct User {
     name: string,
@@ -11,6 +14,9 @@ struct User {
     profile: Profile,
     tags: [string]?,
     null: string?,
+    decimal: decimal,
+    datetime: DateTime,
+    union_type: MyUnionType,
 }
 
 struct Profile {
@@ -50,13 +56,21 @@ test "parse" {
             "city": "Chengdu"
         },
         "tags": null,
-        "null": null
+        "null": null,
+        "decimal": "123.456",
+        "datetime": "2024-02-28T09:50:40Z",
+        "union_type": "foo"
     }`);
     assert_eq user.name, "Jason Lee";
     assert_eq user.id, 123456;
     assert_eq user.enabled, true;
     assert_eq user.float, 1.23;
+    assert_eq user.tags, nil;
+    assert_eq user.null, nil;
+    assert_eq user.decimal, try! decimal.from_float(123.456);
+    assert_eq user.datetime.to_string(), "2024-02-28T09:50:40Z";
     assert_eq user.profile.city, "Chengdu";
+    assert_eq user.union_type.(string), "foo";
 
     // array
     let val = try! json.parse::<[string]>(`["Navi", "Rust"]`);
@@ -67,6 +81,26 @@ test "parse" {
     // map
     let val = try! json.parse::<<string, string>>(`{"name": "Jason Lee"}`);
     assert_eq val["name"], "Jason Lee";
+
+    // union type
+    let val = try! json.parse::<MyUnionType>(`"foo"`);
+    assert_eq val.(string), "foo";
+    let val = try! json.parse::<MyUnionType>(`123`);
+    assert_eq val.(int), 123;
+    let val = try! json.parse::<MyUnionType>(`3.1415`);
+    assert_eq val.(float), 3.1415;
+    let val = try! json.parse::<MyUnionType>(`true`);
+    assert_eq val.(bool), true;
+
+    // any
+    let val = try! json.parse::<any>(`"foo"`);
+    assert_eq val.(string), "foo";
+    let val = try! json.parse::<any>(`123`);
+    assert_eq val.(int), 123;
+    let val = try! json.parse::<any>(`true`);
+    assert_eq val.(bool), true;
+    let val = try! json.parse::<any>(`1.23`);
+    assert_eq val.(float), 1.23;
 }
 
 test "parse_struct" {
@@ -79,6 +113,43 @@ test "parse_struct" {
 }
 
 test "to_string" {
+    // nil
+    assert_eq try! json.to_string(nil), "null";
+    // string
+    assert_eq try! json.to_string("foo"), `"foo"`;
+    // int
+    assert_eq try! json.to_string(123), "123";
+    // float
+    assert_eq try! json.to_string(123.0), "123.0";
+    // bool
+    assert_eq try! json.to_string(true), "true";
+    assert_eq try! json.to_string(false), "false";
+    // array
+    assert_eq try! json.to_string([int] { 1, 2, 3 }), "[1,2,3]";
+    assert_eq try! json.to_string([string] { "Navi", "Rust" }), `["Navi","Rust"]`;
+    // map
+    assert_eq try! json.to_string(<string, string> { "name": "Jason Lee" }), `{"name":"Jason Lee"}`;
+    assert_eq try! json.to_string(<string, float> { "vol": 3.12231 }), `{"vol":3.12231}`;
+    // union type
+    let val: MyUnionType = "foo";
+    assert_eq try! json.to_string(val), `"foo"`;
+    let val: MyUnionType = 123;
+    assert_eq try! json.to_string(val), "123";
+    let val: MyUnionType = 3.1415;
+    assert_eq try! json.to_string(val), "3.1415";
+    let val: MyUnionType = true;
+    assert_eq try! json.to_string(val), "true";
+    // any
+    let val: any = "foo";
+    assert_eq try! json.to_string(val), `"foo"`;
+    let val: any = 123;
+    assert_eq try! json.to_string(val), "123";
+    let val: any = 3.1415;
+    assert_eq try! json.to_string(val), "3.1415";
+    let val: any = true;
+    assert_eq try! json.to_string(val), "true";
+
+    // struct
     let user = try! json.parse::<User>(`{
         "name": "Jason Lee",
         "id": 123456,
@@ -88,10 +159,13 @@ test "to_string" {
             "city": "Chengdu"
         },
         "tags": ["Navi", "Rust"],
-        "null": null
+        "null": null,
+        "decimal": "123.456",
+        "datetime": "2024-02-28T09:50:40Z",
+        "union_type": "foo"
     }`);
-    assert_eq try! json.to_string(user), `{"name":"Jason Lee","id":123456,"enabled":true,"float":1.23,"profile":{"city":"Chengdu"},"tags":["Navi","Rust"],"null":null}`;
-    assert_eq try! json.to_string(user, pretty: true), `{\n  "name": "Jason Lee",\n  "id": 123456,\n  "enabled": true,\n  "float": 1.23,\n  "profile": {\n    "city": "Chengdu"\n  },\n  "tags": [\n    "Navi",\n    "Rust"\n  ],\n  "null": null\n}`;
+    assert_eq try! json.to_string(user), `{"name":"Jason Lee","id":123456,"enabled":true,"float":1.23,"profile":{"city":"Chengdu"},"tags":["Navi","Rust"],"null":null,"decimal":"123.456","datetime":"2024-02-28T09:50:40Z","union_type":"foo"}`;
+    assert_eq try! json.to_string(user, pretty: true), `{\n  "name": "Jason Lee",\n  "id": 123456,\n  "enabled": true,\n  "float": 1.23,\n  "profile": {\n    "city": "Chengdu"\n  },\n  "tags": [\n    "Navi",\n    "Rust"\n  ],\n  "null": null,\n  "decimal": "123.456",\n  "datetime": "2024-02-28T09:50:40Z",\n  "union_type": "foo"\n}`;
 }
 
 test "from_string" {
@@ -141,10 +215,13 @@ test "to_writer" {
         float: 1.23,
         profile: Profile { city: "Chengdu" },
         tags: { "Navi", "Rust" },
-        null: nil
+        null: nil,
+        decimal: try! decimal.from_float(123.456),
+        datetime: try! DateTime.parse("2024-02-28T09:50:40Z"),
+        union_type: 818
     };
 
-    let buf = StringBuffer.new();
+    let buf = Buffer.new();
     try! json.to_writer(buf, user);
-    assert_eq buf.to_string(), `{"name":"Jason Lee","id":123456,"enabled":true,"float":1.23,"profile":{"city":"Chengdu"},"tags":["Navi","Rust"],"null":null}`;
+    assert_eq buf.to_string(), `{"name":"Jason Lee","id":123456,"enabled":true,"float":1.23,"profile":{"city":"Chengdu"},"tags":["Navi","Rust"],"null":null,"decimal":"123.456","datetime":"2024-02-28T09:50:40Z","union_type":818}`;
 }

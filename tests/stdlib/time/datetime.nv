@@ -52,12 +52,8 @@ test "parse with RFC3339" {
 
 test "iso8601 / to_string" {
     let t = try! DateTime.parse("2023-04-13 09:45:26 +07:00");
-    // to_string is original timezone
     assert_eq t.to_string(), "2023-04-13T09:45:26+07:00";
-    // iso8601 is local timezone
-    if (env.get("CI") == "") {
-        assert_eq t.iso8601(), "2023-04-13T10:45:26+08:00";
-    }
+    assert_eq t.iso8601(), "2023-04-13T09:45:26.000000000+07:00";
 }
 
 test "from_timestamp" {
@@ -199,18 +195,17 @@ test "sort_by date" {
     assert_eq dates[3].to_string(), "2023-04-01T09:45:26+08:00";
 
     let dates = try [time.DateTime] {
-        DateTime.parse("2023-04-08 09:45:26 +08:00"),
-        DateTime.parse("2023-04-13 09:45:26 +08:00"),
-        DateTime.parse("2023-04-01 09:45:26 +08:00"),
-        DateTime.parse("2023-04-01 09:45:30 +08:00")
+        DateTime.parse("2023-04-08 01:45:26 +00:00"),
+        DateTime.parse("2023-04-13 01:45:26 +00:00"),
+        DateTime.parse("2023-04-01 01:45:26 +00:00"),
+        DateTime.parse("2023-04-01 01:45:30 +00:00")
     };
     dates.sort_by(|a, b| {
         return a < b;
     });
 
-    assert_eq dates[0].to_string(), "2023-04-01T09:45:26+08:00";
-    assert_eq dates[1].to_string(), "2023-04-01T09:45:30+08:00";
-    assert_eq dates[2].to_string(), "2023-04-08T09:45:26+08:00";
-    assert_eq dates[3].to_string(), "2023-04-13T09:45:26+08:00";
-
+    assert_eq dates[0].to_string(), "2023-04-01T01:45:26Z";
+    assert_eq dates[1].to_string(), "2023-04-01T01:45:30Z";
+    assert_eq dates[2].to_string(), "2023-04-08T01:45:26Z";
+    assert_eq dates[3].to_string(), "2023-04-13T01:45:26Z";
 }

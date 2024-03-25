@@ -1,0 +1,109 @@
+use std.json;
+use std.testing.assert_throws;
+
+#[serde(deny_unknown_fields)]
+struct A_deny_unknown_fields {
+    a: int,
+    b: string,
+}
+
+test "struct deny_unknown_fields" {
+    assert_throws(|| {
+        let r: A_deny_unknown_fields = try json.parse(`{"a": 10, "b": "abc", "c": 20}`);
+    }, "unknown field `c` at line 1 column 26");
+}
+
+#[serde(rename_all = "UPPERCASE")]
+struct A_rename_all {
+    a: int,
+    b: string,
+}
+
+test "struct rename_all" {
+    let r: A_rename_all = try json.parse(`{"A": 10, "B": "abc"}`);
+    assert_eq r.a, 10;
+    assert_eq r.b, "abc";
+
+    assert_eq try json.to_string(r), `{"A":10,"B":"abc"}`;
+}
+
+#[serde(rename_all = "UPPERCASE")]
+struct A_struct_field_rename {
+    #[serde(rename = "cc")]
+    a: int,
+    b: string,
+}
+
+test "struct field rename" {
+    let r: A_struct_field_rename = try json.parse(`{"cc": 10, "B": "abc"}`);
+    assert_eq r.a, 10;
+    assert_eq r.b, "abc";
+
+    assert_eq try json.to_string(r), `{"cc":10,"B":"abc"}`;
+}
+
+struct A_struct_alias {
+    a: int,
+    #[serde(alias = "c")]
+    b: string,
+}
+
+test "struct field rename" {
+    let r: A_struct_alias = try json.parse(`{"a": 10, "b": "abc"}`);
+    assert_eq r.a, 10;
+    assert_eq r.b, "abc";
+
+    let r: A_struct_alias = try json.parse(`{"a": 10, "c": "abc"}`);
+    assert_eq r.a, 10;
+    assert_eq r.b, "abc";
+}
+
+struct A_struct_skip {
+    a: int,
+    #[serde(alias = "c")]
+    b: string,
+}
+
+test "struct field skip" {
+    let r: A_struct_alias = try json.parse(`{"a": 10, "b": "abc"}`);
+    assert_eq r.a, 10;
+    assert_eq r.b, "abc";
+
+    let r: A_struct_alias = try json.parse(`{"a": 10, "c": "abc"}`);
+    assert_eq r.a, 10;
+    assert_eq r.b, "abc";
+}
+
+struct A_struct_skip_serialize_if_nil {
+    #[serde(skip_serialize_if_nil)]
+    a: int?,
+    b: string?,
+}
+
+test "struct field skip serialize if nil" {
+    let r = A_struct_skip_serialize_if_nil { a: 10, b: "abc" };
+    assert_eq try json.to_string(r), `{"a":10,"b":"abc"}`;
+
+    let r = A_struct_skip_serialize_if_nil { a: nil, b: nil };
+    assert_eq try json.to_string(r), `{"b":null}`;
+}
+
+struct A_flatten {
+    a: int,
+    #[serde(flatten)]
+    b: B_flatten,
+}
+
+struct B_flatten {
+    b: int,
+    c: int,
+}
+
+test "struct field flatten" {
+    let r: A_flatten = try json.parse(`{"a": 10, "b": 20, "c": 30}`);
+    assert_eq r.a, 10;
+    assert_eq r.b.b, 20;
+    assert_eq r.b.c, 30;
+
+    assert_eq try json.to_string(r), `{"a":10,"b":20,"c":30}`;
+}

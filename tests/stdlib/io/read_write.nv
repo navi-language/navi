@@ -1,56 +1,5 @@
 use std.io.{self, Buffer, Bytes, StringBuffer};
 
-struct MyReadwriter {
-    data: StringBuffer,
-}
-
-impl MyReadwriter {
-    fn new(s: string): MyReadwriter {
-        let buffer = StringBuffer.new();
-        try! buffer.write_string(s);
-        return MyReadwriter { data: buffer };
-    }
-
-    // impl `std.io.Read`
-    pub fn read(self, buf: Bytes): int throws {
-        let n = 0;
-        let data_bytes = self.data.bytes();
-        while (n < buf.len()) {
-            buf.set(n, data_bytes.get(n));
-            n += 1;
-        }
-
-        return n;
-    }
-
-    pub fn read_to_end(self, buf: Buffer): int throws {
-        let bytes = self.data.bytes();
-        try buf.write_len(bytes, bytes.len());
-
-        return bytes.len();
-    }
-
-    pub fn close(self) throws {
-    }
-
-    // impl `std.io.Write`
-    pub fn write(self, buf: Bytes): int throws {
-        self.data.push(buf.to_string());
-        return buf.len();
-    }
-
-    // impl `std.io.WriteString`
-    pub fn write_string(self, str: string): int throws {
-        self.data.push(str);
-        return str.len();
-    }
-
-    // impl `lang.ToString`
-    pub fn to_string(self): string {
-        return self.data.to_string();
-    }
-}
-
 fn assert_read(reader: io.Read, len: int): string {
     let buf = Bytes.new(len);
     let n = try! reader.read(buf);
@@ -60,22 +9,4 @@ fn assert_read(reader: io.Read, len: int): string {
 
 fn assert_write(writer: io.Write, s: string) {
     assert_eq try! writer.write(s.bytes()), s.len();
-}
-
-fn assert_write_string(writer: io.WriteString, s: string) {
-    assert_eq try! writer.write_string(s), s.len();
-}
-
-test "read & write & write_string" {
-    let my_rw = MyReadwriter.new("Hello world");
-    assert_eq assert_read(my_rw, 5), "Hello";
-    assert_write(my_rw, " From");
-    assert_write_string(my_rw, " Navi");
-    assert_eq my_rw.to_string(), "Hello world From Navi";
-
-}
-
-test "Read.read_to_string" {
-    let my_rw: io.Read = MyReadwriter.new("Hello world");
-    assert_eq try my_rw.read_to_string(), "Hello world";
 }

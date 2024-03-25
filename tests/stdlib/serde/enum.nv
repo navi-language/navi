@@ -1,0 +1,80 @@
+use std.json;
+use std.testing.assert_throws;
+
+#[serde(int)]
+enum E_int {
+    A = 10,
+    B = 20,
+}
+
+test "enum int" {
+    assert_eq try json.parse::<E_int>(`10`), E_int.A;
+    assert_eq try json.parse::<E_int>(`20`), E_int.B;
+    assert_eq try json.to_string(E_int.A), `10`;
+    assert_eq try json.to_string(E_int.B), `20`;
+
+    assert_throws(|| {
+        try json.parse::<E_int>(`1`);
+    }, `invalid value: integer \`1\`, expected an integer value at line 1 column 1`);
+    assert_throws(|| {
+        try json.parse::<E_int>(`"A"`);
+    }, `invalid type: string "A", expected an integer value at line 1 column 3`);
+}
+
+enum E_string {
+    A,
+    B,
+}
+
+test "enum string" {
+    assert_eq try json.parse::<E_string>(`"A"`), E_string.A;
+    assert_eq try json.parse::<E_string>(`"B"`), E_string.B;
+    assert_eq try json.to_string(E_string.A), `"A"`;
+    assert_eq try json.to_string(E_string.B), `"B"`;
+
+    assert_throws(|| {
+        try json.parse::<E_string>(`1`);
+    }, `invalid type: integer \`1\`, expected a string value at line 1 column 1`);
+    assert_throws(|| {
+        try json.parse::<E_string>(`"C"`);
+    }, `invalid value: string "C", expected a string value at line 1 column 3`);
+}
+
+#[serde(rename_all = "lowercase")]
+enum E_rename_all {
+    A,
+    B,
+}
+
+test "enum rename all" {
+    assert_eq try json.parse::<E_rename_all>(`"a"`), E_rename_all.A;
+    assert_eq try json.parse::<E_rename_all>(`"b"`), E_rename_all.B;
+    assert_eq try json.to_string(E_rename_all.A), `"a"`;
+    assert_eq try json.to_string(E_rename_all.B), `"b"`;
+}
+
+#[serde(rename_all = "lowercase")]
+enum E_item_rename {
+    A,
+    #[serde(rename = "cC")]
+    B,
+}
+
+test "enum item rename" {
+    assert_eq try json.parse::<E_item_rename>(`"a"`), E_item_rename.A;
+    assert_eq try json.parse::<E_item_rename>(`"cC"`), E_item_rename.B;
+    assert_eq try json.to_string(E_item_rename.A), `"a"`;
+    assert_eq try json.to_string(E_item_rename.B), `"cC"`;
+}
+
+enum E_item_alias {
+    A,
+    #[serde(alias = "cC")]
+    B,
+}
+
+test "enum field alias" {
+    assert_eq try json.parse::<E_item_alias>(`"A"`), E_item_alias.A;
+    assert_eq try json.parse::<E_item_alias>(`"B"`), E_item_alias.B;
+    assert_eq try json.parse::<E_item_alias>(`"cC"`), E_item_alias.B;
+}

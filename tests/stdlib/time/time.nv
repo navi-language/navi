@@ -15,7 +15,6 @@ test "from_timestamp" {
 }
 
 test "sleep" {
-    time.sleep(0);
-    time.sleep(0.01);
+    time.sleep(0.seconds());
     time.sleep(0.01.seconds());
 }

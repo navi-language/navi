@@ -3,22 +3,7 @@ use std.io.{self, Buffer, Bytes};
 use std.time.DateTime;
 use std.{env, path};
 
-fn fixture(name: string): File {
-    let filename = path.join("tests/fixtures", name);
-    return try! File.open(filename);
-}
-
-fn tmp_filepath(p: string): string {
-    let p = path.join(env.tmpdir(), path.join("navi-tests", p));
-    let dir = path.dir(p);
-    try! fs.create_dir_all(dir);
-    return p;
-}
-
-fn cleanup_tmpdir() {
-    let p = path.join(env.tmpdir(), "navi-tests");
-    try! fs.remove_dir_all(p);
-}
+use utils.{cleanup_tmpdir, fixture, tmp_filepath};
 
 test "fs.read" {
     let buf = try! fs.read(path.join("tests/fixtures", "hello.txt"));

@@ -1,0 +1,24 @@
+use std.fs.{self, File};
+use std.io.{self, Buffer, Bytes};
+use std.{env, path};
+
+pub fn fixture(name: string): File {
+    let filename = path.join("tests/fixtures", name);
+    do {
+        return try File.open(filename);
+    } catch(e) {
+        panic `Error opening fixture ${filename}, ${e.error()}`;
+    }
+}
+
+pub fn tmp_filepath(p: string): string {
+    let p = path.join(env.tmpdir(), path.join("navi-tests", p));
+    let dir = path.dir(p);
+    try! fs.create_dir_all(dir);
+    return p;
+}
+
+pub fn cleanup_tmpdir() {
+    let p = path.join(env.tmpdir(), "navi-tests");
+    try! fs.remove_dir_all(p);
+}

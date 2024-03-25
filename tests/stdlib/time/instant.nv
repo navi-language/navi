@@ -1,0 +1,8 @@
+use std.time.{self, Instant};
+
+test "now & elapsed" {
+    let start = Instant.now();
+    time.sleep(0.1.seconds());
+    let estimated = start.elapsed();
+    assert estimated >= 0.1.seconds();
+}

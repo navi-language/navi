@@ -26,36 +26,36 @@ test "hash - MD5" {
     let hash = crypto.hash("md5");
     hash.update("hello ");
     hash.update("world");
-    assert_eq hash.digest("hex"), "5eb63bbbe01eeed093cb22bb8f5acdc3";
-    assert_eq hash.digest("base64"), "XrY7u+Ae7tCTyyK7j1rNww==";
-    assert_eq hash.digest("base64url"), "XrY7u-Ae7tCTyyK7j1rNww";
+    assert_eq try! hash.digest().encode_to_string("hex"), "5eb63bbbe01eeed093cb22bb8f5acdc3";
+    assert_eq try! hash.digest().encode_to_string("base64"), "XrY7u+Ae7tCTyyK7j1rNww==";
+    assert_eq try! hash.digest().encode_to_string("base64url"), "XrY7u-Ae7tCTyyK7j1rNww";
 
     // chain call
-    assert_eq crypto.hash("md5").update("hello world").digest("hex"), "5eb63bbbe01eeed093cb22bb8f5acdc3";
+    assert_eq try! crypto.hash("md5").update("hello world").digest().encode_to_string("hex"), "5eb63bbbe01eeed093cb22bb8f5acdc3";
 }
 
 test "hash - Sha1" {
     let hash = crypto.hash("sha1");
     hash.update("hello world");
-    assert_eq hash.digest("hex"), "2aae6c35c94fcfb415dbe95f408b9ce91ee846ed";
-    assert_eq hash.digest("base64"), "Kq5sNclPz7QV2+lfQIuc6R7oRu0=";
-    assert_eq hash.digest("base64url"), "Kq5sNclPz7QV2-lfQIuc6R7oRu0";
+    assert_eq try! hash.digest().encode_to_string("hex"), "2aae6c35c94fcfb415dbe95f408b9ce91ee846ed";
+    assert_eq try! hash.digest().encode_to_string("base64"), "Kq5sNclPz7QV2+lfQIuc6R7oRu0=";
+    assert_eq try! hash.digest().encode_to_string("base64url"), "Kq5sNclPz7QV2-lfQIuc6R7oRu0";
 }
 
 test "hash - Sha256" {
     let hash = crypto.hash("sha256");
     hash.update("hello world");
-    assert_eq hash.digest("hex"), "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9";
-    assert_eq hash.digest("base64"), "uU0nuZNNPgilLlLX2n2r+sSE7+N6U4DukIj3rOLvzek=";
-    assert_eq hash.digest("base64url"), "uU0nuZNNPgilLlLX2n2r-sSE7-N6U4DukIj3rOLvzek";
+    assert_eq try! hash.digest().encode_to_string("hex"), "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9";
+    assert_eq try! hash.digest().encode_to_string("base64"), "uU0nuZNNPgilLlLX2n2r+sSE7+N6U4DukIj3rOLvzek=";
+    assert_eq try! hash.digest().encode_to_string("base64url"), "uU0nuZNNPgilLlLX2n2r-sSE7-N6U4DukIj3rOLvzek";
 }
 
 test "hash - Sha512" {
     let hash = crypto.hash("sha512");
     hash.update("hello world");
-    assert_eq hash.digest("hex"), "309ecc489c12d6eb4cc40f50c902f2b4d0ed77ee511a7c7a9bcd3ca86d4cd86f989dd35bc5ff499670da34255b45b0cfd830e81f605dcf7dc5542e93ae9cd76f";
-    assert_eq hash.digest("base64"), "MJ7MSJwS1utMxA9QyQLytNDtd+5RGnx6m808qG1M2G+YndNbxf9JlnDaNCVbRbDP2DDoH2Bdz33FVC6TrpzXbw==";
-    assert_eq hash.digest("base64url"), "MJ7MSJwS1utMxA9QyQLytNDtd-5RGnx6m808qG1M2G-YndNbxf9JlnDaNCVbRbDP2DDoH2Bdz33FVC6TrpzXbw";
+    assert_eq try! hash.digest().encode_to_string("hex"), "309ecc489c12d6eb4cc40f50c902f2b4d0ed77ee511a7c7a9bcd3ca86d4cd86f989dd35bc5ff499670da34255b45b0cfd830e81f605dcf7dc5542e93ae9cd76f";
+    assert_eq try! hash.digest().encode_to_string("base64"), "MJ7MSJwS1utMxA9QyQLytNDtd+5RGnx6m808qG1M2G+YndNbxf9JlnDaNCVbRbDP2DDoH2Bdz33FVC6TrpzXbw==";
+    assert_eq try! hash.digest().encode_to_string("base64url"), "MJ7MSJwS1utMxA9QyQLytNDtd-5RGnx6m808qG1M2G-YndNbxf9JlnDaNCVbRbDP2DDoH2Bdz33FVC6TrpzXbw";
 }
 
 test "hmac - string_interpolation" {
@@ -72,31 +72,31 @@ test "hmac - string_interpolation" {
 test "hmac - MD5" {
     let mac = crypto.hmac("md5", "123");
     mac.update("hello world");
-    assert_eq mac.digest("hex"), "c70af24210738c21adb674b25a21e3a9";
-    assert_eq mac.digest("base64"), "xwryQhBzjCGttnSyWiHjqQ==";
-    assert_eq mac.digest("base64url"), "xwryQhBzjCGttnSyWiHjqQ";
+    assert_eq try! mac.digest().encode_to_string("hex"), "c70af24210738c21adb674b25a21e3a9";
+    assert_eq try! mac.digest().encode_to_string("base64"), "xwryQhBzjCGttnSyWiHjqQ==";
+    assert_eq try! mac.digest().encode_to_string("base64url"), "xwryQhBzjCGttnSyWiHjqQ";
 }
 
 test "hmac - Sha1" {
     let mac = crypto.hmac("sha1", "123");
     mac.update("hello world");
-    assert_eq mac.digest("hex"), "9d103c03c33c3083033404baa0efba927305e394";
-    assert_eq mac.digest("base64"), "nRA8A8M8MIMDNAS6oO+6knMF45Q=";
-    assert_eq mac.digest("base64url"), "nRA8A8M8MIMDNAS6oO-6knMF45Q";
+    assert_eq try! mac.digest().encode_to_string("hex"), "9d103c03c33c3083033404baa0efba927305e394";
+    assert_eq try! mac.digest().encode_to_string("base64"), "nRA8A8M8MIMDNAS6oO+6knMF45Q=";
+    assert_eq try! mac.digest().encode_to_string("base64url"), "nRA8A8M8MIMDNAS6oO-6knMF45Q";
 }
 
 test "hmac - Sha256" {
     let mac = crypto.hmac("sha256", "123");
     mac.update("hello world");
-    assert_eq mac.digest("hex"), "8de9bbe5596700556793559dd70e6486684f379d162f70a4a341b3ee383565d4";
-    assert_eq mac.digest("base64"), "jem75VlnAFVnk1Wd1w5khmhPN50WL3Cko0Gz7jg1ZdQ=";
-    assert_eq mac.digest("base64url"), "jem75VlnAFVnk1Wd1w5khmhPN50WL3Cko0Gz7jg1ZdQ";
+    assert_eq try! mac.digest().encode_to_string("hex"), "8de9bbe5596700556793559dd70e6486684f379d162f70a4a341b3ee383565d4";
+    assert_eq try! mac.digest().encode_to_string("base64"), "jem75VlnAFVnk1Wd1w5khmhPN50WL3Cko0Gz7jg1ZdQ=";
+    assert_eq try! mac.digest().encode_to_string("base64url"), "jem75VlnAFVnk1Wd1w5khmhPN50WL3Cko0Gz7jg1ZdQ";
 }
 
 test "hmac - Sha512" {
     let mac = crypto.hmac("sha512", "123");
     mac.update("hello world");
-    assert_eq mac.digest("hex"), "8e6152a9cef4e034a03429a8137e0fe32358c15a6aa1f19c6932a6f6efb48e9b2708988d894664b44138f875679f6e44c39628a0f4c2cd90ca194e18dfee266d";
-    assert_eq mac.digest("base64"), "jmFSqc704DSgNCmoE34P4yNYwVpqofGcaTKm9u+0jpsnCJiNiUZktEE4+HVnn25Ew5YooPTCzZDKGU4Y3+4mbQ==";
-    assert_eq mac.digest("base64url"), "jmFSqc704DSgNCmoE34P4yNYwVpqofGcaTKm9u-0jpsnCJiNiUZktEE4-HVnn25Ew5YooPTCzZDKGU4Y3-4mbQ";
+    assert_eq try! mac.digest().encode_to_string("hex"), "8e6152a9cef4e034a03429a8137e0fe32358c15a6aa1f19c6932a6f6efb48e9b2708988d894664b44138f875679f6e44c39628a0f4c2cd90ca194e18dfee266d";
+    assert_eq try! mac.digest().encode_to_string("base64"), "jmFSqc704DSgNCmoE34P4yNYwVpqofGcaTKm9u+0jpsnCJiNiUZktEE4+HVnn25Ew5YooPTCzZDKGU4Y3+4mbQ==";
+    assert_eq try! mac.digest().encode_to_string("base64url"), "jmFSqc704DSgNCmoE34P4yNYwVpqofGcaTKm9u-0jpsnCJiNiUZktEE4-HVnn25Ew5YooPTCzZDKGU4Y3-4mbQ";
 }

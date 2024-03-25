@@ -19,6 +19,13 @@ test "int" {
     assert_eq a + c!, 4;
 }
 
+test "decimal" {
+    let eth = try! decimal.from_string("0.00005028");
+    let add: decimal = try! decimal.from_float(0.00000001);
+    let eth1 = eth + add;
+    assert_eq eth1.to_string(), "0.00005029";
+}
+
 test "ToString" {
     let a = 1;
     let b = 2;

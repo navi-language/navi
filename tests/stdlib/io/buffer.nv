@@ -14,28 +14,12 @@ fn assert_write(writer: io.Write) {
     assert_eq n, 8;
 }
 
-fn assert_write_string(writer: io.WriteString) {
-    let n = try! writer.write_string("<write_string");
-    assert_eq n, 13;
-    let n = try! writer.write_string(" 测试>");
-    assert_eq n, 8;
-}
-
 test "write_string" {
     let buf = Buffer.new();
-    let n = try! buf.write_string("hello");
-    assert_eq n, 5;
-    let n = try! buf.write_string(" ");
-    assert_eq n, 1;
-    let n = try! buf.write_string("世界");
-    assert_eq n, 6;
+    try! buf.write_string("hello");
+    try! buf.write_string(" ");
+    try! buf.write_string("世界");
     assert_eq buf.to_string(), "hello 世界";
-}
-
-test "io.WriteString" {
-    let buf = Buffer.new();
-    assert_write_string(buf);
-    assert_eq buf.to_string(), "<write_string 测试>";
 }
 
 test "write" {
@@ -53,7 +37,7 @@ test "write" {
     assert_eq buf.to_string(), "Hello 你好";
 
     let buf = Buffer.new();
-    try! buf.write_len("Hello 你好".bytes(), 5);
+    buf.write_len("Hello 你好".bytes(), 5);
     assert_eq buf.to_string(), "Hello";
 }
 

@@ -6,39 +6,10 @@ test "StringBuffer.new" {
     assert_eq buf.to_string(), "hello world";
 }
 
-fn assert_write(writer: io.Write) {
-    let n = try! writer.write("<write".bytes());
-    assert_eq n, 6;
-
-    let n = try! writer.write(" 测试>".bytes());
-    assert_eq n, 8;
-}
-
-fn assert_write_string(writer: io.WriteString) {
-    let n = try! writer.write_string("<write_string");
-    assert_eq n, 13;
-    let n = try! writer.write_string(" 测试>");
-    assert_eq n, 8;
-}
-
-test "io.Write" {
+test "write_string" {
     let buf = StringBuffer.new();
-    assert_write(buf);
-    assert_eq buf.to_string(), "<write 测试>";
-}
-
-test "io.WriteString" {
-    let buf = StringBuffer.new();
-    assert_write_string(buf);
-    assert_eq buf.to_string(), "<write_string 测试>";
-}
-
-test "write & write_string" {
-    let buf = StringBuffer.new();
-    let n = try buf.write("hello".bytes());
-    assert_eq n, 5;
-    let n = try buf.write_string(" 世界");
-    assert_eq n, 7;
+    buf.write_string("hello");
+    buf.write_string(" 世界");
     assert_eq buf.to_string(), "hello 世界";
 }
 
