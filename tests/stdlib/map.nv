@@ -3,7 +3,7 @@ struct Item {
 }
 
 test "init map" {
-    let a = <int, string> {};
+    let a: <int, string> = {:};
     a.set(1, "a");
     a.set(2, "B");
     a.set(3, "c");
@@ -30,7 +30,7 @@ test "init map" {
 }
 
 test "<string, string>" {
-    let a = <string, string> {};
+    let a: <string, string> = {:};
     a.set("name", "Jason Lee");
     a.set("city", "Wuhan");
     a.set("city", "Chengdu");
@@ -56,7 +56,7 @@ test "<string, string>" {
 }
 
 test "get & [] | set & []=" {
-    let items = <string, string> {};
+    let items: <string, string> = {:};
     items.set("name", "Jason Lee");
     assert_eq items["name"], "Jason Lee";
     assert_eq items.get("not-exist"), nil;
@@ -67,13 +67,13 @@ test "get & [] | set & []=" {
     items["city"] = "Wuhan";
     assert_eq items["city"], "Wuhan";
 
-    let items = <int, int> { 1: 192 };
+    let items = {1: 192};
     assert_eq items[1], 192;
     assert_eq items.get(2), nil;
 }
 
 test "keys" {
-    let items = <int, string> {};
+    let items: <int, string> = {:};
     items.set(1, "a");
     items.set(2, "b");
     items.set(3, "c");
@@ -88,7 +88,7 @@ test "keys" {
 }
 
 test "values" {
-    let items = <int, string> {};
+    let items: <int, string> = {:};
     items.set(1, "a");
     items.set(2, "b");
     items.set(3, "c");
@@ -99,7 +99,7 @@ test "values" {
     assert_eq values[1], "b";
     assert_eq values[2], "c";
 
-    let items = <string, Item> {};
+    let items: <string, Item> = {:};
     items.set("a", Item { name: "a" });
     items.set("b", Item { name: "b" });
 
@@ -110,7 +110,7 @@ test "values" {
 }
 
 test "struct value" {
-    let items = <string, Item> {};
+    let items: <string, Item> = {:};
     items.set("a", Item { name: "a" });
     items.set("b", Item { name: "b" });
 
@@ -118,7 +118,7 @@ test "struct value" {
 }
 
 test "clear" {
-    let items = <string, string> { "name": "Jason", "city": "Chengdu" };
+    let items = {"name": "Jason", "city": "Chengdu"};
 
     assert_eq items.len(), 2;
     items.clear();
@@ -126,7 +126,7 @@ test "clear" {
 }
 
 test "clone" {
-    let items = <string, string> { "name": "Jason", "city": "Chengdu" };
+    let items = {"name": "Jason", "city": "Chengdu"};
     let items2 = items.clone();
     items["name"] = "Sunli";
     items2["city"] = "Wuhan";
@@ -139,9 +139,9 @@ test "clone" {
 }
 
 test "iter k, v in map" {
-    let items = <string, string> { "title": "Navi", "url": "https://navi-lang.org" };
+    let items = {"title": "Navi", "url": "https://navi-lang.org"};
 
-    let result = [string] {};
+    let result: [string] = [];
     for (let k, v in items) {
         result.push(`${k}: ${v}`);
     }

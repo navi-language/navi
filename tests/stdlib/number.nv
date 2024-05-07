@@ -20,10 +20,13 @@ test "int" {
 }
 
 test "decimal" {
-    let eth = try! decimal.from_string("0.00005028");
-    let add: decimal = try! decimal.from_float(0.00000001);
+    let eth = try! Decimal.from_string("0.00005028");
+    let add = try! Decimal.from_float(0.00000001);
     let eth1 = eth + add;
     assert_eq eth1.to_string(), "0.00005029";
+
+    let n = try! Decimal.from_string("123.456", radix: 16);
+    assert_eq n.to_string(), "1193.046";
 }
 
 test "ToString" {

@@ -1,6 +1,6 @@
 use std.json;
-use std.toml;
 use std.testing.assert_throws;
+use std.toml;
 
 struct FooBar {
     foo: string,
@@ -50,7 +50,7 @@ test "parse" {
 test "to_string" {
     let foo_bar = FooBar {
         foo: "bar",
-        baz: { dar: { "qux", "quux" } }
+        baz: {dar: ["qux", "quux"]}
     };
 
     assert_eq try! toml.to_string(foo_bar), `foo = "bar"\n\n[baz]\ndar = ["qux", "quux"]\n`;
@@ -68,6 +68,6 @@ test "to_string" {
         try toml.to_string(123);
     }, "unsupported rust type");
     // map
-    assert_eq try! toml.to_string(<string, string> { "foo": "bar" }), `foo = "bar"\n`;
-    assert_eq try! toml.to_string(<string, int> { "foo": 1811 }), `foo = 1811\n`;
+    assert_eq try! toml.to_string({"foo": "bar"}), `foo = "bar"\n`;
+    assert_eq try! toml.to_string({"foo": 1811}), `foo = 1811\n`;
 }

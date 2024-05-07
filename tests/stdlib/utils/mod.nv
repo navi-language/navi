@@ -1,14 +1,10 @@
 use std.fs.{self, File};
-use std.io.{self, Bytes};
+use std.io;
 use std.{env, path};
 
 pub fn fixture(name: string): File {
     let filename = path.join("tests/fixtures", name);
-    do {
-        return try File.open(filename);
-    } catch(e) {
-        panic `Error opening fixture ${filename}, ${e.error()}`;
-    }
+    return try! File.open(filename);
 }
 
 pub fn tmp_filepath(p: string): string {

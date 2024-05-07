@@ -1,0 +1,28 @@
+use std.io;
+use std.json;
+
+#[serde(name = "a")]
+struct A {
+    a: int,
+}
+
+#[serde(name = "b")]
+struct B {
+    b: string,
+}
+
+#[serde(tag = "type")]
+type T = A | B;
+
+test "type tag" {
+    let t: T = A { a: 1 };
+    assert_eq try! json.to_string(t), `{"type":"a","a":1}`;
+
+    let t: T = B { b: "def" };
+    assert_eq try! json.to_string(t), `{"type":"b","b":"def"}`;
+
+    let a = try! json.from_string::<T>(`{"type": "a", "a": 1}`);
+    assert_eq a.(A), A { a: 1 };
+    let b = try! json.from_string::<T>(`{"type": "b", "b": "def"}`);
+    assert_eq b.(B), B { b: "def" };
+}

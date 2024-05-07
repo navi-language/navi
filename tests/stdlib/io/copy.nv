@@ -1,0 +1,18 @@
+use std.fs;
+use std.io.{self, Bytes, Cursor};
+use std.path;
+
+test "copy" {
+    let reader = Cursor.new("Hello world");
+    let writer = Bytes.new();
+    try! io.copy(reader, writer);
+    assert_eq writer.to_string(), "Hello world";
+}
+
+test "copy from file" {
+    let reader = try fs.open(path.join("tests/fixtures", "hello.txt"));
+    let writer = Bytes.new();
+
+    try! io.copy(reader, writer);
+    assert_eq writer.to_string(), "Hello, world!\n";
+}

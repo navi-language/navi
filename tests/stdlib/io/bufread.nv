@@ -1,0 +1,91 @@
+use std.io.{BufRead, Bytes, Cursor};
+
+test "fill_buf/consume" {
+    let cursor = Cursor.new("hello world");
+    let reader = BufRead.new(cursor, buf_size: 4);
+
+    assert_eq try reader.fill_buf(), b"hell";
+    assert_eq try reader.fill_buf(), b"hell";
+
+    reader.consume(2);
+    assert_eq try reader.fill_buf(), b"ll";
+
+    reader.consume(1);
+    assert_eq try reader.fill_buf(), b"l";
+
+    reader.consume(2);
+    assert_eq try reader.fill_buf(), b"o wo";
+
+    reader.consume(4);
+    assert_eq try reader.fill_buf(), b"rld";
+
+    reader.consume(2);
+    assert_eq try reader.fill_buf(), b"d";
+
+    reader.consume(1);
+    assert_eq try reader.fill_buf(), b"";
+
+    assert_eq try reader.fill_buf(), b"";
+}
+
+test "read_until" {
+    let cursor = Cursor.new("I switched my primary language from C/C++ to rust around 5 years back. I have been interviewing lately for a job change. Most of the interviews were 45 min affairs, solving Leetcode style problems");
+    let reader = BufRead.new(cursor, buf_size: 4);
+    let buf = Bytes.new();
+
+    try reader.read_until(b'.', buf);
+    assert_eq buf, b"I switched my primary language from C/C++ to rust around 5 years back.";
+
+    buf.clear();
+    try reader.read_until(b'.', buf);
+    assert_eq buf, b" I have been interviewing lately for a job change.";
+
+    buf.clear();
+    try reader.read_until(b'.', buf);
+    assert_eq buf, b" Most of the interviews were 45 min affairs, solving Leetcode style problems";
+
+    buf.clear();
+    try reader.read_until(b'.', buf);
+    assert_eq buf, b"";
+}
+
+test "skip_until" {
+    let cursor = Cursor.new("I switched my primary language from C/C++ to rust around 5 years back. I have been interviewing lately for a job change. Most of the interviews were 45 min affairs, solving Leetcode style problems");
+    let reader = BufRead.new(cursor, buf_size: 4);
+
+    assert_eq try reader.skip_until(b'.'), 70;
+    assert_eq try reader.skip_until(b'.'), 50;
+    assert_eq try reader.skip_until(b'.'), 76;
+}
+
+test "read_line" {
+    let cursor = Cursor.new("I switched my primary language from C/C++ to rust around 5 years back.\nI have been interviewing lately for a job change.\nMost of the interviews were 45 min affairs, solving Leetcode style problems");
+    let reader = BufRead.new(cursor, buf_size: 4);
+
+    assert_eq try reader.read_line(), "I switched my primary language from C/C++ to rust around 5 years back.\n";
+    assert_eq try reader.read_line(), "I have been interviewing lately for a job change.\n";
+    assert_eq try reader.read_line(), "Most of the interviews were 45 min affairs, solving Leetcode style problems";
+}
+
+test "read" {
+    let cursor = Cursor.new("I switched my primary language from C/C++ to rust around 5 years back.\nI have been interviewing lately for a job change.\nMost of the interviews were 45 min affairs, solving Leetcode style problems");
+    let reader = BufRead.new(cursor, buf_size: 4);
+    let buf = Bytes.new(len: 2);
+
+    assert_eq try reader.read(buf), 2;
+    assert_eq buf, b"I ";
+    assert_eq try reader.fill_buf(), b"sw";
+
+    let buf = Bytes.new(len: 10);
+    assert_eq try reader.read(buf), 2;
+    assert_eq buf.slice(0, 2), b"sw";
+    assert_eq try reader.fill_buf(), b"itch";
+
+    let buf = Bytes.new(len: 4);
+    assert_eq try reader.read(buf), 4;
+    assert_eq buf, b"itch";
+
+    let buf = Bytes.new(len: 20);
+    assert_eq try reader.read(buf), 20;
+    assert_eq buf, b"ed my primary langua";
+}

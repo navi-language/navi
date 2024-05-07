@@ -60,10 +60,10 @@ test "body & text" {
     let res = Response.new(body: "Hello, world!".bytes());
     let body = res.body();
 
-    let bytes = Bytes.new(5);
+    let bytes = Bytes.new(len: 5);
     try res.body().read(bytes);
     assert_eq bytes.to_string(), "Hello";
-    let bytes = Bytes.new(8);
+    let bytes = Bytes.new(len: 8);
     try res.body().read(bytes);
     assert_eq bytes.to_string(), ", world!";
 

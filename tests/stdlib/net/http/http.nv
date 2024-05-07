@@ -18,7 +18,7 @@ test "request" {
 
     // GET
     let headers = Headers.new();
-    let query = <string, string> { "foo": "1", "bar": "Foo Bar" };
+    let query = {"foo": "1", "bar": "Foo Bar"};
     let body = "";
 
     let res = try http.request("GET", server.url("/get"), headers:, query:, body:);
@@ -71,7 +71,7 @@ test "request with kw_args" {
     assert_eq res.status(), 200;
     assert_eq try res.text().contains("test-header"), true;
 
-    let query = <string, string> { "bar": "1", "foo": "FOO_BAR" };
+    let query = {"bar": "1", "foo": "FOO_BAR"};
     let res = try http.request("GET", server.url("/get"), headers: headers, query: query);
     assert_eq res.status(), 200;
     let text = try res.text();
@@ -82,7 +82,7 @@ test "head" {
     let server = test_harness.start_http_server();
 
     let headers = Headers.new();
-    let query = <string, string> { "foo": "1", "bar": "Foo Bar" };
+    let query = {"foo": "1", "bar": "Foo Bar"};
     let res = try http.head(server.url("/get"), headers: headers, query: query);
     assert_eq res.status(), 200;
 }
@@ -91,7 +91,7 @@ test "get" {
     let server = test_harness.start_http_server();
 
     let headers = Headers.new();
-    let query = <string, string> {
+    let query = {
         "foo": "1",
         "bar": "Foo Bar",
         // same key twice
@@ -109,7 +109,7 @@ test "post" {
     let server = test_harness.start_http_server();
 
     let headers = Headers.new();
-    let query = <string, string> { "foo": "1", "bar": "Foo Bar" };
+    let query = {"foo": "1", "bar": "Foo Bar"};
     let body = "Hello, world!";
     let res = try http.post(server.url("/post"), headers: headers, body:);
     assert_eq res.status(), 200;

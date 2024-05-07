@@ -1,0 +1,124 @@
+use std.env;
+use std.fs.{self, File};
+use std.io.{self, Bytes, IoError, Write};
+use std.json;
+use std.log.{self, Format, Level, Logger};
+use std.time;
+
+use utils.{cleanup_tmpdir, tmp_filepath};
+
+test "log to default logger" {
+    if (env.get("TEST_LOG") == nil) {
+        return;
+    }
+
+    log.error("Hello,", "error log.");
+    log.warn("Hello,", "warn log.");
+    log.info("Hello,", "info log.");
+    log.debug("Hello,", "debug log.");
+    log.trace("Hello,", "trace log.");
+}
+
+test "Logger to stdout" {
+    if (env.get("TEST_LOG") == nil) {
+        return;
+    }
+
+    let logger = Logger.new(io.stdout());
+    logger.error("Hello,", "error log.");
+    logger.warn("Hello,", "warn log.");
+    logger.info("Hello,", "info log.");
+    logger.debug("Hello,", "debug log.");
+    logger.trace("Hello,", "trace log.");
+}
+
+test "Logger to stderr" {
+    if (env.get("TEST_LOG") == nil) {
+        return;
+    }
+
+    let logger = Logger.new(io.stderr());
+    logger.error("Hello,", "error log.");
+    logger.warn("Hello,", "warn log.");
+    logger.info("Hello,", "info log.");
+    logger.debug("Hello,", "debug log.");
+    logger.trace("Hello,", "trace log.");
+}
+
+// const log_file = tmp_filepath("log.txt");
+
+// test "log to file" {
+//     defer cleanup_tmpdir();
+//     let f = try File.create(log_file);
+//     let logger = Logger.new(f);
+//     logger.error("Hello,", "error log.");
+//     logger.warn("Hello,", "warn log.");
+//     logger.info("Hello,", "info log.");
+//     logger.debug("Hello,", "debug log.");
+//     logger.trace("Hello,", "trace log.");
+
+//     let content = try fs.read_to_string(log_file);
+//     assert_eq content.contains("Hello, error log."), true, content;
+//     assert_eq content.contains("Hello, warn log."), true, content;
+//     assert_eq content.contains("Hello, info log."), true, content;
+//     assert_eq content.contains("debug"), false, content;
+//     assert_eq content.contains("debug"), false, content;
+// }
+
+// test "log with level" {
+//     defer cleanup_tmpdir();
+//     let f = try File.create(log_file);
+//     let logger = Logger.new(f, max_level: Level.Debug);
+//     logger.debug("Hello,", "debug log.");
+//     let content = try fs.read_to_string(log_file);
+//     assert_eq content.contains("Hello, debug log."), true, content;
+// }
+
+struct MyWriter {
+    output: string = "",
+}
+
+impl Write for MyWriter {
+    pub fn write(self, buf: Bytes): int throws IoError {
+        self.output += buf.to_string();
+        return buf.len();
+    }
+}
+
+test "Custom Writer" {
+    let writer = MyWriter {};
+    let logger = Logger.new(writer);
+    logger.error("测试,", "error log for Custom Writer.");
+    time.sleep(0.01.seconds());
+    assert writer.output.contains("测试, error log for Custom Writer.");
+}
+
+test "prefix" {
+    let writer = MyWriter {};
+    let logger = Logger.new(writer).prefix("MY_APP: ");
+    logger.error("测试,", "error log for prefix.");
+    time.sleep(0.01.seconds());
+    assert writer.output.contains("MY_APP: 测试, error log for prefix.");
+}
+
+struct LogEvent {
+    timestamp: string,
+    level: string,
+    fields: <string, string>,
+}
+
+test "log with format" {
+    let writer = MyWriter {};
+    let logger = Logger.new(writer, format: Format.JSON);
+    logger.error("测试,", "error log.");
+    logger.info("测试,", "info log.");
+    time.sleep(0.01.seconds());
+
+    let lines = writer.output.split("\n");
+    let event1 = try! json.parse::<LogEvent>(lines[0]);
+    assert_eq event1.level, "ERROR";
+    assert_eq event1.fields["message"], "测试, error log.";
+    let event2 = try! json.parse::<LogEvent>(lines[1]);
+    assert_eq event2.level, "INFO";
+    assert_eq event2.fields["message"], "测试, info log.";
+}

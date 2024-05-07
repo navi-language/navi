@@ -1,8 +1,7 @@
 use std.fs;
-use std.io.{self, Bytes, Cursor};
+use std.io.{self, Cursor};
 use std.json;
-use std.net.http.Request;
-use std.net.http.multipart.Form;
+use std.net.http.{self, Request, FormData};
 use std.path;
 
 use test_harness;
@@ -18,12 +17,12 @@ struct ResponseInfo {
 test "request set_multipart" {
     let server = test_harness.start_http_server();
 
-    let form = Form.new();
+    let form = FormData.new();
     form.set("name", "Jason Lee");
     form.set("city", "Chengdu");
     form.set("content", "Hello, world!".bytes());
     let req = Request.new(method: "POST", url: server.url("/post"));
-    req.set_multipart(form);
+    req.body = form;
 
     let res = try! req.send();
     assert_eq res.status(), 200;
@@ -41,9 +40,9 @@ test "request set_multipart" {
 
 test "new_request with multipart optional" {
     let server = test_harness.start_http_server();
-    let form = Form.new();
+    let form = FormData.new();
     form.set("name", "Jason Lee");
-    let req = Request.new(method: "POST", url: server.url("/post"), multipart: form);
+    let req = Request.new(method: "POST", url: server.url("/post"), body: form);
     let res = try! req.send();
 
     assert_eq res.status(), 200;
@@ -59,11 +58,11 @@ test "upload file" {
     // FIXME: file 如果用两次，不会报错，file 是空的
 
     let server = test_harness.start_http_server();
-    let form = Form.new();
+    let form = FormData.new();
     form.set("my_file0", file, filename: "测试hello0.txt", mime: "text/navi");
     form.set("my_file1", file1, filename: "测试hello1.txt", mime: "text/plain");
 
-    let req = Request.new(method: "POST", url: server.url("/post"), multipart: form);
+    let req = Request.new(method: "POST", url: server.url("/post"), body: form);
     let res = try! req.send();
     assert_eq res.status(), 200;
     let body = try! res.json::<ResponseInfo>();
@@ -82,12 +81,12 @@ test "set" {
     let file = try! fs.open(filename);
 
     let server = test_harness.start_http_server();
-    let form = Form.new();
+    let form = FormData.new();
     form.set("file", file, filename: "测试hello0.txt", mime: "text/navi");
     form.set("file1", "Hello, world!", filename: "测试hello1.txt", mime: "text/plain");
     form.set("file2", "File2".bytes(), filename: "测试hello2.txt", mime: "text/plain");
 
-    let req = Request.new(method: "POST", url: server.url("/post"), multipart: form);
+    let req = Request.new(method: "POST", url: server.url("/post"), body: form);
     let res = try! req.send();
     assert_eq res.status(), 200;
     let body = try! res.json::<ResponseInfo>();
@@ -101,4 +100,29 @@ test "set" {
     assert_eq data.contains(file_payload0), true, data;
     assert_eq data.contains(file_payload1), true, data;
     assert_eq data.contains(file_payload2), true, data;
+}
+
+test "set / append / remove / keys / contains_key / len / is_empty" {
+    let form = FormData.new();
+
+    assert_eq form.len(), 0;
+    assert_eq form.is_empty(), true;
+
+    form.set("name", "Jason Lee");
+    form.set("name", "Sunli");
+    form.append("name", "Xda");
+
+    assert_eq form.contains_key("name"), true;
+    assert_eq form.contains_key("city"), false;
+    assert_eq form.keys(), ["name", "name"];
+    assert_eq form.len(), 2;
+
+    form.append("city", "Chengdu");
+    form.append("id", "100");
+    form.remove("id");
+
+    assert_eq form.contains_key("city"), true;
+    assert_eq form.contains_key("id"), false;
+    assert_eq form.keys(), ["name", "name", "city"];
+    assert_eq form.len(), 3;
 }

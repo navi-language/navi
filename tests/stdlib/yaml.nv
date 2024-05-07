@@ -33,13 +33,16 @@ test "parse" {
     // bool
     assert_eq try! yaml.parse::<bool>("true"), true;
     // array
-    assert_eq try! yaml.parse::<[string]>("- foo\n- bar"), [string] { "foo", "bar" };
-    assert_eq try! yaml.parse::<[int]>("- 123\n- 456"), [int] { 123, 456 };
-    assert_eq try! yaml.parse::<[float]>("- 123.456\n- 456.789"), [float] { 123.456, 456.789 };
-    assert_eq try! yaml.parse::<[bool]>("- true\n- false"), [bool] { true, false };
+    assert_eq try! yaml.parse::<[string]>("- foo\n- bar"), ["foo", "bar"];
+    assert_eq try! yaml.parse::<[int]>("- 123\n- 456"), [123, 456];
+    assert_eq try! yaml.parse::<[float]>("- 123.456\n- 456.789"), [123.456, 456.789];
+    assert_eq try! yaml.parse::<[bool]>("- true\n- false"), [true, false];
     // map
-    assert_eq try! yaml.parse::<<string, string?>>("foo: bar\nbaz: qux"), <string, string> { "foo": "bar", "baz": "qux" };
-    assert_eq try! yaml.parse::<<string, int>>("foo: 123\nbaz: 456"), <string, int> { "foo": 123, "baz": 456 };
+    assert_eq try! yaml.parse::<<string, string?>>("foo: bar\nbaz: qux"), {
+        "foo": "bar",
+        "baz": "qux"
+    };
+    assert_eq try! yaml.parse::<<string, int>>("foo: 123\nbaz: 456"), {"foo": 123, "baz": 456};
 
     // struct
     let val = try! yaml.parse::<FooBar>(`foo: bar\nbaz:\n  dar:\n    - qux\n    - quux\n`);
@@ -80,19 +83,21 @@ test "to_string" {
     assert_eq try! yaml.to_string(true), "true\n";
     assert_eq try! yaml.to_string(false), "false\n";
     // array
-    assert_eq try! yaml.to_string([string] { "foo", "bar" }), "- foo\n- bar\n";
-    assert_eq try! yaml.to_string([int] { 123, 456 }), "- 123\n- 456\n";
-    assert_eq try! yaml.to_string([float] { 123.456, 456.789 }), "- 123.456\n- 456.789\n";
-    assert_eq try! yaml.to_string([bool] { true, false }), "- true\n- false\n";
-    assert_eq try! yaml.to_string([any?] { "foo", 1123, 123.456, true, nil }), "- foo\n- 1123\n- 123.456\n- true\n- null\n";
+    assert_eq try! yaml.to_string(["foo", "bar"]), "- foo\n- bar\n";
+    assert_eq try! yaml.to_string([123, 456]), "- 123\n- 456\n";
+    assert_eq try! yaml.to_string([123.456, 456.789]), "- 123.456\n- 456.789\n";
+    assert_eq try! yaml.to_string([true, false]), "- true\n- false\n";
+    let values: [Any?] = ["foo", 1123, 123.456, true, nil];
+    assert_eq try! yaml.to_string(values), "- foo\n- 1123\n- 123.456\n- true\n- null\n";
     // map
-    assert_eq try! yaml.to_string(<string, string> { "foo": "bar", "baz": "qux" }), "baz: qux\nfoo: bar\n";
-    assert_eq try! yaml.to_string(<string, any> { "foo": "bar", "baz": 456 }), "baz: 456\nfoo: bar\n";
+    assert_eq try! yaml.to_string({"foo": "bar", "baz": "qux"}), "baz: qux\nfoo: bar\n";
+    let values: <string, Any> = {"foo": "bar", "baz": 456};
+    assert_eq try! yaml.to_string(values), "baz: 456\nfoo: bar\n";
 
     // struct
     let foo_bar = FooBar {
         foo: "bar",
-        baz: { dar: { "qux", "quux" } }
+        baz: {dar: ["qux", "quux"]}
     };
 
     assert_eq try! yaml.to_string(foo_bar), "foo: bar\nbaz:\n  dar:\n  - qux\n  - quux\n";

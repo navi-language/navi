@@ -1,0 +1,87 @@
+use std.json;
+use std.net.http.{Request, FormUrlEncoded};
+use std.querystring;
+use test_harness;
+
+struct ResponseInfo {
+    url: string,
+    method: string,
+    data: string,
+    args: <string, string>,
+    headers: <string, string>
+}
+
+test "from <string, string>" {
+    let form = FormUrlEncoded.from({
+        "name": "John",
+        "profile[age]": "20"
+    });
+}
+
+test "from <string, int>" {
+    let form = FormUrlEncoded.from({
+        "name": 100,
+        "profile[age]": 10
+    });
+}
+
+struct Profile {
+    name: string,
+    age: int
+}
+
+test "from struct" {
+    let form = FormUrlEncoded.from(Profile { name: "John", age: 20 });
+}
+
+test "request with form" {
+    let server = test_harness.start_http_server();
+    let form = FormUrlEncoded.from({
+        "foo": "bar",
+        "message": "Hello, 世界!",
+        "bar[baz]": "qux"
+    });
+
+    let req = Request.new(method: "POST", url: server.url("/post"));
+    req.body = form;
+
+    let res = try req.send();
+    assert_eq res.status(), 200;
+
+    let info = try res.json::<ResponseInfo>();
+
+    assert_eq info.headers["content-type"], "application/x-www-form-urlencoded";
+    assert_form_eq(info.data, "bar%5Bbaz%5D=qux&foo=bar&message=Hello%2C+%E4%B8%96%E7%95%8C%21");
+}
+
+fn assert_form_eq(data: string, expected: string) {
+    let data = data.split("&").map(|s| s);
+    data.sort();
+    assert_eq data.join("&"), expected;
+}
+
+test "request with struct" {
+    let server = test_harness.start_http_server();
+    let body = FormUrlEncoded.from(Profile { name: "John", age: 20 });
+    let req = Request.new(method: "POST", url: server.url("/post"), body:);
+
+    let res = try req.send();
+    assert_eq res.status(), 200;
+
+    let info = try res.json::<ResponseInfo>();
+
+    assert_eq info.headers["content-type"], "application/x-www-form-urlencoded";
+    assert_form_eq(info.data, "age=20&name=John");
+}
+
+test "new_request with form optional" {
+    let server = test_harness.start_http_server();
+    let req = Request.new(method: "POST", url: server.url("/post"), body: FormUrlEncoded.from({ "foo": "bar", "message": "Hello, 世界!" }));
+
+    let res = try req.send();
+    assert_eq res.status(), 200;
+
+    let info = try res.json::<ResponseInfo>();
+    assert_eq info.headers["content-type"], "application/x-www-form-urlencoded";
+    assert_form_eq(info.data, "foo=bar&message=Hello%2C+%E4%B8%96%E7%95%8C%21");
+}

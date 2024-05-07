@@ -1,4 +1,5 @@
 use std.env;
+use std.io.BufRead;
 
 // This test only perform on `TEST_STDIN=true`
 // sh tests/test.sh

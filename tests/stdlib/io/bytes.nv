@@ -1,41 +1,46 @@
-use std.io.Bytes;
+use std.io.{Bytes, Write};
+
+test "literal" {
+    let buf: Bytes = b"abcdef";
+    assert_eq buf.to_string(), "abcdef";
+}
 
 test "new_bytes" {
-    let buf = Bytes.new(0);
+    let buf = Bytes.new();
     assert_eq buf.len(), 0;
 
-    let buf = Bytes.new(2);
-    assert_eq buf.get(0), 0;
-    assert_eq buf.get(1), 0;
+    let buf = Bytes.new(len: 2);
+    assert_eq buf[0], 0;
+    assert_eq buf[1], 0;
 }
 
 test "from_bytes" {
-    let buf = Bytes.from_array({ 104, 101, 108, 108, 111 });
+    let buf = Bytes.from_array([104, 101, 108, 108, 111]);
     assert_eq buf.len(), 5;
     assert_eq buf.to_string(), "hello";
 }
 
 test "len" {
-    let buf = Bytes.new(2);
+    let buf = Bytes.new(len: 2);
     assert_eq buf.len(), 2;
 }
 
 test "set & get" {
-    let buf = Bytes.new(5);
-    buf.set(0, 104);
-    buf.set(1, 101);
-    buf.set(2, 108);
-    buf.set(3, 108);
-    buf.set(4, 111);
+    let buf = Bytes.new(len: 5);
+    buf[0] = 104;
+    buf[1] = 101;
+    buf[2] = 108;
+    buf[3] = 108;
+    buf[4] = 111;
     assert_eq buf.to_string(), "hello";
 
     let buf = "hello".bytes();
 
     // Set buf byte, replace with `Hello`.
-    buf.set(0, 72);
+    buf[0] = 72;
 
-    assert_eq buf.get(0), 72;
-    assert_eq buf.get(1), 101;
+    assert_eq buf[0], 72;
+    assert_eq buf[1], 101;
     assert_eq buf.to_string(), "Hello";
 }
 
@@ -45,4 +50,59 @@ test "encode_to_string" {
     assert_eq try! bytes.encode_to_string("hex"), "68656c6c6f20776f726c64";
     assert_eq try! bytes.encode_to_string("base64"), "aGVsbG8gd29ybGQ=";
     assert_eq try! bytes.encode_to_string("base64url"), "aGVsbG8gd29ybGQ";
+}
+
+test "write_string" {
+    let buf = Bytes.new();
+    try! buf.write_string("hello");
+    try! buf.write_string(" ");
+    try! buf.write_string("世界");
+    assert_eq buf.to_string(), "hello 世界";
+}
+
+test "write" {
+    let buf = Bytes.new();
+    let n = try! buf.write(Bytes.from_array([104, 101, 108, 108, 111]));
+    assert_eq n, 5;
+    let n = try! buf.write(Bytes.from_array([32]));
+    assert_eq n, 1;
+    let n = try! buf.write(Bytes.from_array([119, 111, 114, 108, 100]));
+    assert_eq n, 5;
+    assert_eq buf.to_string(), "hello world";
+
+    let buf = Bytes.new();
+    try! buf.write("Hello 你好".bytes());
+    assert_eq buf.to_string(), "Hello 你好";
+
+    let buf = Bytes.new();
+    try! buf.write("Hello 你好".bytes().slice(0, 5));
+    assert_eq buf.to_string(), "Hello";
+}
+
+test "io.Write" {
+    let buf = Bytes.new();
+    let writer: Write = buf;
+
+    let n = try! writer.write("<write".bytes());
+    assert_eq n, 6;
+    let n = try! writer.write(" 测试>".bytes());
+    assert_eq n, 8;
+
+    assert_eq buf.to_string(), "<write 测试>";
+}
+
+test "clear" {
+    let buf = Bytes.new();
+    try! buf.write_string("hello");
+    assert_eq buf.len(), 5;
+    buf.clear();
+    assert_eq buf.len(), 0;
+}
+
+test "trunc" {
+    let buf = Bytes.new();
+    try! buf.write_string("hello world");
+    buf.trunc(5);
+    assert_eq buf.len(), 5;
+    assert_eq buf.to_string(), "hello";
 }

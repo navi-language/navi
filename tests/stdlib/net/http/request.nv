@@ -27,7 +27,7 @@ test "new_request" {
     headers.set("Content-Type", "application/json");
     headers.set("Accept-Encoding", "gzip, deflate");
 
-    let query = <string, string> { "foo": "bar", "baz": "1" };
+    let query = {"foo": "bar", "baz": "1"};
     let body = "Hello World!";
 
     let req = Request.new(method: "GET", url: server.url("/get"), headers:, query:, body:);
@@ -63,7 +63,7 @@ test "send" {
     let req = Request.new(
         method: "POST",
         url: server.url("/post"),
-        query: <string, string> { "foo": "1", "bar": "Foo Bar", "foo": "a" },
+        query: {"foo": "1", "bar": "Foo Bar", "foo": "a"},
         headers:,
         body: "Hello World!"
     );
@@ -147,7 +147,7 @@ test "query" {
     let req = Request.new();
     assert_eq req.query.len(), 0;
 
-    let query = <string, string> { "foo": "bar", "baz": "1" };
+    let query = {"foo": "bar", "baz": "1"};
 
     req.query = query;
     assert_eq req.query.len(), 2;

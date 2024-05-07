@@ -1,16 +1,14 @@
-use std.io;
-
 test "print" {
-    io.print("hello");
-    io.print("hello", "world", 123, 3.14, true, false);
+    print("hello");
+    print("hello", "world", 123, 3.14, true, false);
     let a = 123;
-    io.print("a = ", a);
+    print("a = ", a);
     // let a: int? = 123;
-    // io.print("a = ", a);
+    // print("a = ", a);
 }
 
 test "println" {
-    io.println("hello", "world", 123, 3.14, true, false);
+    println("hello", "world", 123, 3.14, true, false);
     let a = 123;
-    io.println("a = ", a);
+    println("a = ", a);
 }

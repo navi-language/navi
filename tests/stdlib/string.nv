@@ -6,7 +6,7 @@ test "string" {
     assert_eq s, "hello";
 }
 
-test "String - string_interpolation" {
+test "string - string_interpolation" {
     let s = "hello";
     assert_eq `${s}`, "hello";
 }
@@ -29,18 +29,18 @@ test "bytes" {
     let s = "hello world.";
     let buf = s.bytes();
     assert_eq buf.len(), 12;
-    assert_eq buf.get(0), 104;
-    assert_eq buf.get(1), 101;
-    assert_eq buf.get(2), 108;
-    assert_eq buf.get(3), 108;
-    assert_eq buf.get(4), 111;
-    assert_eq buf.get(5), 32;
-    assert_eq buf.get(6), 119;
-    assert_eq buf.get(7), 111;
-    assert_eq buf.get(8), 114;
-    assert_eq buf.get(9), 108;
-    assert_eq buf.get(10), 100;
-    assert_eq buf.get(11), 46;
+    assert_eq buf[0], 104;
+    assert_eq buf[1], 101;
+    assert_eq buf[2], 108;
+    assert_eq buf[3], 108;
+    assert_eq buf[4], 111;
+    assert_eq buf[5], 32;
+    assert_eq buf[6], 119;
+    assert_eq buf[7], 111;
+    assert_eq buf[8], 114;
+    assert_eq buf[9], 108;
+    assert_eq buf[10], 100;
+    assert_eq buf[11], 46;
 
     let s = "👋🏻 你好";
     assert_eq s.bytes().len(), 15;
@@ -109,7 +109,7 @@ test "split" {
     let s = "hello world.";
     let parts = s.split("");
     assert_eq parts.len(), 12;
-    assert_eq parts, { "h", "e", "l", "l", "o", " ", "w", "o", "r", "l", "d", "." };
+    assert_eq parts, ["h", "e", "l", "l", "o", " ", "w", "o", "r", "l", "d", "."];
     assert_eq parts.join(""), s;
 
     let parts = s.split(" ");

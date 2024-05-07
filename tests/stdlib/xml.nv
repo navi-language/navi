@@ -1,7 +1,7 @@
 use std.io.Cursor;
 use std.json;
-use std.xml;
 use std.testing.assert_throws;
+use std.xml;
 
 #[serde(rename_all = "lowercase")]
 struct FooBar {
@@ -53,7 +53,7 @@ test "parse" {
 test "to_string" {
     let foo_bar = FooBar {
         foo: "bar",
-        baz: { dar: { "qux", "quux" } }
+        baz: {dar: ["qux", "quux"]}
     };
 
     assert_eq try! xml.to_string(foo_bar), `<?xml version="1.0" encoding="utf-8"?><foo>bar</foo><baz><dar>qux</dar><dar>quux</dar></baz>`;
@@ -70,10 +70,11 @@ test "to_string" {
     assert_eq try! xml.to_string(true), `<?xml version="1.0" encoding="utf-8"?>true`;
     assert_eq try! xml.to_string(false), `<?xml version="1.0" encoding="utf-8"?>false`;
     // array
-    assert_eq try! xml.to_string([int] {1, 2, 3}), `<?xml version="1.0" encoding="utf-8"?>123`;
+    assert_eq try! xml.to_string([1, 2, 3]), `<?xml version="1.0" encoding="utf-8"?>123`;
     // map
-    assert_eq try! xml.to_string(<string, string> { "foo": "bar", "baz": "qux" }), `<?xml version="1.0" encoding="utf-8"?><baz>qux</baz><foo>bar</foo>`;
-    assert_eq try! xml.to_string(<string, any> { "foo": "bar", "baz": 1, "qux": 1.23, "quux": true }), `<?xml version="1.0" encoding="utf-8"?><quux>true</quux><baz>1</baz><qux>1.23</qux><foo>bar</foo>`;
+    assert_eq try! xml.to_string({"foo": "bar", "baz": "qux"}), `<?xml version="1.0" encoding="utf-8"?><baz>qux</baz><foo>bar</foo>`;
+    let values: <string, Any> = {"foo": "bar", "baz": 1, "qux": 1.23, "quux": true};
+    assert_eq try! xml.to_string(values), `<?xml version="1.0" encoding="utf-8"?><quux>true</quux><baz>1</baz><qux>1.23</qux><foo>bar</foo>`;
 }
 
 test "from_string" {

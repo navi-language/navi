@@ -24,8 +24,8 @@ test "to_string" {
     let user = User {
         name: "Jason Lee",
         id: 123456,
-        profile: { city: "Chengdu" },
-        tags: { "Rust", "Navi" }
+        profile: {city: "Chengdu"},
+        tags: ["Rust", "Navi"]
     };
 
     assert_eq try! querystring.to_string(user), `name=Jason+Lee&id=123456&profile[city]=Chengdu&tags[0]=Rust&tags[1]=Navi`;

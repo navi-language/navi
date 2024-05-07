@@ -1,5 +1,5 @@
 use std.base64.{self, Mode};
-use std.io.{Buffer, Bytes, IoError, StringBuffer};
+use std.io.{IoError, StringBuffer};
 use std.testing.{assert_throws};
 
 test "encode" {

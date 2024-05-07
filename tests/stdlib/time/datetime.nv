@@ -179,12 +179,12 @@ test "to_offset" {
 }
 
 test "sort_by date" {
-    let dates = try [time.DateTime] {
+    let dates = try [
         DateTime.parse("2023-04-08 09:45:26 +08:00"),
         DateTime.parse("2023-04-13 09:45:26 +08:00"),
         DateTime.parse("2023-04-01 09:45:26 +08:00"),
         DateTime.parse("2023-04-01 09:45:30 +08:00")
-    };
+    ];
 
     dates.sort_by(|a, b| {
         return a > b;
@@ -194,12 +194,12 @@ test "sort_by date" {
     assert_eq dates[2].to_string(), "2023-04-01T09:45:30+08:00";
     assert_eq dates[3].to_string(), "2023-04-01T09:45:26+08:00";
 
-    let dates = try [time.DateTime] {
+    let dates = try [
         DateTime.parse("2023-04-08 01:45:26 +00:00"),
         DateTime.parse("2023-04-13 01:45:26 +00:00"),
         DateTime.parse("2023-04-01 01:45:26 +00:00"),
         DateTime.parse("2023-04-01 01:45:30 +00:00")
-    };
+    ];
     dates.sort_by(|a, b| {
         return a < b;
     });

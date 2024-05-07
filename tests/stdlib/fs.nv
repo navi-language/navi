@@ -1,5 +1,6 @@
-use std.fs.{self, File};
-use std.io.{self, Buffer, Bytes};
+use std.fs.{self, File, SeekFrom};
+use std.io.{self, Bytes};
+use std.testing.assert_throws;
 use std.time.DateTime;
 use std.{env, path};
 
@@ -16,9 +17,72 @@ test "fs.read_to_string" {
 }
 
 test "fs.open" {
-    let f = try! fs.open(path.join("tests/fixtures", "hello.txt"));
+    let fname = path.join("tests/fixtures", "hello.txt");
+    let f = try! fs.open(fname);
     assert_eq try! f.read_to_string(), "Hello, world!\n";
     try f.close();
+}
+
+test "fs.open with flag and mode" {
+    // fs.READ|fs.WRITE|fs.CREATE
+    let fname = tmp_filepath("test-std-file-open.txt");
+    let f = try! fs.open(fname, flag: fs.READ | fs.WRITE | fs.CREATE, mode: 0o644);
+    try f.write_string("Hello, world!\n");
+    try f.close();
+    assert_eq try! fs.read_to_string(fname), "Hello, world!\n";
+
+    // READ
+    let f = try! fs.open(fname, flag: fs.READ);
+    assert_eq try f.read_to_string(), "Hello, world!\n";
+    try f.close();
+
+    // WRITE
+    let f = try! fs.open(fname, flag: fs.WRITE);
+    assert_throws(|| {
+        try f.read_to_string();
+    }, |err| {
+        assert err.error().contains("os error");
+    });
+    try f.write_string("Second write content\n");
+    try f.close();
+    assert_eq try! fs.read_to_string(fname), "Second write content\n";
+
+    // APPEND
+    let f = try! fs.open(fname, flag: fs.APPEND | fs.READ, mode: 0o644);
+    assert_eq try f.read_to_string(), "Second write content\n";
+    try f.write_string("Third write\n");
+    try f.close();
+    assert_eq try! fs.read_to_string(fname), "Second write content\nThird write\n";
+
+    // CREATE_NEW
+    assert_throws(|| {
+        try fs.open(fname, flag: fs.CREATE_NEW);
+    }, |err| {
+        assert err.error().contains("os error");
+    });
+    assert_throws(|| {
+        try fs.open(fname, flag: fs.CREATE_NEW | fs.WRITE);
+    }, |err| {
+        if (env.platform() == "windows") {
+            assert err.error().contains("os error");
+        } else {
+            assert err.error().contains("exists");
+        }
+    });
+
+    // CREATE
+    let f = try! fs.open(fname, flag: fs.CREATE | fs.WRITE);
+    try f.write_string("Fourth write\n");
+    try f.close();
+
+    // O_TRUNC
+    let f = try! fs.open(fname, flag: fs.TRUNCATE | fs.READ | fs.WRITE);
+    assert_eq try f.read_to_string(), "";
+    try f.write_string("Hello, world!\n");
+    try f.close();
+    assert_eq try! fs.read_to_string(fname), "Hello, world!\n";
+
+    cleanup_tmpdir();
 }
 
 test "fs.write" {
@@ -60,7 +124,7 @@ test "File.open" {
 
 test "read_to_end" {
     let f = fixture("hello.txt");
-    let buf = Buffer.new();
+    let buf = Bytes.new();
     let n = try! f.read_to_end(buf);
     assert_eq n, 14;
     assert_eq buf.to_string(), "Hello, world!\n";
@@ -69,7 +133,7 @@ test "read_to_end" {
 
 test "read" {
     let f = fixture("hello.txt");
-    let buf = Bytes.new(5);
+    let buf = Bytes.new(len: 5);
     let n = try! f.read(buf);
     assert_eq n, 5;
     assert_eq buf.to_string(), "Hello";
@@ -99,19 +163,15 @@ test "fs.create & write_string & write & remove_file & flush" {
     assert_eq n, 8;
     // Write a byte \n
     try! f.write_byte(10);
-    // Build a buf
-    let buf = Buffer.new();
-    try! buf.write_string("This is Navi.");
-    try! f.write_buffer(buf);
 
     // Close
     try f.close();
 
     let f = try! File.open(p);
-    let buf = Buffer.new();
+    let buf = Bytes.new();
     try! f.read_to_end(buf);
     try f.close();
-    assert_eq buf.to_string(), "Hello, world!\nThis is Navi.";
+    assert_eq buf.to_string(), "Hello, world!\n";
 
     try! fs.remove_file(p);
     assert !path.exists(p);
@@ -176,8 +236,8 @@ test "metadata" {
 }
 
 test "glob" {
-    let paths = [string] {};
-    let exts = [string] {};
+    let paths: [string] = [];
+    let exts: [string] = [];
     try! fs.glob("tests/**/*.nv", |p| {
         paths.push(p);
         exts.push(path.extension(p));
@@ -198,8 +258,124 @@ test "glob" {
     assert exts.contains("nv");
 }
 
+test "copy" {
+    let from = tmp_filepath("test-std-file-from.txt");
+    try! fs.write_string(from, "FROM file contents");
+
+    let to = tmp_filepath("test-std-file-copy.txt");
+    try! fs.copy(from, to);
+    assert_eq try! fs.read_to_string(to), "FROM file contents";
+
+    cleanup_tmpdir();
+}
+
+test "copy_dir" {
+    let tmp_path = path.join(env.tmpdir(), "navi-tests");
+    let from = path.join(tmp_path, "copy_dir/from");
+    try! fs.create_dir_all(path.join(from, "foo/bar/dar"));
+    try! fs.write_string(path.join(from, "foo/bar/dar/file1.txt"), "file1 contents");
+    try! fs.write_string(path.join(from, "foo/bar/dar/file2.txt"), "file2 contents");
+
+    let to = path.join(tmp_path, "copy_dir/to");
+    try! fs.create_dir_all(to);
+    try! fs.copy_dir(from, to);
+    assert path.exists(path.join(to, "from"));
+    assert path.exists(path.join(to, "from/foo/bar/dar/file1.txt"));
+    assert path.exists(path.join(to, "from/foo/bar/dar/file2.txt"));
+    cleanup_tmpdir();
+}
+
+test "copy_dir with recursive and force" {
+    let tmp_path = path.join(env.tmpdir(), "navi-tests");
+    let from = path.join(tmp_path, "copy_dir_recursive/from");
+    try! fs.create_dir_all(path.join(from, "foo/bar/dar"));
+    try! fs.write_string(path.join(from, "foo/bar/dar/file1.txt"), "file1 contents");
+    try! fs.write_string(path.join(from, "foo/bar/dar/file2.txt"), "file2 contents");
+
+    let to = path.join(tmp_path, "copy_dir_recursive/to");
+    try! fs.copy_dir(from, to, recursive: true);
+    assert path.exists(path.join(to, "foo/bar/dar/file1.txt"));
+    assert path.exists(path.join(to, "foo/bar/dar/file2.txt"));
+    cleanup_tmpdir();
+
+    // Force override
+    let from = path.join(tmp_path, "copy_dir_recursive/from1");
+    try! fs.create_dir_all(path.join(from, "aa/bar/dar/"));
+    try! fs.write_string(path.join(from, "aa/bar/dar/from3.txt"), "file3 contents");
+    try! fs.copy_dir(from, to, force: true, recursive: true);
+    // The new files should be copied
+    assert path.exists(path.join(to, "aa/bar/dar/from3.txt"));
+    // And the old files should be removed
+    assert !path.exists(path.join(to, "foo"));
+    assert !path.exists(path.join(to, "foo/bar/dar/file1.txt"));
+    assert !path.exists(path.join(to, "foo/bar/dar/file2.txt"));
+    cleanup_tmpdir();
+}
+
+test "rename" {
+    let from = tmp_filepath("test-std-file-from.txt");
+    try! fs.write_string(from, "FROM file contents");
+
+    let to = tmp_filepath("test-std-file-to.txt");
+    try! fs.rename(from, to);
+    assert_eq try! fs.read_to_string(to), "FROM file contents";
+    assert !path.exists(from);
+
+    cleanup_tmpdir();
+}
+
+test "link && unlink" {
+    let from = tmp_filepath("test-std-file-from.txt");
+    try! fs.write_string(from, "FROM file contents");
+
+    let to = tmp_filepath("test-std-file-to.txt");
+    try! fs.link(from, to);
+    assert path.exists(from);
+    assert path.exists(to);
+    assert_eq try! fs.read_to_string(to), "FROM file contents";
+
+    try! fs.unlink(to);
+    assert !path.exists(to);
+    cleanup_tmpdir();
+}
+
+test "symlink && readlink" {
+    if (env.platform() == "windows") {
+        return;
+    }
+
+    let from = tmp_filepath("test-std-file-symlink-from.txt");
+    try! fs.write_string(from, "FROM file contents");
+
+    assert_throws(|| {
+        try fs.readlink(from);
+    }, |err| {
+        assert err.error().contains("os error");
+    });
+
+    let to = tmp_filepath("test-std-file-symlink-to.txt");
+    try! fs.symlink(from, to);
+    assert path.exists(from);
+    assert path.exists(to);
+    assert_eq try! fs.read_to_string(to), "FROM file contents";
+    assert_eq try! fs.readlink(to), from;
+    cleanup_tmpdir();
+
+    // Test symlink dir
+    let from = tmp_filepath("test-std-file-symlink-from/test");
+    try! fs.create_dir(from);
+    let to = tmp_filepath("test-std-file-symlink-to/test");
+    try! fs.symlink(from, to);
+    assert path.exists(from);
+    assert path.exists(to);
+    assert path.is_dir(to);
+
+    assert_eq try! fs.readlink(to), from;
+    cleanup_tmpdir();
+}
+
 fn assert_read(reader: io.Read, expect: string) {
-    let buf = Buffer.new();
+    let buf = Bytes.new();
     let n = try! reader.read_to_end(buf);
     assert_eq n, 14;
     assert_eq buf.to_string(), expect;
@@ -223,4 +399,36 @@ test "std.io.Write" {
     try f.close();
     assert_eq try! fs.read_to_string(p), "Hello, world!\n";
     cleanup_tmpdir();
+}
+
+test "File.seek and File.rewind" {
+    let p = tmp_filepath("test-std-file-seek.txt");
+    let f = try! File.create(p);
+    try! f.write_string("Hello, world!");
+    try! f.seek(0, SeekFrom.Start);
+    try! f.write_string("Hi,    ");
+    try! f.close();
+    assert_eq try! fs.read_to_string(p), "Hi,    world!";
+
+    let f = try! File.create(p);
+    try! f.write_string("Hello, world!");
+    try! f.seek(0, SeekFrom.End);
+    try! f.write_string("Suffix");
+    try! f.close();
+    assert_eq try! fs.read_to_string(p), "Hello, world!Suffix";
+
+    let f = try! File.create(p);
+    try! f.write_string("Hello, world!");
+    try! f.seek(-10, SeekFrom.Current);
+    try! f.write_string("BBBB");
+    try! f.close();
+
+    assert_eq try! fs.read_to_string(p), "HelBBBBworld!";
+
+    let f = try! File.create(p);
+    try! f.write_string("Hello, world!");
+    try! f.rewind();
+    try! f.write_string("Hi,    ");
+    try! f.close();
+    assert_eq try! fs.read_to_string(p), "Hi,    world!";
 }

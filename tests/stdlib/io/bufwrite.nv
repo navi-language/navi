@@ -1,0 +1,25 @@
+use std.io.{BufWrite, Bytes};
+
+test "write" {
+    let buf = Bytes.new();
+    let writer = BufWrite.new(buf, buf_size: 4);
+
+    assert_eq writer.available(), 4;
+    try writer.write(b"a");
+    assert_eq writer.available(), 3;
+    assert_eq writer.buffered(), 1;
+
+    try writer.write(b"def");
+    assert_eq writer.available(), 0;
+    assert_eq writer.buffered(), 4;
+
+    try writer.write(b"ghi");
+    assert_eq writer.available(), 1;
+    assert_eq writer.buffered(), 3;
+
+    try writer.write(b"12345678");
+    assert_eq writer.available(), 4;
+    assert_eq writer.buffered(), 0;
+
+    assert_eq buf.to_string(), "adefghi12345678";
+}

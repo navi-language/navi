@@ -1,6 +1,13 @@
 name: Trigger Website
 on:
   release:
+    types:
+      - published
+      - unpublished
+      - edited
+      - deleted
+      - prereleased
+      - released
 
 jobs:
   trigger:
