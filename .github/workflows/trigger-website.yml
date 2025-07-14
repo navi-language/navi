@@ -19,7 +19,7 @@ jobs:
           script: |
             await github.rest.actions.createWorkflowDispatch({
               owner: 'navi-language',
-              repo: 'website',
+              repo: 'navi-language.github.io',
               workflow_id: 'publish.yml',
               ref: 'main'
             })
