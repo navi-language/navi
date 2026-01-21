@@ -1,0 +1,317 @@
+// Testing Examples
+// Demonstrates test writing, assertions, and patterns
+
+// ============================================================================
+// BASIC TESTS
+// ============================================================================
+
+/// Add two numbers
+fn add(a: int, b: int): int {
+    return a + b;
+}
+
+test "addition" {
+    assert_eq add(2, 3), 5;
+    assert_eq add(-1, 1), 0;
+    assert_eq add(0, 0), 0;
+}
+
+test "addition with negatives" {
+    assert_eq add(-2, -3), -5;
+    assert_eq add(-10, 5), -5;
+}
+
+// ============================================================================
+// ASSERTIONS
+// ============================================================================
+
+test "assert keyword" {
+    assert true;
+    assert 1 == 1;
+    assert "hello" == "hello";
+}
+
+test "assert_eq" {
+    assert_eq 1 + 1, 2;
+    assert_eq "hello", "hello";
+    assert_eq [1, 2], [1, 2];
+}
+
+test "assert_ne" {
+    assert_ne 1, 2;
+    assert_ne "hello", "world";
+    assert_ne [1, 2], [3, 4];
+}
+
+// ============================================================================
+// TESTING STRUCTS
+// ============================================================================
+
+struct User {
+    name: string,
+    age: int,
+    email: string?,
+}
+
+impl User {
+    pub fn new(name: string, age: int): User {
+        return User {
+            name,
+            age,
+            email: nil,
+        };
+    }
+
+    pub fn is_adult(self): bool {
+        return self.age >= 18;
+    }
+
+    pub fn set_email(self, email: string) {
+        self.email = email;
+    }
+}
+
+test "user creation" {
+    let user = User.new("Alice", 30);
+
+    assert_eq user.name, "Alice";
+    assert_eq user.age, 30;
+    assert_eq user.email, nil;
+}
+
+test "user is adult" {
+    let adult = User.new("Alice", 25);
+    let minor = User.new("Bob", 15);
+
+    assert adult.is_adult();
+    assert !minor.is_adult();
+}
+
+test "user set email" {
+    let user = User.new("Alice", 30);
+    user.set_email("alice@example.com");
+
+    assert_eq user.email, "alice@example.com";
+}
+
+// ============================================================================
+// TESTING ERROR HANDLING
+// ============================================================================
+
+fn divide(a: int, b: int): int throws {
+    if (b == 0) {
+        throw "Division by zero";
+    }
+    return a / b;
+}
+
+test "divide success" {
+    let result = try? divide(10, 2);
+    assert_eq result, 5;
+}
+
+test "divide by zero" {
+    let result = try? divide(10, 0);
+    assert_eq result, nil;
+}
+
+// ============================================================================
+// TESTING OPTIONALS
+// ============================================================================
+
+fn find_user(users: [User], name: string): User? {
+    for (let user in users) {
+        if (user.name == name) {
+            return user;
+        }
+    }
+    return nil;
+}
+
+test "find user success" {
+    let users = [
+        User.new("Alice", 30),
+        User.new("Bob", 25),
+    ];
+
+    let found = find_user(users, "Alice");
+    assert found != nil;
+    assert_eq found!.name, "Alice";
+}
+
+test "find user not found" {
+    let users = [
+        User.new("Alice", 30),
+    ];
+
+    let found = find_user(users, "Bob");
+    assert_eq found, nil;
+}
+
+// ============================================================================
+// TESTING COLLECTIONS
+// ============================================================================
+
+fn filter_adults(users: [User]): [User] {
+    let adults: [User] = [];
+    for (let user in users) {
+        if (user.is_adult()) {
+            adults.push(user);
+        }
+    }
+    return adults;
+}
+
+test "filter adults" {
+    let users = [
+        User.new("Alice", 30),
+        User.new("Bob", 17),
+        User.new("Charlie", 25),
+        User.new("David", 15),
+    ];
+
+    let adults = filter_adults(users);
+
+    assert_eq adults.len(), 2;
+    assert_eq adults[0].name, "Alice";
+    assert_eq adults[1].name, "Charlie";
+}
+
+test "filter adults empty" {
+    let users: [User] = [];
+    let adults = filter_adults(users);
+
+    assert_eq adults.len(), 0;
+}
+
+test "filter adults all minors" {
+    let users = [
+        User.new("Bob", 17),
+        User.new("Charlie", 15),
+    ];
+
+    let adults = filter_adults(users);
+    assert_eq adults.len(), 0;
+}
+
+// ============================================================================
+// TABLE-DRIVEN TESTS
+// ============================================================================
+
+test "addition table" {
+    let cases = [
+        {a: 1, b: 2, expected: 3},
+        {a: 0, b: 0, expected: 0},
+        {a: -1, b: 1, expected: 0},
+        {a: -5, b: -3, expected: -8},
+        {a: 100, b: 200, expected: 300},
+    ];
+
+    for (let c in cases) {
+        let result = add(c.a, c.b);
+        assert_eq result, c.expected;
+    }
+}
+
+// ============================================================================
+// SETUP AND TEARDOWN PATTERN
+// ============================================================================
+
+fn create_test_users(): [User] {
+    return [
+        User.new("Alice", 30),
+        User.new("Bob", 25),
+        User.new("Charlie", 35),
+    ];
+}
+
+test "with setup" {
+    // Setup
+    let users = create_test_users();
+
+    // Test
+    assert_eq users.len(), 3;
+    assert_eq users[0].name, "Alice";
+
+    // Teardown (if needed)
+    // cleanup(users);
+}
+
+// ============================================================================
+// TESTING EDGE CASES
+// ============================================================================
+
+fn get_first(items: [int]): int? {
+    if (items.len() == 0) {
+        return nil;
+    }
+    return items[0];
+}
+
+test "get first empty array" {
+    let empty: [int] = [];
+    let result = get_first(empty);
+
+    assert_eq result, nil;
+}
+
+test "get first single element" {
+    let items = [42];
+    let result = get_first(items);
+
+    assert_eq result, 42;
+}
+
+test "get first multiple elements" {
+    let items = [1, 2, 3];
+    let result = get_first(items);
+
+    assert_eq result, 1;
+}
+
+// ============================================================================
+// DOC TESTS
+// ============================================================================
+
+/// Multiply two numbers
+///
+/// # Examples
+///
+/// ```nv
+/// let result = multiply(3, 4);
+/// assert_eq result, 12;
+/// ```
+///
+/// ```nv
+/// let result = multiply(0, 100);
+/// assert_eq result, 0;
+/// ```
+fn multiply(a: int, b: int): int {
+    return a * b;
+}
+
+/// Check if string is empty
+///
+/// ```nv
+/// assert is_empty("");
+/// assert !is_empty("hello");
+/// ```
+fn is_empty(s: string): bool {
+    return s.len() == 0;
+}
+
+// ============================================================================
+// MAIN FUNCTION (FOR MANUAL TESTING)
+// ============================================================================
+
+fn main() throws {
+    println("=== Testing Examples ===\n");
+
+    println("Run tests with: navi test");
+    println("Run doc tests with: navi test --doc\n");
+
+    println("Example test output:");
+    println("  test addition ... ok");
+    println("  test user creation ... ok");
+    println("  test divide by zero ... ok");
+}

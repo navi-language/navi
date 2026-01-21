@@ -1,0 +1,52 @@
+// MACD (Moving Average Convergence Divergence) Indicator Example
+// A trend-following momentum indicator
+
+meta {
+    title = "MACD",
+    overlay = false,
+}
+
+use quote, ta;
+
+// Parameter definition
+param {
+    @meta(title = "Fast Period", range = 1..100)
+    FastPeriod = 12,
+
+    @meta(title = "Slow Period", range = 1..100)
+    SlowPeriod = 26,
+
+    @meta(title = "Signal Period", range = 1..100)
+    SignalPeriod = 9,
+}
+
+// Calculate MACD
+let fast_ema = ema(close, FastPeriod);
+let slow_ema = ema(close, SlowPeriod);
+
+// DIF (Difference)
+export let hist = fast_ema - slow_ema;
+
+// DEA (Signal line)
+export let signal = ema(hist, SignalPeriod);
+
+// MACD histogram
+export let macd = (hist - signal) * 2;
+
+// Plot lines
+plot(hist, title: "DIF", color: #ffffff);
+plot(signal, title: "DEA", color: #ffff00);
+plot(macd, title: "MACD", color: #ff00ff);
+
+// Signal detection
+let golden_cross = hist > signal && hist[1] <= signal[1];
+let death_cross = hist < signal && hist[1] >= signal[1];
+
+// Annotate signals
+if (golden_cross) {
+    drawtext(macd, "Golden Cross", #ff0000);
+}
+
+if (death_cross) {
+    drawtext(macd, "Death Cross", #00ff00);
+}

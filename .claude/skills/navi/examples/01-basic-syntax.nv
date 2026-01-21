@@ -1,0 +1,225 @@
+// Basic Syntax Examples
+// Demonstrates fundamental Navi syntax and features
+
+/// Entry point - main must have throws
+fn main() throws {
+    println("=== Basic Syntax Examples ===\n");
+
+    // Variables
+    demo_variables();
+
+    // Primitive types
+    demo_primitives();
+
+    // String operations
+    demo_strings();
+
+    // Control flow
+    demo_control_flow();
+
+    // Functions
+    demo_functions();
+}
+
+// ============================================================================
+// VARIABLES AND CONSTANTS
+// ============================================================================
+
+fn demo_variables() {
+    println("--- Variables ---");
+
+    // Mutable variable with type inference
+    let name = "Alice";
+    let age = 30;
+
+    // Explicit type annotation
+    let score: int = 100;
+
+    // Constants (immutable)
+    const MAX_SIZE = 1000;
+
+    println(`Name: ${name}, Age: ${age}, Score: ${score}`);
+    println(`Max size: ${MAX_SIZE}\n`);
+}
+
+// ============================================================================
+// PRIMITIVE TYPES
+// ============================================================================
+
+fn demo_primitives() {
+    println("--- Primitive Types ---");
+
+    // Integer (64-bit)
+    let n: int = 42;
+    let large = 1_000_000;  // Underscores for readability
+
+    // Float (64-bit)
+    let pi: float = 3.14159;
+    let scientific = 1.5e10;
+
+    // Boolean
+    let is_active: bool = true;
+
+    // Character
+    let char: char = 'A';
+    let emoji: char = '🎉';
+
+    println(`Integer: ${n}, Large: ${large}`);
+    println(`Float: ${pi}, Scientific: ${scientific}`);
+    println(`Boolean: ${is_active}`);
+    println(`Char: ${char}, Emoji: ${emoji}\n`);
+}
+
+// ============================================================================
+// STRING OPERATIONS
+// ============================================================================
+
+fn demo_strings() {
+    println("--- Strings ---");
+
+    // String literal
+    let greeting = "Hello";
+
+    // String interpolation (backticks)
+    let name = "World";
+    let message = `${greeting}, ${name}!`;
+
+    // Multi-line string
+    let multiline = `
+        Line 1
+        Line 2
+        Line 3
+    `;
+
+    // String methods
+    let text = "Navi Language";
+    println(`Original: ${text}`);
+    println(`Length: ${text.len()}`);
+    println(`Uppercase: ${text.to_uppercase()}`);
+    println(`Lowercase: ${text.to_lowercase()}`);
+
+    // Escape sequences
+    let escaped = "Quote: \"text\"\nNew line\tTab";
+    println(`Escaped: ${escaped}\n`);
+}
+
+// ============================================================================
+// CONTROL FLOW
+// ============================================================================
+
+fn demo_control_flow() {
+    println("--- Control Flow ---");
+
+    // If-else
+    let score = 85;
+    if (score >= 90) {
+        println("Grade: A");
+    } else if (score >= 80) {
+        println("Grade: B");
+    } else {
+        println("Grade: C");
+    }
+
+    // Switch
+    let day = 3;
+    let day_name = switch (day) {
+        case 1:
+            "Monday";
+        case 2:
+            "Tuesday";
+        case 3:
+            "Wednesday";
+        default:
+            "Other";
+    };
+    println(`Day ${day}: ${day_name}`);
+
+    // For loop with range
+    println("Counting:");
+    for (let i in 0..5) {
+        println(`  ${i}`);
+    }
+
+    // For loop with array
+    let fruits = ["apple", "banana", "cherry"];
+    println("Fruits:");
+    for (let fruit in fruits) {
+        println(`  - ${fruit}`);
+    }
+
+    // While loop
+    let count = 0;
+    while (count < 3) {
+        println(`Count: ${count}`);
+        count += 1;
+    }
+
+    println("");
+}
+
+// ============================================================================
+// FUNCTIONS
+// ============================================================================
+
+fn demo_functions() {
+    println("--- Functions ---");
+
+    // Simple function
+    let sum = add(5, 3);
+    println(`5 + 3 = ${sum}`);
+
+    // Function with optional parameter
+    println(greet("Alice", nil));
+    println(greet("Bob", "Dr."));
+
+    // Function with variadic arguments
+    println(`Sum of 1,2,3,4,5: ${sum_all(1, 2, 3, 4, 5)}`);
+
+    // Closure
+    let multiply: |(int, int): int| = |a, b| {
+        return a * b;
+    };
+    println(`3 * 4 = ${multiply(3, 4)}`);
+
+    println("");
+}
+
+/// Add two numbers
+fn add(a: int, b: int): int {
+    return a + b;
+}
+
+/// Greet with optional title
+fn greet(name: string, title: string?): string {
+    let t = title || "Mr./Ms.";
+    return `Hello, ${t} ${name}!`;
+}
+
+/// Sum variadic arguments
+fn sum_all(first: int, rest: ..int): int {
+    let total = first;
+    for (let n in rest) {
+        total += n;
+    }
+    return total;
+}
+
+// ============================================================================
+// TESTS
+// ============================================================================
+
+test "basic arithmetic" {
+    assert_eq add(2, 3), 5;
+    assert_eq add(-1, 1), 0;
+}
+
+test "sum all" {
+    assert_eq sum_all(1), 1;
+    assert_eq sum_all(1, 2, 3), 6;
+}
+
+test "string operations" {
+    let text = "hello";
+    assert_eq text.len(), 5;
+    assert_eq text.to_uppercase(), "HELLO";
+}

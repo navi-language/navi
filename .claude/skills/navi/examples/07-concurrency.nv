@@ -1,0 +1,366 @@
+// Concurrency Examples
+// Demonstrates spawn and channels
+// Note: Navi uses concurrent (not parallel) execution
+
+use std.time;
+
+// ============================================================================
+// BASIC SPAWN
+// ============================================================================
+
+fn demo_basic_spawn() throws {
+    println("--- Basic Spawn ---");
+
+    let done = channel::<bool>();
+
+    spawn {
+        println("Task 1: Starting");
+        time.sleep(0.1.seconds());
+        println("Task 1: Done");
+        try! done.send(true);
+    }
+
+    println("Main: Waiting for task");
+    try done.recv();
+    println("Main: Task completed\n");
+}
+
+// ============================================================================
+// MULTIPLE TASKS
+// ============================================================================
+
+fn demo_multiple_tasks() throws {
+    println("--- Multiple Tasks ---");
+
+    let ch = channel::<int>();
+
+    // Spawn 3 concurrent tasks
+    for (let i in 0..3) {
+        spawn {
+            println(`Task ${i}: Working`);
+            time.sleep(0.05.seconds());
+            try! ch.send(i * 10);
+        }
+    }
+
+    // Collect results
+    println("Main: Collecting results");
+    for (let i in 0..3) {
+        let result = try ch.recv();
+        println(`  Received: ${result}`);
+    }
+
+    println("");
+}
+
+// ============================================================================
+// DEFER WITH SPAWN
+// ============================================================================
+
+fn demo_defer_in_spawn() throws {
+    println("--- Defer in Spawn ---");
+
+    let done = channel::<bool>();
+
+    spawn {
+        defer {
+            println("  Cleanup executed");
+        }
+
+        println("  Task working");
+        time.sleep(0.05.seconds());
+        println("  Task done");
+
+        try! done.send(true);
+    }
+
+    try done.recv();
+    println("");
+}
+
+// ============================================================================
+// WORKER POOL PATTERN
+// ============================================================================
+
+fn worker_pool(jobs: [int]) throws {
+    println("--- Worker Pool ---");
+
+    let results = channel::<int>();
+
+    // Spawn worker for each job
+    for (let job in jobs) {
+        spawn {
+            // Simulate work
+            let result = job * 2;
+            time.sleep(0.05.seconds());
+            try! results.send(result);
+        }
+    }
+
+    // Collect all results
+    println("Collecting results:");
+    for (let i in 0..jobs.len()) {
+        let result = try results.recv();
+        println(`  Job result: ${result}`);
+    }
+
+    println("");
+}
+
+// ============================================================================
+// PIPELINE PATTERN
+// ============================================================================
+
+fn pipeline(numbers: [int]) throws {
+    println("--- Pipeline Pattern ---");
+
+    let stage1 = channel::<int>();
+    let stage2 = channel::<int>();
+
+    // Stage 1: Multiply by 2
+    spawn {
+        for (let n in numbers) {
+            let result = n * 2;
+            try! stage1.send(result);
+        }
+    }
+
+    // Stage 2: Add 10
+    spawn {
+        for (let i in 0..numbers.len()) {
+            let n = try! stage1.recv();
+            let result = n + 10;
+            try! stage2.send(result);
+        }
+    }
+
+    // Collect final results
+    println("Pipeline results:");
+    for (let i in 0..numbers.len()) {
+        let result = try stage2.recv();
+        println(`  ${result}`);
+    }
+
+    println("");
+}
+
+// ============================================================================
+// FAN-OUT / FAN-IN PATTERN
+// ============================================================================
+
+fn fan_out(data: [int]) throws {
+    println("--- Fan-Out Pattern ---");
+
+    let results = channel::<int>();
+
+    // Fan out: process each item concurrently
+    for (let item in data) {
+        spawn {
+            let processed = item * item;  // Square
+            try! results.send(processed);
+        }
+    }
+
+    // Fan in: collect all results
+    let total = 0;
+    for (let i in 0..data.len()) {
+        let result = try results.recv();
+        total += result;
+    }
+
+    println(`Total: ${total}\n`);
+}
+
+// ============================================================================
+// TIMEOUT PATTERN (Simulated)
+// ============================================================================
+
+fn with_timeout(seconds: float): int? {
+    println("--- Timeout Pattern ---");
+
+    let result = channel::<int?>();
+
+    // Task that might take long
+    spawn {
+        time.sleep(0.2.seconds());
+        try! result.send(42);
+    }
+
+    // Timeout task
+    spawn {
+        time.sleep(seconds.seconds());
+        try! result.send(nil);
+    }
+
+    // First to finish wins
+    let value = try! result.recv();
+    if (let v = value) {
+        println(`Completed with result: ${v}`);
+    } else {
+        println("Timed out");
+    }
+
+    println("");
+    return value;
+}
+
+// ============================================================================
+// SYNCHRONIZATION PATTERN
+// ============================================================================
+
+struct SharedCounter {
+    ch: channel<int>,
+}
+
+impl SharedCounter {
+    pub fn new(): SharedCounter {
+        return SharedCounter {
+            ch: channel(),
+        };
+    }
+
+    pub fn increment(self) throws {
+        try self.ch.send(1);
+    }
+
+    pub fn get_total(self, count: int): int throws {
+        let total = 0;
+        for (let i in 0..count) {
+            let val = try self.ch.recv();
+            total += val;
+        }
+        return total;
+    }
+}
+
+fn demo_synchronization() throws {
+    println("--- Synchronization ---");
+
+    let counter = SharedCounter.new();
+
+    // Spawn multiple incrementers
+    for (let i in 0..5) {
+        spawn {
+            try! counter.increment();
+        }
+    }
+
+    // Wait and sum
+    time.sleep(0.1.seconds());
+    let total = try counter.get_total(5);
+    println(`Total increments: ${total}\n`);
+}
+
+// ============================================================================
+// ERROR HANDLING IN CONCURRENT CODE
+// ============================================================================
+
+fn demo_concurrent_errors() throws {
+    println("--- Error Handling ---");
+
+    let results = channel::<string>();
+    let errors = channel::<string>();
+
+    // Task that might fail
+    spawn {
+        do {
+            // Simulate operation that might fail
+            throw "Task failed";
+            try! results.send("Success");
+        } catch (e) {
+            try! errors.send(e.error());
+        }
+    }
+
+    // Check result or error
+    spawn {
+        time.sleep(0.05.seconds());
+        try! results.send("timeout");
+    }
+
+    let outcome = try! results.recv();
+    if (outcome == "timeout") {
+        let error = try? errors.recv();
+        if (let e = error) {
+            println(`Caught error: ${e}`);
+        }
+    }
+
+    println("");
+}
+
+// ============================================================================
+// MAIN FUNCTION
+// ============================================================================
+
+fn main() throws {
+    println("=== Concurrency Examples ===\n");
+    println("Note: Navi uses CONCURRENT (not parallel) execution");
+    println("All tasks run in a single thread\n");
+
+    try demo_basic_spawn();
+    try demo_multiple_tasks();
+    try demo_defer_in_spawn();
+
+    try worker_pool([1, 2, 3, 4, 5]);
+    try pipeline([1, 2, 3]);
+    try fan_out([1, 2, 3, 4]);
+
+    with_timeout(0.1);  // Timeout
+    with_timeout(0.3);  // Complete
+
+    try demo_synchronization();
+    try demo_concurrent_errors();
+
+    println("All concurrency examples completed!");
+}
+
+// ============================================================================
+// TESTS
+// ============================================================================
+
+test "basic channel" {
+    let ch = channel::<int>();
+
+    spawn {
+        try! ch.send(42);
+    }
+
+    let result = try! ch.recv();
+    assert_eq result, 42;
+}
+
+test "multiple sends" {
+    let ch = channel::<int>();
+
+    spawn {
+        try! ch.send(1);
+        try! ch.send(2);
+        try! ch.send(3);
+    }
+
+    let sum = 0;
+    for (let i in 0..3) {
+        sum += try! ch.recv();
+    }
+
+    assert_eq sum, 6;
+}
+
+test "worker pool" {
+    let results = channel::<int>();
+    let jobs = [1, 2, 3];
+
+    for (let job in jobs) {
+        spawn {
+            try! results.send(job * 2);
+        }
+    }
+
+    let total = 0;
+    for (let i in 0..jobs.len()) {
+        total += try! results.recv();
+    }
+
+    assert_eq total, 12;  // 2 + 4 + 6
+}

@@ -1,0 +1,399 @@
+// Design Pattern Examples
+// Demonstrates common design patterns in Navi
+
+// ============================================================================
+// BUILDER PATTERN
+// ============================================================================
+
+struct HttpRequest {
+    url: string,
+    method: string = "GET",
+    headers: <string, string> = {:},
+    body: string? = nil,
+    timeout: float = 30.0,
+}
+
+impl HttpRequest {
+    /// Create new request
+    pub fn new(url: string): HttpRequest {
+        return HttpRequest { url };
+    }
+
+    /// Set HTTP method
+    pub fn method(self, method: string): HttpRequest {
+        self.method = method;
+        return self;
+    }
+
+    /// Add header
+    pub fn header(self, key: string, value: string): HttpRequest {
+        self.headers[key] = value;
+        return self;
+    }
+
+    /// Set body
+    pub fn body(self, body: string): HttpRequest {
+        self.body = body;
+        return self;
+    }
+
+    /// Set timeout
+    pub fn timeout(self, seconds: float): HttpRequest {
+        self.timeout = seconds;
+        return self;
+    }
+
+    /// Build final request
+    pub fn build(self): string {
+        let req = `${self.method} ${self.url}`;
+
+        if (self.headers.len() > 0) {
+            req = `${req}\nHeaders: ${self.headers.len()}`;
+        }
+
+        if (let body = self.body) {
+            req = `${req}\nBody: ${body.len()} bytes`;
+        }
+
+        return req;
+    }
+}
+
+fn demo_builder() {
+    println("--- Builder Pattern ---");
+
+    let request = HttpRequest.new("https://api.example.com/users")
+        .method("POST")
+        .header("Content-Type", "application/json")
+        .header("Authorization", "Bearer token")
+        .body(`{"name": "Alice"}`)
+        .timeout(10.0);
+
+    println(request.build());
+    println("");
+}
+
+// ============================================================================
+// FACTORY PATTERN
+// ============================================================================
+
+enum DatabaseType {
+    Postgres,
+    MySQL,
+    SQLite,
+}
+
+interface Database {
+    fn connect(self): string;
+    fn query(self, sql: string): string;
+}
+
+struct PostgresDB {
+    host: string,
+}
+
+impl Database for PostgresDB {
+    fn connect(self): string {
+        return `Connected to PostgreSQL at ${self.host}`;
+    }
+
+    fn query(self, sql: string): string {
+        return `Postgres query: ${sql}`;
+    }
+}
+
+struct MySQLDB {
+    host: string,
+}
+
+impl Database for MySQLDB {
+    fn connect(self): string {
+        return `Connected to MySQL at ${self.host}`;
+    }
+
+    fn query(self, sql: string): string {
+        return `MySQL query: ${sql}`;
+    }
+}
+
+struct DatabaseFactory {}
+
+impl DatabaseFactory {
+    pub fn create(db_type: DatabaseType, host: string): Database {
+        switch (db_type) {
+            case .Postgres:
+                return PostgresDB { host };
+            case .MySQL:
+                return MySQLDB { host };
+            case .SQLite:
+                return PostgresDB { host: "local.db" };
+        }
+    }
+}
+
+fn demo_factory() {
+    println("--- Factory Pattern ---");
+
+    let db = DatabaseFactory.create(.Postgres, "localhost:5432");
+    println(db.connect());
+    println(db.query("SELECT * FROM users"));
+
+    println("");
+}
+
+// ============================================================================
+// STRATEGY PATTERN
+// ============================================================================
+
+interface SortStrategy {
+    fn sort(self, data: [int]): [int];
+}
+
+struct BubbleSort {}
+
+impl SortStrategy for BubbleSort {
+    fn sort(self, data: [int]): [int] {
+        // Simplified bubble sort
+        println("  Using Bubble Sort");
+        return data;
+    }
+}
+
+struct QuickSort {}
+
+impl SortStrategy for QuickSort {
+    fn sort(self, data: [int]): [int] {
+        // Simplified quick sort
+        println("  Using Quick Sort");
+        return data;
+    }
+}
+
+struct Sorter {
+    strategy: SortStrategy,
+}
+
+impl Sorter {
+    pub fn new(strategy: SortStrategy): Sorter {
+        return Sorter { strategy };
+    }
+
+    pub fn sort(self, data: [int]): [int] {
+        return self.strategy.sort(data);
+    }
+
+    pub fn set_strategy(self, strategy: SortStrategy) {
+        self.strategy = strategy;
+    }
+}
+
+fn demo_strategy() {
+    println("--- Strategy Pattern ---");
+
+    let data = [3, 1, 4, 1, 5, 9, 2, 6];
+
+    let sorter = Sorter.new(BubbleSort {});
+    sorter.sort(data);
+
+    sorter.set_strategy(QuickSort {});
+    sorter.sort(data);
+
+    println("");
+}
+
+// ============================================================================
+// ITERATOR PATTERN
+// ============================================================================
+
+struct Counter {
+    max: int,
+}
+
+impl Counter {
+    pub fn new(max: int): Counter {
+        return Counter { max };
+    }
+
+    pub fn iter(self): CounterIter {
+        return CounterIter {
+            current: 0,
+            max: self.max,
+        };
+    }
+}
+
+struct CounterIter {
+    current: int,
+    max: int,
+}
+
+impl CounterIter {
+    pub fn next(self): int? {
+        if (self.current >= self.max) {
+            return nil;
+        }
+
+        let value = self.current;
+        self.current += 1;
+        return value;
+    }
+}
+
+fn demo_iterator() {
+    println("--- Iterator Pattern ---");
+
+    println("Counting to 5:");
+    for (let n in Counter.new(5)) {
+        println(`  ${n}`);
+    }
+
+    println("");
+}
+
+// ============================================================================
+// OBSERVER PATTERN (Simplified)
+// ============================================================================
+
+interface Observer {
+    fn update(self, message: string);
+}
+
+struct EmailNotifier {
+    email: string,
+}
+
+impl Observer for EmailNotifier {
+    fn update(self, message: string) {
+        println(`Email to ${self.email}: ${message}`);
+    }
+}
+
+struct SmsNotifier {
+    phone: string,
+}
+
+impl Observer for SmsNotifier {
+    fn update(self, message: string) {
+        println(`SMS to ${self.phone}: ${message}`);
+    }
+}
+
+struct Subject {
+    observers: [Observer],
+}
+
+impl Subject {
+    pub fn new(): Subject {
+        return Subject { observers: [] };
+    }
+
+    pub fn attach(self, observer: Observer) {
+        self.observers.push(observer);
+    }
+
+    pub fn notify(self, message: string) {
+        for (let observer in self.observers) {
+            observer.update(message);
+        }
+    }
+}
+
+fn demo_observer() {
+    println("--- Observer Pattern ---");
+
+    let subject = Subject.new();
+
+    subject.attach(EmailNotifier { email: "alice@example.com" });
+    subject.attach(SmsNotifier { phone: "+1234567890" });
+
+    subject.notify("System update available");
+
+    println("");
+}
+
+// ============================================================================
+// SINGLETON PATTERN (Module-level)
+// ============================================================================
+
+struct Config {
+    initialized: bool = false,
+    value: string = "default",
+}
+
+let global_config = Config {};
+
+fn get_config(): Config {
+    if (!global_config.initialized) {
+        println("  Initializing global config");
+        global_config.initialized = true;
+        global_config.value = "production";
+    }
+    return global_config;
+}
+
+fn demo_singleton() {
+    println("--- Singleton Pattern ---");
+
+    let config1 = get_config();
+    println(`Config value: ${config1.value}`);
+
+    let config2 = get_config();
+    println(`Config value: ${config2.value}`);
+
+    println("");
+}
+
+// ============================================================================
+// MAIN FUNCTION
+// ============================================================================
+
+fn main() throws {
+    println("=== Design Pattern Examples ===\n");
+
+    demo_builder();
+    demo_factory();
+    demo_strategy();
+    demo_iterator();
+    demo_observer();
+    demo_singleton();
+
+    println("All pattern examples completed!");
+}
+
+// ============================================================================
+// TESTS
+// ============================================================================
+
+test "builder pattern" {
+    let request = HttpRequest.new("https://example.com")
+        .method("POST")
+        .timeout(5.0);
+
+    assert_eq request.method, "POST";
+    assert_eq request.timeout, 5.0;
+}
+
+test "factory pattern" {
+    let db = DatabaseFactory.create(.Postgres, "localhost");
+    let msg = db.connect();
+    assert msg.len() > 0;
+}
+
+test "iterator pattern" {
+    let counter = Counter.new(3);
+    let values: [int] = [];
+
+    for (let n in counter) {
+        values.push(n);
+    }
+
+    assert_eq values, [0, 1, 2];
+}
+
+test "singleton pattern" {
+    let config1 = get_config();
+    let config2 = get_config();
+
+    // Both should reference the same config
+    assert_eq config1.value, config2.value;
+}

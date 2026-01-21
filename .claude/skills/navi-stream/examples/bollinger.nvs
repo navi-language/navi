@@ -1,0 +1,64 @@
+// Bollinger Bands Indicator Example
+// Price volatility channel indicator
+
+meta {
+    title = "Bollinger Bands",
+    overlay = true,
+}
+
+use quote, ta;
+
+// Parameters
+param {
+    @meta(title = "Period", range = 1..100)
+    Period = 20,
+
+    @meta(title = "Upper Multiplier", range = 0.1..5.0)
+    UpperMultiplier = 1.02,
+
+    @meta(title = "Lower Multiplier", range = 0.1..5.0)
+    LowerMultiplier = 0.98,
+}
+
+// Calculate middle band (moving average)
+let mid_band = ma(close, Period);
+
+// Calculate upper and lower bands
+// Note: Simplified version using fixed multiplier instead of standard deviation
+export let upper = mid_band * UpperMultiplier;
+export let middle = mid_band;
+export let lower = mid_band * LowerMultiplier;
+
+// Plot Bollinger Bands
+plot(upper, title: "Upper", color: #ff0000);
+plot(middle, title: "Mid", color: #ffff00);
+plot(lower, title: "Lower", color: #00ff00);
+
+// Fill channel area
+if (close > upper || close < lower) {
+    fill(upper, lower, #4444ff);
+}
+
+// Breakout signals
+let break_upper = close > upper && close[1] <= upper[1];
+let break_lower = close < lower && close[1] >= lower[1];
+
+export let overbought = break_upper;
+export let oversold = break_lower;
+
+// Annotate breakouts
+if (break_upper) {
+    drawtext(upper * 1.01, "Overbought", #ff0000);
+}
+
+if (break_lower) {
+    drawtext(lower * 0.99, "Oversold", #00ff00);
+}
+
+// Squeeze signal (channel narrowing)
+let band_width = (upper - lower) / middle;
+export let squeeze = band_width < 0.02;  // Band width less than 2%
+
+if (squeeze) {
+    drawtext(middle, "Squeeze", #ffff00);
+}

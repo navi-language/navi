@@ -1,0 +1,265 @@
+// Error Handling Examples
+// Demonstrates throws, try, try?, try!, and custom errors
+
+/// Custom error type
+struct ValidationError {
+    field: string,
+    message: string,
+}
+
+impl Error for ValidationError {
+    pub fn error(self): string {
+        return `Validation error on ${self.field}: ${self.message}`;
+    }
+}
+
+/// Another custom error
+struct ParseError {
+    input: string,
+    reason: string,
+}
+
+impl Error for ParseError {
+    pub fn error(self): string {
+        return `Failed to parse '${self.input}': ${self.reason}`;
+    }
+}
+
+// ============================================================================
+// THROWING FUNCTIONS
+// ============================================================================
+
+/// Divide with error handling
+fn divide(a: int, b: int): int throws {
+    if (b == 0) {
+        throw "Division by zero";
+    }
+    return a / b;
+}
+
+/// Validate age with custom error
+fn validate_age(age: int): bool throws ValidationError {
+    if (age < 0) {
+        throw ValidationError {
+            field: "age",
+            message: "Age cannot be negative",
+        };
+    }
+    if (age > 150) {
+        throw ValidationError {
+            field: "age",
+            message: "Age seems unrealistic",
+        };
+    }
+    return true;
+}
+
+/// Parse integer with custom error
+fn parse_number(text: string): int throws ParseError {
+    let result = text.parse_int();
+    if (result == nil) {
+        throw ParseError {
+            input: text,
+            reason: "Not a valid integer",
+        };
+    }
+    return result!;
+}
+
+// ============================================================================
+// ERROR HANDLING PATTERNS
+// ============================================================================
+
+/// Pattern 1: Propagate with try
+fn process_with_propagate(a: int, b: int): int throws {
+    let result = try divide(a, b);
+    return result * 2;
+}
+
+/// Pattern 2: Convert to optional with try?
+fn divide_safe(a: int, b: int): int? {
+    return try? divide(a, b);
+}
+
+/// Pattern 3: Panic with try! (use sparingly)
+fn divide_unsafe(a: int, b: int): int {
+    return try! divide(a, b);
+}
+
+/// Pattern 4: Do-catch block
+fn divide_with_catch(a: int, b: int): int {
+    do {
+        let result = try divide(a, b);
+        return result;
+    } catch (e) {
+        println(`Error: ${e.error()}`);
+        return 0;
+    }
+}
+
+/// Pattern 5: Early return with try?
+fn validate_and_create(name: string, age: int): User? {
+    let valid = try? validate_age(age);
+    if (valid == nil) {
+        return nil;
+    }
+
+    return User { name, age };
+}
+
+/// Pattern 6: Multiple error types
+fn process_input(text: string): int throws {
+    // Parse number (can throw ParseError)
+    let num = try parse_number(text);
+
+    // Validate (can throw ValidationError)
+    try validate_age(num);
+
+    return num;
+}
+
+/// Pattern 7: Context wrapping
+fn load_config(path: string): Config throws {
+    do {
+        let content = try read_file(path);
+        let config = try parse_config(content);
+        return config;
+    } catch (e) {
+        throw `Failed to load config from ${path}: ${e.error()}`;
+    }
+}
+
+// ============================================================================
+// HELPER TYPES
+// ============================================================================
+
+struct User {
+    name: string,
+    age: int,
+}
+
+struct Config {
+    value: string,
+}
+
+fn read_file(path: string): string throws {
+    throw "File not found";
+}
+
+fn parse_config(content: string): Config throws {
+    return Config { value: content };
+}
+
+// ============================================================================
+// MAIN FUNCTION
+// ============================================================================
+
+fn main() throws {
+    println("=== Error Handling Examples ===\n");
+
+    // Example 1: try? returns nil on error
+    println("--- try? pattern ---");
+    let result1 = try? divide(10, 2);
+    println(`10 / 2 = ${result1 || 0}`);
+
+    let result2 = try? divide(10, 0);
+    if (result2 == nil) {
+        println("Division by zero returned nil");
+    }
+
+    // Example 2: do-catch
+    println("\n--- do-catch pattern ---");
+    do {
+        let result = try divide(20, 0);
+        println(`Result: ${result}`);
+    } catch (e) {
+        println(`Caught error: ${e.error()}`);
+    }
+
+    // Example 3: Custom errors
+    println("\n--- Custom errors ---");
+    do {
+        try validate_age(-5);
+    } catch (e: ValidationError) {
+        println(`Validation failed: ${e.message}`);
+    } catch (e) {
+        println(`Other error: ${e.error()}`);
+    }
+
+    // Example 4: Parse error
+    println("\n--- Parse error ---");
+    let parsed = try? parse_number("abc");
+    if (parsed == nil) {
+        println("Failed to parse 'abc'");
+    }
+
+    let parsed2 = try? parse_number("42");
+    println(`Parsed '42': ${parsed2!}`);
+
+    // Example 5: Early return pattern
+    println("\n--- Early return ---");
+    let user = validate_and_create("Alice", 30);
+    if (let u = user) {
+        println(`Created user: ${u.name}`);
+    }
+
+    let invalid_user = validate_and_create("Bob", -5);
+    if (invalid_user == nil) {
+        println("Failed to create user with invalid age");
+    }
+
+    println("\nAll error handling examples completed!");
+}
+
+// ============================================================================
+// TESTS
+// ============================================================================
+
+test "divide success" {
+    let result = try? divide(10, 2);
+    assert_eq result, 5;
+}
+
+test "divide by zero" {
+    let result = try? divide(10, 0);
+    assert_eq result, nil;
+}
+
+test "validate age success" {
+    let result = try? validate_age(25);
+    assert_eq result, true;
+}
+
+test "validate age negative" {
+    let result = try? validate_age(-5);
+    assert_eq result, nil;
+}
+
+test "validate age unrealistic" {
+    let result = try? validate_age(200);
+    assert_eq result, nil;
+}
+
+test "parse number success" {
+    let result = try? parse_number("42");
+    assert_eq result, 42;
+}
+
+test "parse number failure" {
+    let result = try? parse_number("abc");
+    assert_eq result, nil;
+}
+
+test "divide safe" {
+    assert_eq divide_safe(10, 2), 5;
+    assert_eq divide_safe(10, 0), nil;
+}
+
+test "early return pattern" {
+    let user = validate_and_create("Alice", 30);
+    assert user != nil;
+    assert_eq user!.name, "Alice";
+
+    let invalid = validate_and_create("Bob", -5);
+    assert_eq invalid, nil;
+}

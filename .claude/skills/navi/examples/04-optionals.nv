@@ -1,0 +1,348 @@
+// Optional Type Examples
+// Demonstrates optional handling, unwrapping, and chaining
+
+struct User {
+    name: string,
+    email: string?,
+    profile: Profile?,
+}
+
+struct Profile {
+    bio: string?,
+    website: string?,
+    settings: Settings?,
+}
+
+struct Settings {
+    theme: string,
+    notifications: bool,
+}
+
+// ============================================================================
+// OPTIONAL CREATION AND CHECKING
+// ============================================================================
+
+fn demo_basic_optionals() {
+    println("--- Basic Optionals ---");
+
+    // Create optional value
+    let name: string? = "Alice";
+    let empty: string? = nil;
+
+    // Check if nil
+    if (name == nil) {
+        println("Name is nil");
+    } else {
+        println("Name has value");
+    }
+
+    if (empty != nil) {
+        println("Empty has value");
+    } else {
+        println("Empty is nil");
+    }
+
+    println("");
+}
+
+// ============================================================================
+// UNWRAPPING PATTERNS
+// ============================================================================
+
+fn demo_unwrapping() {
+    println("--- Unwrapping Patterns ---");
+
+    let value: int? = 42;
+
+    // Pattern 1: Unwrap or default with ||
+    let result1 = value || 0;
+    println(`Unwrap or default: ${result1}`);
+
+    // Pattern 2: If-let
+    if (let v = value) {
+        println(`If-let unwrapped: ${v}`);
+    }
+
+    // Pattern 3: Let-else
+    let v = value else {
+        println("Value was nil");
+        return;
+    };
+    println(`Let-else unwrapped: ${v}`);
+
+    // Pattern 4: Force unwrap (use carefully!)
+    // let forced = value!;  // Panics if nil
+    // println(`Force unwrapped: ${forced}`);
+
+    println("");
+}
+
+// ============================================================================
+// OPTIONAL CHAINING
+// ============================================================================
+
+fn demo_chaining() {
+    println("--- Optional Chaining ---");
+
+    let user = User {
+        name: "Alice",
+        email: "alice@example.com",
+        profile: Profile {
+            bio: "Software Engineer",
+            website: nil,
+            settings: Settings {
+                theme: "dark",
+                notifications: true,
+            },
+        },
+    };
+
+    // Safe chaining
+    let theme = user.profile?.settings?.theme;
+    println(`Theme: ${theme || "default"}`);
+
+    let website = user.profile?.website;
+    println(`Website: ${website || "none"}`);
+
+    // Multiple levels with default
+    let bio = user.profile?.bio || "No bio";
+    println(`Bio: ${bio}`);
+
+    // User without profile
+    let user2 = User {
+        name: "Bob",
+        email: nil,
+        profile: nil,
+    };
+
+    let theme2 = user2.profile?.settings?.theme || "light";
+    println(`Bob's theme: ${theme2}`);
+
+    println("");
+}
+
+// ============================================================================
+// OPTIONAL METHODS
+// ============================================================================
+
+fn demo_optional_methods() {
+    println("--- Optional Methods ---");
+
+    let value: string? = "hello";
+
+    // is_nil()
+    println(`Is nil: ${value.is_nil()}`);
+
+    // map() - transform if present
+    let upper = value.map(|s| s.to_uppercase());
+    println(`Mapped: ${upper || "none"}`);
+
+    // map_or() - transform with default
+    let length = value.map_or(0, |s| s.len());
+    println(`Length (map_or): ${length}`);
+
+    // and() - chain optionals
+    let value2: string? = "world";
+    let chained = value.and(value2);
+    println(`Chained: ${chained || "none"}`);
+
+    // or() - provide alternative
+    let empty: string? = nil;
+    let alternative = empty.or("default");
+    println(`Alternative: ${alternative || "none"}`);
+
+    // unwrap_or() - unwrap with default
+    let result = empty.unwrap_or("fallback");
+    println(`Unwrap or: ${result}`);
+
+    println("");
+}
+
+// ============================================================================
+// PRACTICAL EXAMPLES
+// ============================================================================
+
+/// Get user email with fallback
+fn get_user_email(user: User?): string {
+    return user?.email || "no-email@example.com";
+}
+
+/// Process optional user
+fn process_optional_user(user: User?) {
+    println("\n--- Processing Optional User ---");
+
+    // Pattern 1: if-let
+    if (let u = user) {
+        println(`Processing: ${u.name}`);
+        println(`Email: ${u.email || "none"}`);
+    } else {
+        println("No user to process");
+    }
+
+    // Pattern 2: let-else (early return)
+    let u = user else {
+        println("User is nil, exiting");
+        return;
+    };
+
+    println(`Name: ${u.name}`);
+}
+
+/// Find user by name
+fn find_user(users: [User], name: string): User? {
+    for (let user in users) {
+        if (user.name == name) {
+            return user;
+        }
+    }
+    return nil;
+}
+
+/// Get nested value safely
+fn get_theme(user: User?): string {
+    // Multiple levels of optional chaining
+    return user?.profile?.settings?.theme || "default";
+}
+
+// ============================================================================
+// MAIN FUNCTION
+// ============================================================================
+
+fn main() throws {
+    println("=== Optional Examples ===\n");
+
+    demo_basic_optionals();
+    demo_unwrapping();
+    demo_chaining();
+    demo_optional_methods();
+
+    // Practical examples
+    let alice = User {
+        name: "Alice",
+        email: "alice@example.com",
+        profile: Profile {
+            bio: "Engineer",
+            website: nil,
+            settings: Settings {
+                theme: "dark",
+                notifications: true,
+            },
+        },
+    };
+
+    println("--- Practical Examples ---");
+    println(`Email: ${get_user_email(alice)}`);
+    println(`Theme: ${get_theme(alice)}`);
+
+    let bob: User? = nil;
+    println(`Bob's email: ${get_user_email(bob)}`);
+
+    process_optional_user(alice);
+    process_optional_user(nil);
+
+    // Find user
+    let users = [alice];
+    let found = find_user(users, "Alice");
+    if (let u = found) {
+        println(`\nFound user: ${u.name}`);
+    }
+
+    let not_found = find_user(users, "Charlie");
+    if (not_found == nil) {
+        println("Charlie not found");
+    }
+}
+
+// ============================================================================
+// TESTS
+// ============================================================================
+
+test "basic optional" {
+    let value: int? = 42;
+    assert value != nil;
+    assert_eq value!, 42;
+
+    let empty: int? = nil;
+    assert empty == nil;
+}
+
+test "unwrap or default" {
+    let value: int? = 42;
+    assert_eq value || 0, 42;
+
+    let empty: int? = nil;
+    assert_eq empty || 0, 0;
+}
+
+test "optional chaining" {
+    let user = User {
+        name: "Alice",
+        email: nil,
+        profile: Profile {
+            bio: nil,
+            website: nil,
+            settings: Settings {
+                theme: "dark",
+                notifications: true,
+            },
+        },
+    };
+
+    let theme = user.profile?.settings?.theme;
+    assert_eq theme, "dark";
+
+    let bio = user.profile?.bio;
+    assert_eq bio, nil;
+}
+
+test "get user email" {
+    let user = User {
+        name: "Alice",
+        email: "alice@example.com",
+        profile: nil,
+    };
+
+    assert_eq get_user_email(user), "alice@example.com";
+
+    user.email = nil;
+    assert_eq get_user_email(user), "no-email@example.com";
+
+    assert_eq get_user_email(nil), "no-email@example.com";
+}
+
+test "find user" {
+    let alice = User {
+        name: "Alice",
+        email: nil,
+        profile: nil,
+    };
+
+    let bob = User {
+        name: "Bob",
+        email: nil,
+        profile: nil,
+    };
+
+    let users = [alice, bob];
+
+    let found = find_user(users, "Alice");
+    assert found != nil;
+    assert_eq found!.name, "Alice";
+
+    let not_found = find_user(users, "Charlie");
+    assert_eq not_found, nil;
+}
+
+test "optional methods" {
+    let value: string? = "hello";
+
+    assert !value.is_nil();
+    assert_eq value.unwrap_or("default"), "hello";
+
+    let mapped = value.map(|s| s.len());
+    assert_eq mapped, 5;
+
+    let empty: string? = nil;
+    assert empty.is_nil();
+    assert_eq empty.unwrap_or("default"), "default";
+}

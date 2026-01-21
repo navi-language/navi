@@ -1,0 +1,64 @@
+// Moving Average Crossover Strategy Example
+// Uses multiple moving averages to generate trading signals
+
+meta {
+    title = "MA Cross",
+    overlay = true,  // Overlay on price chart
+}
+
+use quote, ta;
+
+// Parameters: Three MA periods
+param {
+    @meta(title = "Short MA", range = 1..100)
+    ShortPeriod = 5,
+
+    @meta(title = "Mid MA", range = 1..100)
+    MidPeriod = 10,
+
+    @meta(title = "Long MA", range = 1..250)
+    LongPeriod = 20,
+}
+
+// Calculate three moving averages
+let ma_short = ema(close, ShortPeriod);
+let ma_mid = ema(close, MidPeriod);
+let ma_long = ema(close, LongPeriod);
+
+// Export MA values
+export let short = ma_short;
+export let mid = ma_mid;
+export let long = ma_long;
+
+// Plot moving averages
+plot(ma_short, title: "MA5", color: #ddff53, key: "short");
+plot(ma_mid, title: "MA10", color: #4781ff, key: "mid");
+plot(ma_long, title: "MA20", color: #fc6ebc, key: "long");
+
+// Trend determination
+let uptrend = ma_short > ma_mid && ma_mid > ma_long;
+let downtrend = ma_short < ma_mid && ma_mid < ma_long;
+
+// Golden cross: short MA crosses above mid MA
+let golden_cross = ma_short > ma_mid && ma_short[1] <= ma_mid[1];
+
+// Death cross: short MA crosses below mid MA
+let death_cross = ma_short < ma_mid && ma_short[1] >= ma_mid[1];
+
+// Export signals
+export let buy_signal = golden_cross && uptrend;
+export let sell_signal = death_cross && downtrend;
+
+// Annotate crosses
+if (golden_cross) {
+    drawtext(close * 0.98, "Golden Cross", #ff0000);
+}
+
+if (death_cross) {
+    drawtext(close * 1.02, "Death Cross", #00ff00);
+}
+
+// Breakout signal
+if (close > ma_long && close[1] <= ma_long[1]) {
+    drawtext(close, "Breakout", #ffff00);
+}

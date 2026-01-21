@@ -1,0 +1,365 @@
+// Collection Examples
+// Demonstrates arrays and maps operations
+
+// ============================================================================
+// ARRAY OPERATIONS
+// ============================================================================
+
+fn demo_arrays() {
+    println("--- Arrays ---");
+
+    // Create arrays
+    let numbers = [1, 2, 3, 4, 5];
+    let names: [string] = ["Alice", "Bob", "Charlie"];
+    let empty: [int] = [];
+
+    // Array with repeated value
+    let zeros: [int] = [0; 10];  // [0, 0, 0, ...]
+
+    println(`Numbers: length = ${numbers.len()}`);
+    println(`Names: ${names[0]}, ${names[1]}, ${names[2]}`);
+
+    // Modify array
+    numbers.push(6);
+    println(`After push: length = ${numbers.len()}`);
+
+    let last = numbers.pop();
+    println(`Popped: ${last || 0}`);
+
+    // Array methods
+    numbers.unshift(0);  // Add to start
+    println(`After unshift: ${numbers[0]}`);
+
+    let first = numbers.shift();  // Remove from start
+    println(`Shifted: ${first || 0}`);
+
+    println("");
+}
+
+// ============================================================================
+// MAP OPERATIONS
+// ============================================================================
+
+fn demo_maps() {
+    println("--- Maps ---");
+
+    // Create maps
+    let scores = {"Alice": 95, "Bob": 87, "Charlie": 92};
+    let config: <string, string> = {"host": "localhost", "port": "8080"};
+    let empty: <string, int> = {:};
+
+    println(`Scores: length = ${scores.len()}`);
+    println(`Alice's score: ${scores["Alice"]}`);
+
+    // Modify map
+    scores["David"] = 88;
+    println(`After adding David: length = ${scores.len()}`);
+
+    // Access with default
+    let eve_score = scores["Eve"] || 0;
+    println(`Eve's score (default): ${eve_score}`);
+
+    // Keys and values
+    let keys = scores.keys();
+    let values = scores.values();
+    println(`Keys: ${keys.len()}`);
+    println(`Values: ${values.len()}`);
+
+    println("");
+}
+
+// ============================================================================
+// ITERATION
+// ============================================================================
+
+fn demo_iteration() {
+    println("--- Iteration ---");
+
+    // Iterate over array
+    let fruits = ["apple", "banana", "cherry"];
+    println("Fruits:");
+    for (let fruit in fruits) {
+        println(`  - ${fruit}`);
+    }
+
+    // Iterate over map
+    let ages = {"Alice": 30, "Bob": 25, "Charlie": 35};
+    println("\nAges:");
+    for (let name, age in ages) {
+        println(`  ${name}: ${age}`);
+    }
+
+    // Iterate with range
+    println("\nRange 0..5:");
+    for (let i in 0..5) {
+        println(`  ${i}`);
+    }
+
+    // Range with step
+    println("\nRange 0..10 step 2:");
+    for (let i in (0..10).step(2)) {
+        println(`  ${i}`);
+    }
+
+    println("");
+}
+
+// ============================================================================
+// COLLECTION OPERATIONS
+// ============================================================================
+
+struct User {
+    name: string,
+    age: int,
+    active: bool,
+}
+
+/// Filter users by age
+fn filter_adults(users: [User]): [User] {
+    let adults: [User] = [];
+    for (let user in users) {
+        if (user.age >= 18) {
+            adults.push(user);
+        }
+    }
+    return adults;
+}
+
+/// Group users by age group
+fn group_by_age(users: [User]): <string, [User]> {
+    let groups: <string, [User]> = {:};
+
+    for (let user in users) {
+        let group = if (user.age < 18) {
+            "minor"
+        } else if (user.age < 65) {
+            "adult"
+        } else {
+            "senior"
+        };
+
+        if (groups[group] == nil) {
+            groups[group] = [];
+        }
+
+        groups[group].push(user);
+    }
+
+    return groups;
+}
+
+/// Count users by age group
+fn count_by_age_group(users: [User]): <string, int> {
+    let counts: <string, int> = {:};
+
+    for (let user in users) {
+        let group = if (user.age < 18) {
+            "minor"
+        } else if (user.age < 65) {
+            "adult"
+        } else {
+            "senior"
+        };
+
+        let current = counts[group] || 0;
+        counts[group] = current + 1;
+    }
+
+    return counts;
+}
+
+/// Find user by name
+fn find_user(users: [User], name: string): User? {
+    for (let user in users) {
+        if (user.name == name) {
+            return user;
+        }
+    }
+    return nil;
+}
+
+/// Map user names to uppercase
+fn map_names_uppercase(users: [User]): [string] {
+    let names: [string] = [];
+    for (let user in users) {
+        names.push(user.name.to_uppercase());
+    }
+    return names;
+}
+
+/// Sum of ages
+fn sum_ages(users: [User]): int {
+    let total = 0;
+    for (let user in users) {
+        total += user.age;
+    }
+    return total;
+}
+
+/// Average age
+fn average_age(users: [User]): float {
+    if (users.len() == 0) {
+        return 0.0;
+    }
+    let total = sum_ages(users) as float;
+    return total / (users.len() as float);
+}
+
+// ============================================================================
+// NESTED COLLECTIONS
+// ============================================================================
+
+fn demo_nested() {
+    println("--- Nested Collections ---");
+
+    // 2D array (matrix)
+    let matrix: [[int]] = [
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9],
+    ];
+
+    println("Matrix:");
+    for (let row in matrix) {
+        for (let val in row) {
+            print(`${val} `);
+        }
+        println("");
+    }
+
+    // Map of arrays
+    let teams: <string, [string]> = {
+        "Engineering": ["Alice", "Bob"],
+        "Design": ["Charlie", "David"],
+    };
+
+    println("\nTeams:");
+    for (let team, members in teams) {
+        println(`${team}:`);
+        for (let member in members) {
+            println(`  - ${member}`);
+        }
+    }
+
+    println("");
+}
+
+// ============================================================================
+// MAIN FUNCTION
+// ============================================================================
+
+fn main() throws {
+    println("=== Collection Examples ===\n");
+
+    demo_arrays();
+    demo_maps();
+    demo_iteration();
+    demo_nested();
+
+    // User operations
+    println("--- User Operations ---");
+    let users = [
+        User { name: "Alice", age: 30, active: true },
+        User { name: "Bob", age: 17, active: true },
+        User { name: "Charlie", age: 70, active: false },
+        User { name: "David", age: 25, active: true },
+    ];
+
+    let adults = filter_adults(users);
+    println(`Adults: ${adults.len()} users`);
+
+    let counts = count_by_age_group(users);
+    println(`Minors: ${counts["minor"] || 0}`);
+    println(`Adults: ${counts["adult"] || 0}`);
+    println(`Seniors: ${counts["senior"] || 0}`);
+
+    let found = find_user(users, "Alice");
+    if (let u = found) {
+        println(`\nFound: ${u.name}, age ${u.age}`);
+    }
+
+    let names = map_names_uppercase(users);
+    println(`\nNames in uppercase: ${names[0]}, ${names[1]}`);
+
+    let avg = average_age(users);
+    println(`Average age: ${avg}`);
+}
+
+// ============================================================================
+// TESTS
+// ============================================================================
+
+test "array operations" {
+    let arr = [1, 2, 3];
+
+    assert_eq arr.len(), 3;
+    assert_eq arr[0], 1;
+
+    arr.push(4);
+    assert_eq arr.len(), 4;
+
+    let last = arr.pop();
+    assert_eq last, 4;
+    assert_eq arr.len(), 3;
+}
+
+test "map operations" {
+    let map = {"a": 1, "b": 2};
+
+    assert_eq map.len(), 2;
+    assert_eq map["a"], 1;
+
+    map["c"] = 3;
+    assert_eq map.len(), 3;
+}
+
+test "filter adults" {
+    let users = [
+        User { name: "Alice", age: 30, active: true },
+        User { name: "Bob", age: 17, active: true },
+        User { name: "Charlie", age: 25, active: true },
+    ];
+
+    let adults = filter_adults(users);
+    assert_eq adults.len(), 2;
+}
+
+test "count by age group" {
+    let users = [
+        User { name: "Alice", age: 30, active: true },
+        User { name: "Bob", age: 17, active: true },
+        User { name: "Charlie", age: 70, active: true },
+    ];
+
+    let counts = count_by_age_group(users);
+    assert_eq counts["minor"], 1;
+    assert_eq counts["adult"], 1;
+    assert_eq counts["senior"], 1;
+}
+
+test "find user" {
+    let users = [
+        User { name: "Alice", age: 30, active: true },
+        User { name: "Bob", age: 25, active: true },
+    ];
+
+    let found = find_user(users, "Alice");
+    assert found != nil;
+    assert_eq found!.name, "Alice";
+
+    let not_found = find_user(users, "Charlie");
+    assert_eq not_found, nil;
+}
+
+test "average age" {
+    let users = [
+        User { name: "Alice", age: 30, active: true },
+        User { name: "Bob", age: 20, active: true },
+    ];
+
+    let avg = average_age(users);
+    assert_eq avg, 25.0;
+
+    let empty: [User] = [];
+    assert_eq average_age(empty), 0.0;
+}

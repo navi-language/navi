@@ -1,0 +1,125 @@
+// RSI (Relative Strength Index) Example
+// Used to identify overbought and oversold conditions
+
+meta {
+    title = "RSI",
+    overlay = false,
+}
+
+use quote, ta, math;
+
+// Parameters
+param {
+    @meta(title = "Period", range = 2..100)
+    Period = 14,
+
+    @meta(title = "Overbought Level", range = 50..100)
+    OverboughtLevel = 70,
+
+    @meta(title = "Oversold Level", range = 0..50)
+    OversoldLevel = 30,
+}
+
+// Calculate price change
+let price_change = close - close[1];
+
+// Calculate gains and losses
+let gain = max(price_change, 0);
+let loss = abs(min(price_change, 0));
+
+// Average gains and losses (simplified using EMA)
+let avg_gain = ema(gain, Period);
+let avg_loss = ema(loss, Period);
+
+// Calculate RS and RSI
+let rs = avg_gain / max(avg_loss, 0.0001);  // Avoid division by zero
+export let rsi = 100 - (100 / (1 + rs));
+
+// Plot RSI line
+plot(rsi, title: "RSI", color: #ffffff);
+
+// Plot overbought/oversold lines
+plot(OverboughtLevel, title: "Overbought", color: #ff0000);
+plot(50, title: "Middle", color: #ffff00);
+plot(OversoldLevel, title: "Oversold", color: #00ff00);
+
+// Overbought/oversold signals
+export let is_overbought = rsi > OverboughtLevel;
+export let is_oversold = rsi < OversoldLevel;
+
+// Enter overbought/oversold zone signals
+let enter_overbought = rsi > OverboughtLevel && rsi[1] <= OverboughtLevel;
+let enter_oversold = rsi < OversoldLevel && rsi[1] >= OversoldLevel;
+
+// Exit overbought/oversold zone signals (potential reversal)
+let exit_overbought = rsi < OverboughtLevel && rsi[1] >= OverboughtLevel;
+let exit_oversold = rsi > OversoldLevel && rsi[1] <= OversoldLevel;
+
+export let sell_signal = enter_overbought || exit_overbought;
+export let buy_signal = enter_oversold || exit_oversold;
+
+// Annotate signals
+if (enter_overbought) {
+    drawtext(rsi, "Enter Overbought", #ff0000);
+}
+
+if (enter_oversold) {
+    drawtext(rsi, "Enter Oversold", #00ff00);
+}
+
+if (exit_overbought) {
+    drawtext(rsi, "Sell", #ff6666);
+}
+
+if (exit_oversold) {
+    drawtext(rsi, "Buy", #66ff66);
+}
+
+// Divergence detection (simplified)
+fn dhhv(x: number, n: number): number {
+    var values = array.new::<number>();
+    if (barstate.is_confirmed) {
+        values.unshift(x);
+    }
+
+    let r: number = values.get(0);
+    for (let i in 1..min(n, values.len())) {
+        r = max(r, values.get(i));
+    }
+    return r;
+}
+
+fn dllv(x: number, n: number): number {
+    var values = array.new::<number>();
+    if (barstate.is_confirmed) {
+        values.unshift(x);
+    }
+
+    let r: number = values.get(0);
+    for (let i in 1..min(n, values.len())) {
+        r = min(r, values.get(i));
+    }
+    return r;
+}
+
+// Bearish divergence: price makes new high but RSI doesn't
+let price_high = dhhv(close, Period);
+let rsi_high = dhhv(rsi, Period);
+export let bearish_divergence =
+    close > price_high[5] &&  // Price makes new high
+    rsi < rsi_high[5];         // RSI doesn't make new high
+
+// Bullish divergence: price makes new low but RSI doesn't
+let price_low = dllv(close, Period);
+let rsi_low = dllv(rsi, Period);
+export let bullish_divergence =
+    close < price_low[5] &&   // Price makes new low
+    rsi > rsi_low[5];          // RSI doesn't make new low
+
+if (bearish_divergence) {
+    drawtext(rsi, "Bearish Div", #ff0000);
+}
+
+if (bullish_divergence) {
+    drawtext(rsi, "Bullish Div", #00ff00);
+}

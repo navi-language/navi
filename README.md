@@ -59,6 +59,16 @@ Options:
   -V, --version      Print version information
 ```
 
+## AI Skills
+
+We have provided [Skills](./.claude/skills) directory for AI to understand Navi & Navi Stream language syntax and semantics better. You can use these skills in your AI applications to enhance their capabilities in working with Navi code.
+
+Run following command to add Navi skills to your local:
+
+```bash
+$ npx skills add navi-language/navi
+```
+
 ### Run a Navi program
 
 You can create a file named with `.nv` extension, and write some code in it, for example:

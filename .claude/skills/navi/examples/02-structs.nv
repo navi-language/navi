@@ -1,0 +1,207 @@
+// Struct Examples
+// Demonstrates struct definition, methods, and implementation
+
+/// User struct with optional fields and defaults
+struct User {
+    name: string,
+    email: string?,
+    age: int,
+    active: bool = true,
+}
+
+impl User {
+    /// Static constructor
+    pub fn new(name: string, age: int): User {
+        return User {
+            name,
+            email: nil,
+            age,
+        };
+    }
+
+    /// Create user with email
+    pub fn with_email(name: string, age: int, email: string): User {
+        return User {
+            name,
+            email,
+            age,
+        };
+    }
+
+    /// Instance method
+    pub fn greet(self): string {
+        return `Hello, I'm ${self.name}, ${self.age} years old`;
+    }
+
+    /// Check if user is adult
+    pub fn is_adult(self): bool {
+        return self.age >= 18;
+    }
+
+    /// Get display name
+    pub fn display_name(self): string {
+        if (let email = self.email) {
+            return `${self.name} <${email}>`;
+        }
+        return self.name;
+    }
+
+    /// ToString implementation
+    pub fn to_string(self): string {
+        let email_str = self.email || "no email";
+        let status = if (self.active) { "active" } else { "inactive" };
+        return `User(${self.name}, ${email_str}, ${status})`;
+    }
+}
+
+/// Address struct
+struct Address {
+    street: string,
+    city: string,
+    country: string = "USA",
+}
+
+impl Address {
+    pub fn full_address(self): string {
+        return `${self.street}, ${self.city}, ${self.country}`;
+    }
+}
+
+/// User profile with nested struct
+struct UserProfile {
+    user: User,
+    address: Address?,
+    bio: string?,
+}
+
+impl UserProfile {
+    pub fn new(user: User): UserProfile {
+        return UserProfile {
+            user,
+            address: nil,
+            bio: nil,
+        };
+    }
+
+    pub fn with_address(self, address: Address): UserProfile {
+        self.address = address;
+        return self;
+    }
+
+    pub fn summary(self): string {
+        let addr = if (let a = self.address) {
+            a.full_address()
+        } else {
+            "No address"
+        };
+
+        return `${self.user.name} - ${addr}`;
+    }
+}
+
+/// Destructuring example
+struct Point {
+    x: int,
+    y: int,
+}
+
+fn distance_from_origin(point: Point): float {
+    let Point { x, y } = point;
+    let sum = (x * x + y * y) as float;
+    return sum;  // Simplified, normally would use sqrt
+}
+
+/// Main function demonstrating struct usage
+fn main() throws {
+    println("=== Struct Examples ===\n");
+
+    // Create user with constructor
+    let alice = User.new("Alice", 30);
+    println(alice.greet());
+    println(`Is adult: ${alice.is_adult()}`);
+    println(alice.to_string());
+
+    // Create user with email
+    let bob = User.with_email("Bob", 25, "bob@example.com");
+    println(bob.display_name());
+
+    // Struct with optional field
+    alice.email = "alice@example.com";
+    println(`Updated: ${alice.display_name()}`);
+
+    // Nested structs
+    let address = Address {
+        street: "123 Main St",
+        city: "San Francisco",
+    };
+
+    let profile = UserProfile.new(alice)
+        .with_address(address);
+
+    println(`\n${profile.summary()}`);
+
+    // Destructuring
+    let point = Point { x: 3, y: 4 };
+    let Point { x, y } = point;
+    println(`\nPoint coordinates: x=${x}, y=${y}`);
+
+    // Short syntax
+    let name = "Charlie";
+    let age = 28;
+    let charlie = User { name, age, email: nil };
+    println(charlie.greet());
+}
+
+// ============================================================================
+// TESTS
+// ============================================================================
+
+test "user creation" {
+    let user = User.new("Alice", 30);
+    assert_eq user.name, "Alice";
+    assert_eq user.age, 30;
+    assert_eq user.email, nil;
+    assert_eq user.active, true;
+}
+
+test "user with email" {
+    let user = User.with_email("Bob", 25, "bob@example.com");
+    assert_eq user.email, "bob@example.com";
+}
+
+test "is adult check" {
+    let adult = User.new("Alice", 25);
+    let minor = User.new("Bob", 15);
+
+    assert adult.is_adult();
+    assert !minor.is_adult();
+}
+
+test "display name" {
+    let user = User.new("Alice", 30);
+    assert_eq user.display_name(), "Alice";
+
+    user.email = "alice@example.com";
+    assert_eq user.display_name(), "Alice <alice@example.com>";
+}
+
+test "destructuring" {
+    let point = Point { x: 10, y: 20 };
+    let Point { x, y } = point;
+
+    assert_eq x, 10;
+    assert_eq y, 20;
+}
+
+test "nested structs" {
+    let user = User.new("Alice", 30);
+    let address = Address {
+        street: "123 Main St",
+        city: "NYC",
+    };
+
+    let profile = UserProfile.new(user).with_address(address);
+
+    assert profile.address != nil;
+    assert_eq profile.address!.city, "NYC";
+}
