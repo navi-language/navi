@@ -24,7 +24,7 @@ Navi (/ˈnævi/) is a high-performance, statically-typed compiled language desig
 // Entry point (main must have throws)
 fn main() throws {
     let name = "World";
-    let message = `Hello ${name}!`;  // String interpolation
+    let message = `Hello ${name}.`;  // String interpolation
     println(message);  // Auto-imported from std.io
 }
 
@@ -54,6 +54,51 @@ impl User {
 - `//` for single-line comments, `///` for doc comments
 - String interpolation uses backticks: `` `value: ${x}` ``
 - File extension: `.nv`
+
+### Important Syntax Limitations
+
+**If and Switch are STATEMENTS, not expressions:**
+```nv
+// ❌ WRONG - Cannot assign if/switch directly
+let status = if (active) { "on" } else { "off" };
+let day = switch (n) { case 1: "Mon"; default: "Other"; };
+
+// ✅ CORRECT - Use statements, then assign
+let status = "";
+if (active) {
+    status = "on";
+} else {
+    status = "off";
+}
+```
+
+**Scientific notation requires explicit sign:**
+```nv
+// ❌ WRONG
+let num = 1.5e10;
+
+// ✅ CORRECT
+let num = 1.5e+10;  // or 1.5e-10 for negative exponent
+```
+
+**Map access with `[]` vs `.get()`:**
+```nv
+let scores = {"Alice": 95, "Bob": 87};
+
+// ❌ WRONG - scores["key"] returns non-optional, can't use ||
+let score = scores["Eve"] || 0;
+
+// ✅ CORRECT - Use .get() which returns optional type
+let score = scores.get("Eve") || 0;
+
+// ✅ Also correct - Direct access (but key must exist)
+let alice_score = scores["Alice"];  // OK if key exists
+
+// ✅ Also correct - Check before access
+if (scores.get("Eve") != nil) {
+    let score = scores["Eve"];
+}
+```
 
 ### Type System Essentials
 
@@ -295,7 +340,7 @@ navi compile          # Show bytecode
 
 ## Testing
 
-```nv
+````nv
 test "addition" {
     let result = add(2, 3);
     assert result == 5;
@@ -310,7 +355,7 @@ test "addition" {
 fn add(a: int, b: int): int {
     return a + b;
 }
-```
+````
 
 ## Best Practices
 
@@ -331,7 +376,6 @@ fn add(a: int, b: int): int {
 
 - Use `||` for simple defaults
 - Use `?.` for safe chaining
-- Avoid `!` unless absolutely certain value exists
 - Prefer `if let` for conditional logic
 - Use `let else` for early returns
 

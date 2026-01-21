@@ -55,7 +55,7 @@ fn demo_primitives() {
 
     // Float (64-bit)
     let pi: float = 3.14159;
-    let scientific = 1.5e10;
+    let scientific = 1.5e+10;
 
     // Boolean
     let is_active: bool = true;
@@ -122,16 +122,17 @@ fn demo_control_flow() {
 
     // Switch
     let day = 3;
-    let day_name = switch (day) {
+    let day_name = "";
+    switch (day) {
         case 1:
-            "Monday";
+            day_name = "Monday";
         case 2:
-            "Tuesday";
+            day_name = "Tuesday";
         case 3:
-            "Wednesday";
+            day_name = "Wednesday";
         default:
-            "Other";
-    };
+            day_name = "Other";
+    }
     println(`Day ${day}: ${day_name}`);
 
     // For loop with range

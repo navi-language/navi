@@ -56,7 +56,7 @@ fn demo_maps() {
     println(`After adding David: length = ${scores.len()}`);
 
     // Access with default
-    let eve_score = scores["Eve"] || 0;
+    let eve_score = scores.get("Eve") || 0;
     println(`Eve's score (default): ${eve_score}`);
 
     // Keys and values
@@ -130,15 +130,16 @@ fn group_by_age(users: [User]): <string, [User]> {
     let groups: <string, [User]> = {:};
 
     for (let user in users) {
-        let group = if (user.age < 18) {
-            "minor"
+        let group = "";
+        if (user.age < 18) {
+            group = "minor";
         } else if (user.age < 65) {
-            "adult"
+            group = "adult";
         } else {
-            "senior"
-        };
+            group = "senior";
+        }
 
-        if (groups[group] == nil) {
+        if (groups.get(group) == nil) {
             groups[group] = [];
         }
 
@@ -153,15 +154,16 @@ fn count_by_age_group(users: [User]): <string, int> {
     let counts: <string, int> = {:};
 
     for (let user in users) {
-        let group = if (user.age < 18) {
-            "minor"
+        let group = "";
+        if (user.age < 18) {
+            group = "minor";
         } else if (user.age < 65) {
-            "adult"
+            group = "adult";
         } else {
-            "senior"
-        };
+            group = "senior";
+        }
 
-        let current = counts[group] || 0;
+        let current = counts.get(group) || 0;
         counts[group] = current + 1;
     }
 
@@ -269,9 +271,9 @@ fn main() throws {
     println(`Adults: ${adults.len()} users`);
 
     let counts = count_by_age_group(users);
-    println(`Minors: ${counts["minor"] || 0}`);
-    println(`Adults: ${counts["adult"] || 0}`);
-    println(`Seniors: ${counts["senior"] || 0}`);
+    println(`Minors: ${counts.get("minor") || 0}`);
+    println(`Adults: ${counts.get("adult") || 0}`);
+    println(`Seniors: ${counts.get("senior") || 0}`);
 
     let found = find_user(users, "Alice");
     if (let u = found) {

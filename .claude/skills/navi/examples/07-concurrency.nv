@@ -266,7 +266,6 @@ fn demo_concurrent_errors() throws {
         do {
             // Simulate operation that might fail
             throw "Task failed";
-            try! results.send("Success");
         } catch (e) {
             try! errors.send(e.error());
         }

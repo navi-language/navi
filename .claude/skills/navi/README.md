@@ -312,6 +312,34 @@ fn add(a: int, b: int): int {
 }
 ````
 
+## Common Pitfalls to Avoid
+
+Based on validation of example code, watch out for these common mistakes:
+
+1. **If/Switch expressions** - Navi does NOT support if or switch as expressions. They are statements only.
+   ```nv
+   // ❌ WRONG
+   let x = if (cond) { "a" } else { "b" };
+
+   // ✅ CORRECT
+   let x = "";
+   if (cond) { x = "a"; } else { x = "b"; }
+   ```
+
+2. **Scientific notation** - Must include explicit sign in exponent
+   ```nv
+   // ❌ WRONG: let num = 1.5e10;
+   // ✅ CORRECT: let num = 1.5e+10;
+   ```
+
+3. **Map access with default values** - Use `.get()` for optional access
+   ```nv
+   // ❌ WRONG: let val = map["key"] || default;
+   // ✅ CORRECT: let val = map.get("key") || default;
+   ```
+
+4. **Unreachable code** - Compiler detects statements after `throw`, `return`, etc.
+
 ## Best Practices
 
 ### Naming Conventions
